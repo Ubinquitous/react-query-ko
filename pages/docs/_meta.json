@@ -1,0 +1,23 @@
+{
+  "index": {
+    "title": "개요"
+  },
+  "getting-started": {
+    "title": "GETTING STARTED"
+  },
+  "guides-and-concept": {
+    "title": "GUIDES & CONCEPT"
+  },
+  "api-references": {
+    "title": "API REFERENCES"
+  },
+  "eslint": {
+    "title": "ESLINT"
+  },
+  "community-resources": {
+    "title": "COMMUNITY RESOURCES"
+  },
+  "plugins": {
+    "title": "PLUGINS"
+  }
+}
