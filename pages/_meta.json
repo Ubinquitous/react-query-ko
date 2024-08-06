@@ -1,0 +1,21 @@
+{
+  "index": {
+    "type": "page",
+    "title": "React Query v5 (react) 한글 문서 비공식 번역",
+    "display": "hidden",
+    "theme": {
+      "layout": "article"
+    }
+  },
+  "docs": {
+    "type": "page",
+    "title": "Docs"
+  },
+  "contribution": {
+    "type": "page",
+    "title": "Contribution",
+    "theme": {
+      "typesetting": "article"
+    }
+  }
+}
