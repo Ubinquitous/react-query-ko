@@ -1,0 +1,29 @@
+{
+  "index": {
+    "title": "Overview"
+  },
+  "installation": {
+    "title": "Installation"
+  },
+  "quick-start": {
+    "title": "Quick Start"
+  },
+  "devtools": {
+    "title": "Devtools"
+  },
+  "videos-and-talks": {
+    "title": "Videos & Talks"
+  },
+  "comparison": {
+    "title": "Comparison"
+  },
+  "typescript": {
+    "title": "TypeScript"
+  },
+  "graphql": {
+    "title": "GraphQL"
+  },
+  "react-native": {
+    "title": "React Native"
+  }
+}
