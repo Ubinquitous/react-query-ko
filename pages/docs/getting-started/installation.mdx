@@ -1,0 +1,82 @@
+---
+title: Installation
+description: React Query는 NPM 또는 ESM.sh를 사용한 \<script\> 태그로 설치할 수 있습니다.
+---
+
+## Installation
+
+React Query는 NPM 또는 ESM.sh를 사용한 \<script\> 태그로 설치할 수 있습니다.
+
+### NPM
+
+```bash
+npm i @tanstack/react-query
+# or
+pnpm add @tanstack/react-query
+# or
+yarn add @tanstack/react-query
+# or
+bun add @tanstack/react-query
+```
+
+React Query는 React v18+과 호환되며, ReactDOM 및 React Native와 함께 작동합니다.
+
+> <b>
+>   <i>
+>     "다운로드하기 전에 사용해보고 싶으신가요? 간단하고 기본적인 예제로
+>     사용해보세요!"
+>   </i>
+> </b>
+
+### CDN
+
+모듈 번들러나 패키지 매니저를 사용하지 않는 경우, ESM.sh와 같은 ESM 호환 CDN을 통해 사용할 수 있습니다.  
+HTML 파일의 맨 아래에 \<script type="module"\> 태그를 다음과 같이 추가하세요:
+
+```js
+<script type="module">
+  import React from 'https://esm.sh/react@18.2.0' import ReactDOM from
+  'https://esm.sh/react-dom@18.2.0' import {QueryClient} from
+  'https://esm.sh/@tanstack/react-query'
+</script>
+```
+
+> <b>
+>   <i>"위처럼 JSX 없이도 React를 사용할 수 있습니다."</i>
+> </b>
+
+### Requirements
+
+React Query는 최신 브라우저에 최적화되어 있습니다. 호환되는 브라우저들은 다음과 같습니다:
+
+```
+Chrome >= 91
+Firefox >= 90
+Edge >= 91
+Safari >= 15
+iOS >= 15
+Opera >= 77
+```
+
+> <b>
+>   <i>
+>     "환경에 따라 폴리필(polyfill)을 추가해야 할 수도 있습니다. <br />
+>     구형 브라우저를 지원하려면 node_modules에서 라이브러리를 직접 트랜스파일(transpile)해야
+>     합니다."
+>   </i>
+> </b>
+
+### Recommendations
+
+코드를 짜는 동안 버그와 문법 오류를 잡아주는 ESLint Plugin Query를 사용하는 것도 추천드립니다.  
+다음과 같이 설치할 수 있습니다:
+
+```bash
+npm i -D @tanstack/eslint-plugin-query
+# or
+pnpm add -D @tanstack/eslint-plugin-query
+# or
+yarn add -D @tanstack/eslint-plugin-query
+# or
+bun add -D @tanstack/eslint-plugin-query
+```
