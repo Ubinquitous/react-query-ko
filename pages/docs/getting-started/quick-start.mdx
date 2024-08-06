@@ -1,0 +1,80 @@
+---
+title: Quick Start
+description: 아래의 코드는 React Query의 세 가지 핵심 개념을 아주 간단히 설명합니다
+---
+
+## Quick Start
+
+아래의 코드는 React Query의 세 가지 핵심 개념을 아주 간단히 설명합니다:
+
+- [Queries](/docs/guides-and-concepts/queries)
+- [Mutations](/docs/guides-and-concepts/mutations)
+- [Query Invalidation](/docs/guides-and-concepts/query-invalidation)
+
+완전히 작동하는 예제를 원한다면, 작성해둔 [간단한 StackBlitz 예제](https://tanstack.com/query/latest/docs/framework/react/examples/simple)를 확인해보세요.
+
+```tsx
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { getTodos, postTodo } from "../my-api";
+
+// Create a client
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    // Provide the client to your App
+    <QueryClientProvider client={queryClient}>
+      <Todos />
+    </QueryClientProvider>
+  );
+}
+
+function Todos() {
+  // Access the client
+  const queryClient = useQueryClient();
+
+  // Queries
+  const query = useQuery({ queryKey: ["todos"], queryFn: getTodos });
+
+  // Mutations
+  const mutation = useMutation({
+    mutationFn: postTodo,
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    },
+  });
+
+  return (
+    <div>
+      <ul>
+        {query.data?.map((todo) => (
+          <li key={todo.id}>{todo.title}</li>
+        ))}
+      </ul>
+
+      <button
+        onClick={() => {
+          mutation.mutate({
+            id: Date.now(),
+            title: "Do Laundry",
+          });
+        }}
+      >
+        Add Todo
+      </button>
+    </div>
+  );
+}
+
+render(<App />, document.getElementById("root"));
+```
+
+이 세 가지 개념은 React Query의 핵심 기능 대부분을 구성합니다.  
+문서의 다음 섹션에서는 이러한 핵심 개념 각각에 대해 자세히 설명하겠습니다.
