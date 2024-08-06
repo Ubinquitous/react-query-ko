@@ -1,0 +1,115 @@
+---
+title: Overview
+description: TanStack Query (FKA React Query) is often described as the missing data-fetching library for web applications, but in more technical terms, it makes fetching, caching, synchronizing and updating server state in your web applications a breeze.
+---
+
+## Overview
+
+TanStack Query(이전 명칭: React Query)는 웹 애플리케이션을 위한 데이터 fetching 라이브러리입니다.  
+더 기술적으로 표현하자면, 웹 애플리케이션에서 서버 상태를 손쉽게 fetching, caching, 동기화 및 업데이트할 수 있게 해줍니다.
+
+### Motivation
+
+대부분의 웹 프레임워크는 데이터를 전체적으로 fetching하거나 업데이트하는 명확한 방법을 제공하지 않습니다.  
+그래서 개발자들은 데이터 fetching에 대한 프레임워크를 만들거나, 자신만의 데이터 fetching 방식을 고안하게 됩니다.  
+보통 컴포넌트 내 상태와 사이드 이펙트(부수 효과)를 조합하거나, 비동기 데이터를 애플리케이션 전반에 저장  
+및 제공을 위해 일반적인 상태 관리 라이브러리를 사용하는 것을 의미합니다.
+
+대부분의 상태 관리 라이브러리는 클라이언트에서의 상태를 다루는 데에는 뛰어나지만,  
+**비동기나 혹은 서버 상태를 다루는 데에는 효과적이지 않습니다.**  
+**서버 상태가 클라이언트와 완전히 다르기 때문입니다.**  
+서버 상태는 다음과 같은 특징을 가집니다:
+
+- 유저가 제어하거나 접근할 수 없는 위치에 데이터가 저장됩니다.
+- fetching이나 업데이트를 하려면 비동기 API를 사용해야 합니다.
+- 한 서버를 여러 사람이 함께 사용할 수 있고, 다른 사용자가 모르는 사이 데이터가 변경될 수 있습니다.
+  <small>
+    (ubinquitous) 추가적인 설명을 덧붙이면, 클라이언트 즉 React에서는 사용자
+    각각 자신의 어플리케이션을 가지지만, <br />
+    Next에서는 하나의 서버가 사용자들에게 웹 페이지를 내려주는 식으로 작동합니다.
+    <br /> 그래서 Next 서버 측에서 데이터를 관리할 땐 내가 수정한 데이터도 다른
+    사용자에게 업데이트되는 것입니다.
+  </small>
+- 잘못하면 애플리케이션 내 데이터를 항상 최신 상태로 유지하지 못할 수 있습니다.
+
+서버 상태의 특성을 이해하고 나면, 다음과 같은 **더 많은 도전 과제**가 발생할 수 있습니다:
+
+- caching... (프로그래밍에서 가장 어려운 일 중 하나)
+- 동일한 데이터를 위한 여러 요청을 단일 요청으로 중복 제거
+- 백그라운드에서 오래된 데이터를 업데이트
+- 데이터가 오래된 시점을 파악
+- 업데이트된 데이터를 빠르게 반영
+- pagination과 lazy loading과 같은 성능 최적화
+- 서버 상태의 메모리 관리 및 가비지 컬렉션
+- 구조적 공유를 통한 쿼리 결과 데이터 메모이제이션
+
+만약 위의 것들이 익숙하다면, 아마 서버 상태 문제를 모두 해결할 수 있다는 뜻일 겁니다.  
+하지만 대부분의 사람들은 이 모든 도전 과제를 해결하지 못했거나 다루지 않았을 것입니다.  
+우리는 이제 겨우 겉핥기만 하고 있는 셈입니다!
+
+React Query는 서버 상태를 관리하는 데 최고의 라이브러리 중 하나입니다.  
+별다른 설정 없이 바로 잘 작동하며, 애플리케이션 규모에 따라 설정을 커스터마이징할 수 있습니다.
+
+React Query를 사용하면 서버 상태의 까다로운 문제들을 극복하고,  
+애플리케이션 데이터가 당신을 관리하기 전에 당신이 데이터를 관리할 수 있습니다.
+
+기술적인 면에서, React Query에게 다음을 기대할 수 있습니다:
+
+- 복잡하고 이해하기 어려운 많은 양의 코드를 React Query 코드 몇 줄로 대체할 수 있습니다.
+- 애플리케이션의 유지보수를 용이하게 하고, 새로운 서버 상태 관련 기능을 더 쉽게 추가할 수 있습니다.
+- 애플리케이션이 더욱 빠르고 반응성이 좋게 느껴지도록 하여 최종 사용자에게 직접적인 영향을 미칩니다.
+- 대역폭을 절약하고 메모리 성능을 향상시킬 수 있습니다.
+
+### Enough talk, show me some code already!
+
+아래 예제에서는 React Query가 가장 기본적이고 간단한 형태로 사용됩니다.  
+React Query 리포지토리의 깃허브 통계를 가져오는 코드입니다:
+
+[StackBlitz에서 열기](https://stackblitz.com/github/TanStack/query/tree/main/examples/react/simple)
+
+```jsx
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Example />
+    </QueryClientProvider>
+  );
+}
+
+function Example() {
+  const { isPending, error, data } = useQuery({
+    queryKey: ["repoData"],
+    queryFn: () =>
+      fetch("https://api.github.com/repos/TanStack/query").then((res) =>
+        res.json()
+      ),
+  });
+
+  if (isPending) return "로딩중...";
+
+  if (error) return "에러가 발생했습니다: " + error.message;
+
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.description}</p>
+      <strong>👀 {data.subscribers_count}</strong>{" "}
+      <strong>✨ {data.stargazers_count}</strong>{" "}
+      <strong>🍴 {data.forks_count}</strong>
+    </div>
+  );
+}
+```
+
+### You talked me into it, so what now?
+
+- 공식 React Query 강의를 개인 또는 팀 단위로 구매하여 수강해보세요. React Query의 모든 기능을 체계적으로 배우는 데 도움이 될 것입니다.
+- [Walkthrough Guide](/docs/installation)와 [API Reference](/docs/api-references/useQuery)를 참고하여 자신의 속도에 맞춰 학습하세요. 이 가이드는 React Query의 사용법을 자세히 설명하고 있어, 실습을 통해 이해도를 높이는 데 유용합니다.
