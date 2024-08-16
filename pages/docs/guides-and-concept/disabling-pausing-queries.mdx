@@ -1,0 +1,123 @@
+---
+id: disabling-queries
+title: Disabling/Pausing Queries
+---
+
+## Disabling/Pausing Queries
+
+쿼리가 자동으로 실행되는 것을 원하지 않을 때, `enabled = false` 옵션을 사용하면 됩니다. `enabled` 옵션은 boolean을 반환하는 콜백을 받아들일 수도 있습니다.
+
+`enabled`가 `false`일 때:
+
+- 쿼리에 캐시된 데이터가 있으면, 쿼리는 `status === 'success'` 또는 `isSuccess` 상태로 초기화됩니다.
+- 쿼리에 캐시된 데이터가 없으면, 쿼리는 `status === 'pending'` 및 `fetchStatus === 'idle'` 상태로 시작됩니다.
+- 쿼리는 자동으로 마운트 시에 fetch되지 않습니다.
+- 쿼리는 백그라운드에서 자동으로 refetch되지 않습니다.
+- 쿼리는 쿼리 클라이언트의 `invalidateQueries` 및 `refetchQueries` 호출을 무시합니다. 이 호출들은 일반적으로 쿼리가 refetch되는 결과를 초래합니다.
+- `useQuery`에서 반환된 `refetch`를 사용하여 쿼리를 수동으로 trigger 할 수 있습니다. 그러나 `skipToken`과 함께 사용하면 작동하지 않습니다.
+
+> Typescript 사용자는 `enabled = false` 대신 [skipToken](#typesafe-disabling-of-queries-using-skiptoken)을 사용하는 것을 선호할 수 있습니다.
+
+예시:
+
+'''tsx
+function Todos() {
+const { isLoading, isError, data, error, refetch, isFetching } = useQuery({
+queryKey: ['todos'],
+queryFn: fetchTodoList,
+enabled: false,
+})
+
+return (
+<div>
+<button onClick={() => refetch()}>Fetch Todos</button>
+
+      {data ? (
+        <>
+          <ul>
+            {data.map((todo) => (
+              <li key={todo.id}>{todo.title}</li>
+            ))}
+          </ul>
+        </>
+      ) : isError ? (
+        <span>Error: {error.message}</span>
+      ) : isLoading ? (
+        <span>Loading...</span>
+      ) : (
+        <span>Not ready ...</span>
+      )}
+
+      <div>{isFetching ? 'Fetching...' : null}</div>
+    </div>
+
+)
+}
+'''
+
+쿼리를 영구적으로 비활성화하면 TanStack Query의 많은 유용한 기능들 (예: 백그라운드 refetch 등)을 사용할 수 없게 됩니다. 또한 이는 선언적 접근 방식에서 명령적 모드로 전환됩니다 (여기서 클릭 시 fetch 실행). `refetch`에 파라미터를 전달하는 것도 불가능합니다. 자주 원하는 것은 초기 fetch를 지연시키는 lazy query입니다.
+
+## Lazy Queries
+
+`enabled` 옵션은 쿼리를 영구적으로 비활성화하는 것 외에도, 나중에 쿼리를 활성화/비활성화 하는 데 사용할 수 있습니다. 좋은 예는 사용자가 필터 값을 입력할 때만 첫 번째 요청을 실행하고 싶은 필터 폼입니다:
+
+예시:
+
+'''tsx
+function Todos() {
+const [filter, setFilter] = React.useState('')
+
+const { data } = useQuery({
+queryKey: ['todos', filter],
+queryFn: () => fetchTodos(filter),
+// ⬇️ 필터가 비어 있는 동안 비활성화
+enabled: !!filter,
+})
+
+return (
+<div>
+// 🚀 필터를 적용하면 쿼리가 활성화되고 실행됩니다
+<FiltersForm onApply={setFilter} />
+{data && <TodosTable data={data} />}
+</div>
+)
+}
+'''
+
+### isLoading (Previously: `isInitialLoading`)
+
+Lazy queries는 시작부터 `status: 'pending'` 상태에 있습니다. `pending`은 데이터가 아직 없다는 것을 의미합니다. 기술적으로 맞지만, 현재 데이터를 fetch하지 않기 때문에 (쿼리가 _활성화되지 않음_) 이 플래그를 로딩 스피너를 표시하는 데 사용할 수 없을 것입니다.
+
+비활성화되거나 lazy 쿼리를 사용할 때는 `isLoading` 플래그를 사용할 수 있습니다. 이 플래그는 다음으로부터 계산된 값입니다:
+
+`isPending && isFetching`
+
+따라서 쿼리가 처음으로 fetch 중일 때만 true가 됩니다.
+
+## Typesafe disabling of queries using `skipToken`
+
+TypeScript를 사용하는 경우, `skipToken`을 사용하여 쿼리를 비활성화할 수 있습니다. 이는 조건에 따라 쿼리를 비활성화하고 싶지만, 쿼리를 타입 안전하게 유지하고 싶을 때 유용합니다.
+
+> 중요: `useQuery`의 `refetch`는 `skipToken`과 함께 작동하지 않습니다. 그 외에는 `skipToken`은 `enabled: false`와 같은 방식으로 작동합니다.
+
+예시:
+
+'''tsx
+function Todos() {
+const [filter, setFilter] = React.useState<string | undefined>()
+
+const { data } = useQuery({
+queryKey: ['todos', filter],
+// ⬇️ 필터가 undefined이거나 비어 있는 동안 비활성화
+queryFn: filter ? () => fetchTodos(filter) : skipToken,
+})
+
+return (
+<div>
+// 🚀 필터를 적용하면 쿼리가 활성화되고 실행됩니다
+<FiltersForm onApply={setFilter} />
+{data && <TodosTable data={data} />}
+</div>
+)
+}
+'''
