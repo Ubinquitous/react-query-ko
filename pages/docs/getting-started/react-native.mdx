@@ -1,0 +1,179 @@
+---
+id: react-native
+title: React Native
+---
+
+## React Native
+
+React Query는 React Native와 즉시 호환되도록 설계되어 있지만, 현재로서는 devtools가 React DOM에서만 지원됩니다.
+
+다음은 React Native에서 사용할 수 있는 서드 파티 플러그인들입니다:
+
+[Expo](https://docs.expo.dev/) 플러그인: https://github.com/expo/dev-plugins/tree/main/packages/react-query
+
+[Flipper](https://fbflipper.com/docs/getting-started/react-native/) 플러그인: https://github.com/bgaleotti/react-query-native-devtools
+
+[Reactotron](https://github.com/infinitered/reactotron/) 플러그인: https://github.com/hsndmr/reactotron-react-query
+
+라이브러리 안에 내장된 devtools를 플랫폼에 구애받지 않도록 만들고 싶다면, React Query 팀에게 연락해주세요!
+
+## Online status management
+
+React Query는 웹 브라우저에서 자동 재요청(auto refetch on reconnect)을 이미 지원합니다. React Native에서 이 기능을 추가하려면 아래 예제와 같이 React Query의 onlineManager를 사용해야 합니다:
+
+```tsx
+import NetInfo from "@react-native-community/netinfo";
+import { onlineManager } from "@tanstack/react-query";
+
+onlineManager.setEventListener((setOnline) => {
+  return NetInfo.addEventListener((state) => {
+    setOnline(!!state.isConnected);
+  });
+});
+```
+
+## Refetch on App focus
+
+`window`의 이벤트 리스너 대신, React Native는 [AppState 모듈](https://reactnative.dev/docs/appstate#app-states)을 통해 포커스 정보를 제공합니다. `AppState`의 "change" 이벤트를 사용하여 앱 상태가 "active"로 변경될 때 업데이트를 트리거할 수 있습니다:
+
+```tsx
+import { useEffect } from "react";
+import { AppState, Platform } from "react-native";
+import type { AppStateStatus } from "react-native";
+import { focusManager } from "@tanstack/react-query";
+
+function onAppStateChange(status: AppStateStatus) {
+  if (Platform.OS !== "web") {
+    focusManager.setFocused(status === "active");
+  }
+}
+
+useEffect(() => {
+  const subscription = AppState.addEventListener("change", onAppStateChange);
+
+  return () => subscription.remove();
+}, []);
+```
+
+## Refresh on Screen focus
+
+어떤 상황에서는 React Native 화면이 다시 포커스될 때 쿼리를 재요청(refetch)하고 싶을 수 있습니다.  
+이 커스텀 훅은 화면이 다시 포커스될 때 제공된 refetch 함수를 호출합니다.
+
+```tsx
+import React from "react";
+import { useFocusEffect } from "@react-navigation/native";
+
+export function useRefreshOnFocus<T>(refetch: () => Promise<T>) {
+  const firstTimeRef = React.useRef(true);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (firstTimeRef.current) {
+        firstTimeRef.current = false;
+        return;
+      }
+
+      refetch();
+    }, [refetch])
+  );
+}
+```
+
+위 코드에서 `refetch`는 화면이 포커스될 때마다 호출되지만, `useFocusEffect`가 화면이 포커스될 때뿐만 아니라 마운트 시에도 콜백을 호출하기 때문에 처음에는 건너뜁니다.
+
+## Disable re-renders on out of focus Screens
+
+성능 문제를 포함한 몇 가지 상황에서는 React Native 화면이 포커스에서 벗어날 때 리렌더링을 중지하고 싶을 수 있습니다. 이를 위해 `@react-navigation/native`의 `useFocusEffect`와 `notifyOnChangeProps` 쿼리 옵션을 함께 사용할 수 있습니다.
+
+이 커스텀 훅은 화면이 포커스에서 벗어날 때 빈 배열을 반환하는 `notifyOnChangeProps` 옵션을 제공합니다. 이렇게 하면 해당 상황에서 리렌더링이 효과적으로 중지됩니다. 화면이 다시 포커스되면 동작이 정상으로 돌아옵니다.
+
+```tsx
+import React from "react";
+import { NotifyOnChangeProps } from "@tanstack/query-core";
+import { useFocusEffect } from "@react-navigation/native";
+
+export function useFocusNotifyOnChangeProps(
+  notifyOnChangeProps?: NotifyOnChangeProps
+) {
+  const focusedRef = React.useRef(true);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      focusedRef.current = true;
+
+      return () => {
+        focusedRef.current = false;
+      };
+    }, [])
+  );
+
+  return () => {
+    if (!focusedRef.current) {
+      return [];
+    }
+
+    if (typeof notifyOnChangeProps === "function") {
+      return notifyOnChangeProps();
+    }
+
+    return notifyOnChangeProps;
+  };
+}
+```
+
+위 코드에서 `useFocusEffect`는 콜백이 조건으로 사용할 참조의 값을 변경하는 데 사용됩니다.
+
+인자는 참조로 감싸져 있어 반환된 콜백이 항상 같은 참조를 유지하도록 보장합니다.
+
+Example usage:
+
+```tsx
+function MyComponent() {
+  const notifyOnChangeProps = useFocusNotifyOnChangeProps();
+
+  const { dataUpdatedAt } = useQuery({
+    queryKey: ["myKey"],
+    queryFn: async () => {
+      const response = await fetch(
+        "https://api.github.com/repos/tannerlinsley/react-query"
+      );
+      return response.json();
+    },
+    notifyOnChangeProps,
+  });
+
+  return <Text>DataUpdatedAt: {dataUpdatedAt}</Text>;
+}
+```
+
+## Disable queries on out of focus screens
+
+enabled는 콜백으로 설정할 수도 있어, 상태와 리렌더링 없이 화면 포커스가 벗어난 경우 쿼리 비활성화를 지원합니다. 이는 notifyOnChangeProps가 작동하는 방식과 유사하지만, 추가로 refetchType이 active일 때 쿼리를 무효화할 때 재요청을 트리거하지 않습니다.
+
+```tsx
+import React from 'react'
+import { useFocusEffect } from '@react-navigation/native'
+
+export function useQueryFocusAware(notifyOnChangeProps?: NotifyOnChangeProps) {
+  const focusedRef = React.useRef(true)
+
+  useFocusEffect(
+    React.useCallback(() => {
+      focusedRef.current = true
+
+      return () => {
+        focusedRef.current = false
+      }
+    }, []),
+  )
+
+  return () => focusedRef.current
+
+  useQuery({
+    queryKey: ['key'],
+    queryFn: () => fetch(...),
+    enabled: () => focusedRef.current,
+  })
+}
+```
