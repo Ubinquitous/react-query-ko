@@ -20,17 +20,17 @@ title: Disabling/Pausing Queries
 
 예시:
 
-'''tsx
+```tsx
 function Todos() {
-const { isLoading, isError, data, error, refetch, isFetching } = useQuery({
-queryKey: ['todos'],
-queryFn: fetchTodoList,
-enabled: false,
-})
+  const { isLoading, isError, data, error, refetch, isFetching } = useQuery({
+    queryKey: ["todos"],
+    queryFn: fetchTodoList,
+    enabled: false,
+  });
 
-return (
-<div>
-<button onClick={() => refetch()}>Fetch Todos</button>
+  return (
+    <div>
+      <button onClick={() => refetch()}>Fetch Todos</button>
 
       {data ? (
         <>
@@ -48,12 +48,11 @@ return (
         <span>Not ready ...</span>
       )}
 
-      <div>{isFetching ? 'Fetching...' : null}</div>
+      <div>{isFetching ? "Fetching..." : null}</div>
     </div>
-
-)
+  );
 }
-'''
+```
 
 쿼리를 영구적으로 비활성화하면 TanStack Query의 많은 유용한 기능들 (예: 백그라운드 refetch 등)을 사용할 수 없게 됩니다. 또한 이는 선언적 접근 방식에서 명령적 모드로 전환됩니다 (여기서 클릭 시 fetch 실행). `refetch`에 파라미터를 전달하는 것도 불가능합니다. 자주 원하는 것은 초기 fetch를 지연시키는 lazy query입니다.
 
@@ -63,26 +62,26 @@ return (
 
 예시:
 
-'''tsx
+```tsx
 function Todos() {
-const [filter, setFilter] = React.useState('')
+  const [filter, setFilter] = React.useState("");
 
-const { data } = useQuery({
-queryKey: ['todos', filter],
-queryFn: () => fetchTodos(filter),
-// ⬇️ 필터가 비어 있는 동안 비활성화
-enabled: !!filter,
-})
+  const { data } = useQuery({
+    queryKey: ["todos", filter],
+    queryFn: () => fetchTodos(filter),
+    // ⬇️ 필터가 비어 있는 동안 비활성화
+    enabled: !!filter,
+  });
 
-return (
-<div>
-// 🚀 필터를 적용하면 쿼리가 활성화되고 실행됩니다
-<FiltersForm onApply={setFilter} />
-{data && <TodosTable data={data} />}
-</div>
-)
+  return (
+    <div>
+      // 🚀 필터를 적용하면 쿼리가 활성화되고 실행됩니다
+      <FiltersForm onApply={setFilter} />
+      {data && <TodosTable data={data} />}
+    </div>
+  );
 }
-'''
+```
 
 ### isLoading (Previously: `isInitialLoading`)
 
@@ -102,22 +101,22 @@ TypeScript를 사용하는 경우, `skipToken`을 사용하여 쿼리를 비활�
 
 예시:
 
-'''tsx
+```tsx
 function Todos() {
-const [filter, setFilter] = React.useState<string | undefined>()
+  const [filter, setFilter] = React.useState<string | undefined>();
 
-const { data } = useQuery({
-queryKey: ['todos', filter],
-// ⬇️ 필터가 undefined이거나 비어 있는 동안 비활성화
-queryFn: filter ? () => fetchTodos(filter) : skipToken,
-})
+  const { data } = useQuery({
+    queryKey: ["todos", filter],
+    // ⬇️ 필터가 undefined이거나 비어 있는 동안 비활성화
+    queryFn: filter ? () => fetchTodos(filter) : skipToken,
+  });
 
-return (
-<div>
-// 🚀 필터를 적용하면 쿼리가 활성화되고 실행됩니다
-<FiltersForm onApply={setFilter} />
-{data && <TodosTable data={data} />}
-</div>
-)
+  return (
+    <div>
+      // 🚀 필터를 적용하면 쿼리가 활성화되고 실행됩니다
+      <FiltersForm onApply={setFilter} />
+      {data && <TodosTable data={data} />}
+    </div>
+  );
 }
-'''
+```
