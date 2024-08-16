@@ -1,0 +1,97 @@
+---
+id: dependent-queries
+title: Dependent Queries
+---
+
+## Dependent Queries
+
+## useQuery dependent Query
+
+Dependent (또는 직렬) 쿼리는 이전 쿼리가 완료된 후에야 실행될 수 있습니다. 이를 달성하기 위해 `enabled` 옵션을 사용하여 쿼리가 실행될 준비가 되었을 때를 지정하는 것만으로 쉽게 구현할 수 있습니다:
+
+[//]: # "Example"
+
+```tsx
+// 사용자 정보를 가져옵니다
+const { data: user } = useQuery({
+  queryKey: ["user", email],
+  queryFn: getUserByEmail,
+});
+
+const userId = user?.id;
+
+// 그 다음, 사용자의 프로젝트를 가져옵니다
+const {
+  status,
+  fetchStatus,
+  data: projects,
+} = useQuery({
+  queryKey: ["projects", userId],
+  queryFn: getProjectsByUser,
+  // userId가 존재할 때까지 쿼리가 실행되지 않습니다
+  enabled: !!userId,
+});
+```
+
+[//]: # "Example"
+
+`projects` 쿼리는 다음 상태에서 시작합니다:
+
+```tsx
+status: "pending";
+isPending: true;
+fetchStatus: "idle";
+```
+
+`user`가 사용 가능해지면, `projects` 쿼리는 `enabled` 상태가 되어 다음으로 전환됩니다:
+
+```tsx
+status: "pending";
+isPending: true;
+fetchStatus: "fetching";
+```
+
+프로젝트를 가져오면 다음 상태로 변경됩니다:
+
+```tsx
+status: "success";
+isPending: false;
+fetchStatus: "idle";
+```
+
+## useQueries dependent Query
+
+동적 병렬 쿼리 - `useQueries`도 이전 쿼리에 의존할 수 있습니다. 이를 구현하는 방법은 다음과 같습니다:
+
+[//]: # "Example2"
+
+```tsx
+// 사용자 ID를 가져옵니다
+const { data: userIds } = useQuery({
+  queryKey: ["users"],
+  queryFn: getUsersData,
+  select: (users) => users.map((user) => user.id),
+});
+
+// 그 다음, 사용자의 메시지를 가져옵니다
+const usersMessages = useQueries({
+  queries: userIds
+    ? userIds.map((id) => {
+        return {
+          queryKey: ["messages", id],
+          queryFn: () => getMessagesByUsers(id),
+        };
+      })
+    : [], // 사용자 ID가 undefined일 경우, 빈 배열이 반환됩니다
+});
+```
+
+[//]: # "Example2"
+
+**참고**: `useQueries`는 **쿼리 결과의 배열**을 반환합니다.
+
+## 성능에 대한 주의 사항
+
+의존성 쿼리는 본질적으로 [request waterfall](../../../react/guides/request-waterfalls)의 형태를 가지며, 이는 성능에 영향을 미칩니다. 두 쿼리가 동일한 시간만큼 걸린다고 가정할 때, 병렬로 실행하는 대신 직렬로 실행하면 항상 두 배의 시간이 소요됩니다. 이는 특히 높은 지연(latency)을 가진 클라이언트에서 더욱 문제가 될 수 있습니다. 가능하다면, 두 쿼리가 병렬로 fetching할 수 있도록 백엔드 API를 재구성하는 것이 좋습니다. 하지만 이는 항상 실용적이지 않을 수 있습니다.
+
+위 예제에서 `getUserByEmail`을 먼저 가져와서 `getProjectsByUser`를 호출하는 대신, 새로운 `getProjectsByUserEmail` 쿼리를 도입하면 waterfall을 평탄화할 수 있습니다.
