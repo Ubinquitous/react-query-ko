@@ -1,0 +1,58 @@
+---
+id: parallel-queries
+title: Parallel Queries
+---
+
+## Parallel Queries
+
+"Parallel" 쿼리는 동시에 실행되어 최대한 많은 동시 fetching을 달성하는 쿼리입니다.
+
+## Manual Parallel Queries
+
+병렬 쿼리의 수가 변하지 않는 경우, 병렬 쿼리를 사용하는 데 **추가적인 노력**이 필요하지 않습니다. TanStack Query의 `useQuery`와 `useInfiniteQuery` 훅을 나란히 사용하기만 하면 됩니다!
+
+[//]: # "Example"
+
+```tsx
+function App () {
+// 다음 쿼리들은 병렬로 실행됩니다
+const usersQuery = useQuery({ queryKey: ['users'], queryFn: fetchUsers })
+const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: fetchTeams })
+const projectsQuery = useQuery({ queryKey: ['projects'], queryFn: fetchProjects })
+...
+}
+```
+
+[//]: # "Example"
+[//]: # "Info"
+
+> React Query를 서스펜스 모드에서 사용할 때는 이 병렬 패턴이 작동하지 않습니다. 첫 번째 쿼리가 내부적으로 약속(promise)을 던져서 다른 쿼리가 실행되기 전에 컴포넌트를 일시 중지시킬 수 있기 때문입니다. 이를 해결하려면 `useSuspenseQueries` 훅을 사용하거나 각 `useSuspenseQuery` 인스턴스에 대해 별도의 컴포넌트를 사용하여 병렬 실행을 직접 조정해야 합니다.
+
+[//]: # "Info"
+
+## Dynamic Parallel Queries with `useQueries`
+
+[//]: # "DynamicParallelIntro"
+
+쿼리의 수가 렌더링마다 변경되는 경우, 수동 쿼리를 사용할 수 없습니다. 이는 훅의 규칙을 위반하기 때문입니다. 대신, TanStack Query는 `useQueries` 훅을 제공하여 원하는 만큼 많은 쿼리를 동적으로 병렬로 실행할 수 있습니다.
+
+[//]: # "DynamicParallelIntro"
+
+`useQueries`는 **options 객체**를 받아들이며, 이 객체에는 **queries 키**가 있으며 그 값은 **쿼리 객체의 배열**입니다. 이 훅은 **쿼리 결과의 배열**을 반환합니다:
+
+[//]: # "Example2"
+
+```tsx
+function App({ users }) {
+  const userQueries = useQueries({
+    queries: users.map((user) => {
+      return {
+        queryKey: ["user", user.id],
+        queryFn: () => fetchUserById(user.id),
+      };
+    }),
+  });
+}
+```
+
+[//]: # "Example2"
