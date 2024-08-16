@@ -1,0 +1,102 @@
+---
+id: query-functions
+title: Query Functions
+---
+
+## Query Functions
+
+쿼리 함수는 문자 그대로 **약속을 반환하는** 어떤 함수든 될 수 있습니다. 반환된 약속은 **데이터를 해결**하거나 **오류를 발생**시켜야 합니다.
+
+다음은 유효한 쿼리 함수 구성 예시입니다:
+
+```tsx
+useQuery({ queryKey: ["todos"], queryFn: fetchAllTodos });
+useQuery({ queryKey: ["todos", todoId], queryFn: () => fetchTodoById(todoId) });
+useQuery({
+  queryKey: ["todos", todoId],
+  queryFn: async () => {
+    const data = await fetchTodoById(todoId);
+    return data;
+  },
+});
+useQuery({
+  queryKey: ["todos", todoId],
+  queryFn: ({ queryKey }) => fetchTodoById(queryKey[1]),
+});
+```
+
+## Handling and Throwing Errors
+
+TanStack Query가 쿼리에서 오류를 감지하려면 쿼리 함수가 **오류를 발생**시키거나 **거부된 약속**을 반환해야 합니다. 쿼리 함수에서 발생된 오류는 쿼리의 `error` 상태에 유지됩니다.
+
+```tsx
+const { error } = useQuery({
+  queryKey: ["todos", todoId],
+  queryFn: async () => {
+    if (somethingGoesWrong) {
+      throw new Error("Oh no!");
+    }
+    if (somethingElseGoesWrong) {
+      return Promise.reject(new Error("Oh no!"));
+    }
+
+    return data;
+  },
+});
+```
+
+## Usage with `fetch` and other clients that do not throw by default
+
+`axios`나 `graphql-request` 같은 대부분의 유틸리티는 실패한 HTTP 호출에 대해 자동으로 오류를 발생시키지만, `fetch` 같은 유틸리티는 기본적으로 오류를 발생시키지 않습니다. 이 경우, 직접 오류를 발생시켜야 합니다. 인기 있는 `fetch` API를 사용하여 이를 간단히 처리하는 방법은 다음과 같습니다:
+
+```tsx
+useQuery({
+  queryKey: ["todos", todoId],
+  queryFn: async () => {
+    const response = await fetch("/todos/" + todoId);
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return response.json();
+  },
+});
+```
+
+## Query Function Variables
+
+쿼리 키는 데이터를 고유하게 식별하는 것뿐만 아니라, 쿼리 함수에 QueryFunctionContext의 일부로 편리하게 전달됩니다. 항상 필요한 것은 아니지만, 필요한 경우 쿼리 함수를 추출할 수 있게 해줍니다:
+
+```tsx
+function Todos({ status, page }) {
+  const result = useQuery({
+    queryKey: ["todos", { status, page }],
+    queryFn: fetchTodoList,
+  });
+}
+
+// 쿼리 함수에서 키, 상태 및 페이지 변수를 액세스합니다!
+function fetchTodoList({ queryKey }) {
+  const [_key, { status, page }] = queryKey;
+  return new Promise();
+}
+```
+
+### QueryFunctionContext
+
+`QueryFunctionContext`는 각 쿼리 함수에 전달되는 객체입니다. 다음으로 구성됩니다:
+
+- `queryKey: QueryKey`: [Query Keys](../query-keys)
+- `signal?: AbortSignal`
+  - TanStack Query에서 제공하는 [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) 인스턴스
+  - [쿼리 취소](../query-cancellation)에 사용될 수 있습니다
+- `meta: Record<string, unknown> | undefined`
+  - 쿼리에 대한 추가 정보를 채울 수 있는 선택적 필드
+
+추가로, [무한 쿼리](../infinite-queries)에는 다음과 같은 옵션이 전달됩니다:
+
+- `pageParam: TPageParam`
+  - 현재 페이지를 가져오는 데 사용되는 페이지 매개변수
+- `direction: 'forward' | 'backward'`
+  - **사용되지 않음**
+  - 현재 페이지 가져오기 방향
+  - 현재 페이지 가져오기 방향에 액세스하려면, `getNextPageParam`과 `getPreviousPageParam`에서 `pageParam`에 방향을 추가하세요.
