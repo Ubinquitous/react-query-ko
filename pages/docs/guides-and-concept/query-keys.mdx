@@ -1,0 +1,84 @@
+---
+id: query-keys
+title: Query Keys
+---
+
+## Query Keys
+
+TanStack Query의 핵심은 쿼리 키를 기반으로 쿼리 캐싱을 관리하는 것입니다. 쿼리 키는 최상위에서 배열 형태여야 하며, 단일 문자열을 가진 간단한 배열부터 많은 문자열과 중첩된 객체를 포함하는 복잡한 배열까지 가능합니다. 쿼리 키가 직렬화 가능하고 **쿼리의 데이터와 유일**하다면, 자유롭게 사용할 수 있습니다!
+
+## Simple Query Keys
+
+가장 간단한 형태의 키는 상수 값을 가진 배열입니다. 이 형식은 다음과 같은 경우에 유용합니다:
+
+- 일반적인 리스트/인덱스 리소스
+- 비계층적 리소스
+
+```tsx
+// 투두 목록
+useQuery({ queryKey: ['todos'], ... })
+
+// 다른 것, 뭐든지!
+useQuery({ queryKey: ['something', 'special'], ... })
+```
+
+## Array Keys with variables
+
+쿼리가 데이터를 고유하게 설명하기 위해 더 많은 정보가 필요한 경우, 문자열과 직렬화 가능한 객체를 포함하는 배열을 사용할 수 있습니다. 이는 다음과 같은 경우에 유용합니다:
+
+- 계층적 또는 중첩된 리소스
+  - 항목을 고유하게 식별하기 위해 ID, 인덱스 또는 다른 원시 값을 전달하는 것이 일반적입니다.
+- 추가 매개변수가 있는 쿼리
+  - 추가 옵션의 객체를 전달하는 것이 일반적입니다.
+
+```tsx
+// 개별 투두
+useQuery({ queryKey: ['todo', 5], ... })
+
+// "미리보기" 형식의 개별 투두
+useQuery({ queryKey: ['todo', 5, { preview: true }], ...})
+
+// "완료된" 투두 목록
+useQuery({ queryKey: ['todos', { type: 'done' }], ... })
+```
+
+## Query Keys are hashed deterministically!
+
+쿼리 키는 결정적으로 해시됩니다. 즉, 객체 내 키의 순서와 관계없이 다음 쿼리들은 모두 동일하게 간주됩니다:
+
+```tsx
+useQuery({ queryKey: ['todos', { status, page }], ... })
+useQuery({ queryKey: ['todos', { page, status }], ...})
+useQuery({ queryKey: ['todos', { page, status, other: undefined }], ... })
+```
+
+하지만 다음 쿼리 키들은 동일하지 않습니다. 배열 항목의 순서가 중요합니다!
+
+```tsx
+useQuery({ queryKey: ['todos', status, page], ... })
+useQuery({ queryKey: ['todos', page, status], ...})
+useQuery({ queryKey: ['todos', undefined, page, status], ...})
+```
+
+## If your query function depends on a variable, include it in your query key
+
+쿼리 키는 가져오고 있는 데이터를 고유하게 설명하므로, 쿼리 함수에서 **변경되는** 변수는 쿼리 키에 포함되어야 합니다. 예를 들어:
+
+```tsx
+function Todos({ todoId }) {
+  const result = useQuery({
+    queryKey: ["todos", todoId],
+    queryFn: () => fetchTodoById(todoId),
+  });
+}
+```
+
+쿼리 키는 쿼리 함수의 종속성 역할을 합니다. 종속 변수를 쿼리 키에 추가하면 쿼리가 독립적으로 캐시되고, 변수가 변경될 때마다 *쿼리가 자동으로 재가져오기*됩니다(설정된 `staleTime`에 따라). 더 많은 정보와 예제는 [exhaustive-deps](../../../../eslint/exhaustive-deps) 섹션을 참조하세요.
+
+[//]: # "Materials"
+
+## Further reading
+
+더 큰 애플리케이션에서 Query Keys를 정리하는 방법에 대한 팁은 [Effective React Query Keys](../../community/tkdodos-blog#8-effective-react-query-keys)를 확인하고, Community Resources에서 [Query Key Factory Package](../../community/community-projects#query-key-factory)를 살펴보세요.
+
+[//]: # "Materials"
