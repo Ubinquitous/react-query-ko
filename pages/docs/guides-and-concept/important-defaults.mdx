@@ -1,0 +1,45 @@
+---
+id: important-defaults
+title: Important Defaults
+---
+
+## Important Defaults
+
+기본적으로 TanStack Query는 **적극적이지만 합리적인** 기본값으로 설정되어 있습니다. **이 기본값들은 새 사용자에게는 다소 혼란스러울 수 있으며, 사용자에게 잘 알려지지 않은 경우 학습이나 디버깅이 어려울 수 있습니다.** TanStack Query를 계속 배우고 사용할 때 이 기본값들을 염두에 두세요:
+
+- 기본적으로 `useQuery` 또는 `useInfiniteQuery`를 통한 쿼리 인스턴스는 **캐시된 데이터를 오래된 것으로 간주**합니다.
+
+  > 이 동작을 변경하려면, `staleTime` 옵션을 사용하여 전역적으로 또는 쿼리별로 쿼리를 구성할 수 있습니다. 더 긴 `staleTime`을 지정하면 쿼리가 데이터를 덜 자주 재요청합니다.
+
+- 오래된 쿼리는 다음 상황에서 자동으로 백그라운드에서 재요청됩니다:
+
+  - 쿼리의 새 인스턴스가 마운트될 때
+  - 창이 다시 포커스될 때
+  - 네트워크가 재연결될 때
+  - 쿼리가 선택적으로 재요청 간격을 설정한 경우
+
+  > 이 기능을 변경하려면, `refetchOnMount`, `refetchOnWindowFocus`, `refetchOnReconnect` 및 `refetchInterval`과 같은 옵션을 사용할 수 있습니다.
+
+- 더 이상 활성 인스턴스가 없는 쿼리 결과(`useQuery`, `useInfiniteQuery` 또는 쿼리 옵저버)는 "비활성"으로 표시되며 나중에 다시 사용될 경우를 대비하여 캐시에 남아 있습니다.
+- 기본적으로 "비활성" 쿼리는 **5분** 후에 가비지 컬렉션됩니다.
+
+  > 이를 변경하려면, 쿼리의 기본 `gcTime` 값을 `1000 * 60 * 5` 밀리초 외의 값으로 조정할 수 있습니다.
+
+- 쿼리가 실패하면 **3회 조용히 재시도되며, 지수 백오프 지연이 적용**된 후 UI에 오류를 캡처하고 표시합니다.
+
+  > 이를 변경하려면, 쿼리의 기본 `retry` 및 `retryDelay` 옵션을 `3`과 기본 지수 백오프 함수 외의 값으로 조정할 수 있습니다.
+
+- 기본적으로 쿼리 결과는 **구조적으로 공유되어 데이터가 실제로 변경되었는지 감지**하며, 변경되지 않은 경우 **데이터 참조가 변경되지 않은 채 유지**되어 useMemo 및 useCallback과 관련하여 값 안정화에 도움을 줍니다. 이 개념이 낯설다면 걱정하지 마세요! 99.9%의 경우 이 기능을 비활성화할 필요가 없으며, 이 기능은 추가 비용 없이 앱의 성능을 향상시킵니다.
+
+  > 구조적 공유는 JSON 호환 값에 대해서만 작동하며, 다른 값 유형은 항상 변경된 것으로 간주됩니다. 예를 들어 큰 응답으로 인해 성능 문제가 발생하는 경우, `config.structuralSharing` 플래그로 이 기능을 비활성화할 수 있습니다. 쿼리 응답에서 JSON 호환되지 않는 값을 다루면서 데이터 변경 여부를 감지하고 싶다면, `config.structuralSharing`에 사용자 정의 함수를 제공하여 이전 응답과 새로운 응답에서 값을 계산하고 참조를 유지할 수 있습니다.
+
+[//]: # "Materials"
+
+## Further Reading
+
+기본값에 대한 더 자세한 설명은 커뮤니티 리소스의 다음 기사를 참조하세요:
+
+- [Practical React Query](../../community/tkdodos-blog#1-practical-react-query)
+- [React Query as a State Manager](../../community/tkdodos-blog#10-react-query-as-a-state-manager)
+
+[//]: # "Materials"
