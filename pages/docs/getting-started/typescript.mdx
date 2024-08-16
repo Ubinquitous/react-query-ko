@@ -1,0 +1,230 @@
+---
+id: typescript
+title: TypeScript
+---
+
+## TypeScript
+
+이제 리액트 쿼리는 타입스크립트로 작성되었기에, 라이브러리가 여러분의 프로젝트의 타입 안전성을 보장해줍니다!
+
+기억해야 할 사항들:
+
+- 현재 TypeScript v4.7 이상을 요구합니다.
+- 이 저장소의 타입 변경은 호환성에 영향을 미치지 않으며, 보통 패치 버전으로 릴리스됩니다 (모든 타입 개선이 메이저 버전이 되지 않도록 하기 위함입니다).
+- 리액트 쿼리 패키지 버전을 특정 패치 릴리스로 고정하고, 타입이 수정되거나 업그레이드될 수 있음을 감안하여 업그레이드하는 것을 강력히 권장합니다.
+- 리액트 쿼리의 타입과 관련이 없는 공개 API는 여전히 엄격하게 semver를 따릅니다.
+
+## Type Inference
+
+리액트 쿼리의 타입은 일반적으로 잘 통합되어 있어서, 개발자가 직접 타입 주석을 추가하지 않아도 타입 추론이 정확하게 이루어집니다. 즉, 리액트 쿼리의 타입 시스템이 자동으로 적절한 타입을 추론해주기 때문에, 명시적으로 타입을 지정할 필요가 없습니다.
+
+[//]: # "TypeInference1"
+
+```tsx
+const { data } = useQuery({
+  //    ^? const data: number | undefined
+  queryKey: ["test"],
+  queryFn: () => Promise.resolve(5),
+});
+```
+
+[typescript playground](https://www.typescriptlang.org/play?#code/JYWwDg9gTgLgBAbzgVwM4FMCKz1QJ5wC+cAZlBCHAORToCGAxjALQCOO+VAsAFC8MQAdqnhIAJnRh0icALwoM2XHgAUAbSqDkIAEa4qAXQA0cFQEo5APjgAFciGAYAdLVQQANgDd0KgKxmzXgB6ILgw8IA9AH5eIA)
+
+[//]: # "TypeInference1"
+[//]: # "TypeInference2"
+
+```tsx
+const { data } = useQuery({
+  //      ^? const data: string | undefined
+  queryKey: ["test"],
+  queryFn: () => Promise.resolve(5),
+  select: (data) => data.toString(),
+});
+```
+
+[typescript playground](https://www.typescriptlang.org/play?#code/JYWwDg9gTgLgBAbzgVwM4FMCKz1QJ5wC+cAZlBCHAORToCGAxjALQCOO+VAsAFC8MQAdqnhIAJnRh0icALwoM2XHgAUAbSox0IqgF0ANHBUBKOQD44ABXIhgGAHS1UEADYA3dCoCsxw0gwu6EwAXHASUuZhknT2MBAAyjBQwIIA5iaExrwA9Nlw+QUAegD8vEA)
+
+[//]: # "TypeInference2"
+
+이 기능은 queryFn의 반환 타입이 명확하게 정의되어 있을 때 가장 잘 작동합니다. 대부분의 데이터 페칭 라이브러리는 기본적으로 any를 반환하므로, 이를 올바르게 타입이 지정된 함수로 추출하는 것이 중요합니다.
+
+[//]: # "TypeInference3"
+
+```tsx
+const fetchGroups = (): Promise<Group[]> =>
+  axios.get("/groups").then((response) => response.data);
+
+const { data } = useQuery({ queryKey: ["groups"], queryFn: fetchGroups });
+//      ^? const data: Group[] | undefined
+```
+
+[typescript playground](https://www.typescriptlang.org/play?#code/JYWwDg9gTgLgBAbzgVwM4FMCKz1QJ5wC+cAZlBCHAORToCGAxjALQCOO+VAsAFCiSw4dAB7AIqUuUpURY1Nx68YeMOjgBxcsjBwAvIjjAAJgC44AO2QgARriK9eDCOdTwS6GAwAWmiNon6ABQAlGYAClLAGAA8vtoA2gC6AHx6qbLiAHQA5h6BVAD02Vpg8sGZMF7o5oG0qJAuarqpdQ0YmUZ0MHTBDjxOLvBInd1EeigY2Lh4gfFUxX6lVIkANKQe3nGlvTwFBXAHhwB6APxwA65wI3RmW0lwAD4o5kboJMDm6Ea8QA)
+
+[//]: # "TypeInference3"
+
+## Type Narrowing
+
+리액트 쿼리는 쿼리 결과에 대해 [구분된 유니온 타입](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes-func.html#discriminated-unions)을 사용합니다. 이 타입은 `status` 필드와 파생된 상태 불리언 플래그에 의해 구분됩니다. 이를 통해 예를 들어 `success` 상태를 확인하여 `data`가 정의되었는지를 확인할 수 있습니다:
+
+[//]: # "TypeNarrowing"
+
+```tsx
+const { data, isSuccess } = useQuery({
+  queryKey: ["test"],
+  queryFn: () => Promise.resolve(5),
+});
+
+if (isSuccess) {
+  data;
+  //  ^? const data: number
+}
+```
+
+[typescript playground](https://www.typescriptlang.org/play?#code/JYWwDg9gTgLgBAbzgVwM4FMCKz1QJ5wC+cAZlBCHAORToCGAxjALQCOO+VAsAFC8MQAdqnhIAJnRh0ANHGCoAysgYN0qVETgBeFBmy48ACgDaVGGphUAurMMBKbQD44ABXIh56AHS1UEADYAbuiGAKx2dry8wCRwhvJKKmqoDgi8cBlwElK8APS5GQB6APy8hLxAA)
+
+[//]: # "TypeNarrowing"
+
+## Typing the error field
+
+오류의 타입은 기본적으로 `Error`로 설정되어 있습니다. 이는 대부분의 개발자들이 예상할 타입이기 때문입니다.
+
+[//]: # "TypingError"
+
+```tsx
+const { error } = useQuery({ queryKey: ["groups"], queryFn: fetchGroups });
+//      ^? const error: Error
+```
+
+[typescript playground](https://www.typescriptlang.org/play?#code/JYWwDg9gTgLgBAbzgVwM4FMCKz1QJ5wC+cAZlBCHAOQACMAhgHaoMDGA1gPRTr2swBaAI458VALAAoUJFhx6AD2ARUpcpSqLlqCZKkw8YdHADi5ZGDgBeRHGAATAFxxGyEACNcRKVNYRm8CToMKwAFmYQFqo2ABQAlM4ACurAGAA8ERYA2gC6AHzWBVoqAHQA5sExVJxl5mA6cSUwoeiMMTyokMzGVgUdXRgl9vQMcT6SfgG2uORQRNYoGNi4eDFZVLWR9VQ5ADSkwWGZ9WOSnJxwl1cAegD8QA)
+
+[//]: # "TypingError"
+
+커스텀 오류를 던지거나 `Error`가 아닌 다른 유형의 오류를 사용하려면, 오류 필드의 타입을 명시할 수 있습니다:
+
+[//]: # "TypingError2"
+
+```tsx
+const { error } = useQuery<Group[], string>(["groups"], fetchGroups);
+//      ^? const error: string | null
+```
+
+[//]: # "TypingError2"
+
+하지만 이렇게 되면 `useQuery`의 다른 제네릭 타입에 대한 타입 추론이 더 이상 작동하지 않게 됩니다. 일반적으로 `Error`가 아닌 객체를 throw하는 것은 추천되지 않으므로, `AxiosError`와 같은 서브클래스를 사용하는 경우에는 _type narrowing_ 을 사용하여 오류를 구체적으로 정의할 수 있습니다.
+
+[//]: # "TypingError3"
+
+```tsx
+import axios from "axios";
+
+const { error } = useQuery({ queryKey: ["groups"], queryFn: fetchGroups });
+//      ^? const error: Error | null
+
+if (axios.isAxiosError(error)) {
+  error;
+  // ^? const error: AxiosError
+}
+```
+
+[typescript playground](https://www.typescriptlang.org/play?#code/JYWwDg9gTgLgBAbzgVwM4FMCKz1QJ5wC+cAZlBCHAOQACMAhgHaoMDGA1gPRTr2swBaAI458VALAAoUJFhx6AD2ARUpcpSqLlqCZKkw8YdHADi5ZGDgBeRHGAATAFxxGyEACNcRKVNYRm8CToMKwAFmYQFqo2ABQAlM4ACurAGAA8ERYA2gC6AHzWBVoqAHQA5sExVJxl5mA6cSUwoeiMMTyokMzGVgUdXRgl9vQMcT6SfgG2uORQRNYoGNi4eDFIIisA0uh4zllUtZH1VDkANHAb+ABijM5BIeF1qoRjkpyccJ9fAHoA-OPAEhwGLFVAlVIAQSUKgAolBZjEZtA4nFEFJPkioOi4O84H8pIQgA)
+
+[//]: # "TypingError3"
+
+### Registering a global Error
+
+TanStack Query v5에서는 `Register` 인터페이스를 수정하여 전역 오류 타입을 설정할 수 있습니다. 이를 통해 호출부에서 제네릭을 지정하지 않고도 타입 추론이 여전히 작동하며, 오류는 지정한 타입으로 설정됩니다.
+
+[//]: # "RegisterErrorType"
+
+```tsx
+import "@tanstack/react-query";
+
+declare module "@tanstack/react-query" {
+  interface Register {
+    defaultError: AxiosError;
+  }
+}
+
+const { error } = useQuery({ queryKey: ["groups"], queryFn: fetchGroups });
+//      ^? const error: AxiosError | null
+```
+
+[//]: # "RegisterErrorType"
+[//]: # "TypingMeta"
+
+## Typing meta
+
+### Registering global Meta
+
+[전역 오류 타입](#registering-a-global-error)을 등록하는 것과 유사하게, 전역 `Meta` 타입을 등록할 수도 있습니다. 이를 통해 [queries](/docs/api-references/useQuery)와 [mutations](/docs/api-references/useMutation)의 옵셔널한 `meta` 필드가 일관되게 유지되고 타입 안전성을 보장할 수 있습니다. 등록된 타입은 `Record<string, unknown>`을 확장해야 meta를 객체로 유지할 수 있습니다.
+
+```ts
+import "@tanstack/react-query";
+
+interface MyMeta extends Record<string, unknown> {
+  // Your meta type definition.
+}
+
+declare module "@tanstack/react-query" {
+  interface Register {
+    queryMeta: MyMeta;
+    mutationMeta: MyMeta;
+  }
+}
+```
+
+[//]: # "TypingMeta"
+[//]: # "TypingQueryOptions"
+
+## Typing Query Options
+
+`useQuery`에 쿼리 옵션을 인라인으로 넣으면 자동으로 타입 추론이 됩니다. 그러나 예를 들어 쿼리 옵션을 별도의 함수로 추출하여 `useQuery`와 `prefetchQuery` 간에 공유하고 싶을 수도 있습니다. 이 경우에는 타입 추론이 사라지게 됩니다. 이를 다시 작동시키려면, `queryOptions` 헬퍼를 사용할 수 있습니다.
+
+```ts
+import { queryOptions } from "@tanstack/react-query";
+
+function groupOptions() {
+  return queryOptions({
+    queryKey: ["groups"],
+    queryFn: fetchGroups,
+    staleTime: 5 * 1000,
+  });
+}
+
+useQuery(groupOptions());
+queryClient.prefetchQuery(groupOptions());
+```
+
+또한, queryOptions에서 반환된 `queryKey`는 해당 `queryFn`에 대한 정보를 알고 있습니다. 이 타입 정보를 활용하여 `queryClient.getQueryData`와 같은 함수도 타입을 인식할 수 있게 됩니다.
+
+```ts
+function groupOptions() {
+  return queryOptions({
+    queryKey: ["groups"],
+    queryFn: fetchGroups,
+    staleTime: 5 * 1000,
+  });
+}
+
+const data = queryClient.getQueryData(groupOptions().queryKey);
+//     ^? const data: Group[] | undefined
+```
+
+`queryOptions` 없이 사용하면 `data`의 타입이 `unknown`이 됩니다. 이를 해결하려면 제네릭 타입을 전달해야 합니다:
+
+```ts
+const data = queryClient.getQueryData<Group[]>(["groups"]);
+```
+
+[//]: # "TypingQueryOptions"
+[//]: # "Materials"
+
+## Further Reading
+
+타입 추론에 대한 팁과 요령은 커뮤니티 리소스의 [React Query와 TypeScript](/docs/community-resources/tkdodo-s-blog)를 참조하세요. 최상의 타입 안전성을 확보하는 방법을 알고 싶다면, [Type-safe React Query](/docs/community-resources/tkdodo-s-blog)를 읽어보세요.
+
+[//]: # "Materials"
+
+## Typesafe disabling of queries using `skipToken`
+
+타입스크립트를 사용하고 있다면, `skipToken`을 사용하여 쿼리를 비활성화할 수 있습니다. 이는 조건에 따라 [쿼리를 비활성화](/docs/guides-and-concepts/disabling-queries)하면서도 타입 안전성을 유지하고 싶을 때 유용합니다. 더 자세한 내용은 쿼리 비활성화 가이드를 참조하세요.
