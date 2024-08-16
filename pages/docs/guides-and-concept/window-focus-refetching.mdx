@@ -1,0 +1,87 @@
+---
+id: window-focus-refetching
+title: Window Focus Refetching
+---
+
+## Window Focus Refetching
+
+사용자가 애플리케이션을 떠나고 다시 돌아왔을 때, 쿼리 데이터가 오래된 경우 **TanStack Query는 백그라운드에서 자동으로 새로운 데이터를 요청합니다**. 이 기능은 전역적으로 또는 쿼리별로 `refetchOnWindowFocus` 옵션을 사용하여 비활성화할 수 있습니다.
+
+#### Disabling Globally
+
+```tsx
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // 기본값: true
+    },
+  },
+});
+
+function App() {
+  return <QueryClientProvider client={queryClient}>...</QueryClientProvider>;
+}
+```
+
+#### Disabling Per-Query
+
+```tsx
+useQuery({
+  queryKey: ["todos"],
+  queryFn: fetchTodos,
+  refetchOnWindowFocus: false,
+});
+```
+
+## Custom Window Focus Event
+
+드물게, 자신만의 창 포커스 이벤트를 관리하여 TanStack Query가 재검증되도록 할 수도 있습니다. 이를 위해 TanStack Query는 `focusManager.setEventListener` 함수를 제공합니다. 이 함수는 창이 포커스될 때 호출되어야 하는 콜백을 제공하며, 자신만의 이벤트를 설정할 수 있게 해줍니다. `focusManager.setEventListener`를 호출하면 이전에 설정된 핸들러(대부분의 경우 기본 핸들러)가 제거되고 새 핸들러가 대신 사용됩니다. 예를 들어, 기본 핸들러는 다음과 같습니다:
+
+```tsx
+focusManager.setEventListener((handleFocus) => {
+  // visibilitychange를 수신합니다.
+  if (typeof window !== "undefined" && window.addEventListener) {
+    const visibilitychangeHandler = () => {
+      handleFocus(document.visibilityState === "visible");
+    };
+    window.addEventListener("visibilitychange", visibilitychangeHandler, false);
+    return () => {
+      // 새 핸들러가 설정되면 구독을 취소해야 합니다.
+      window.removeEventListener("visibilitychange", visibilitychangeHandler);
+    };
+  }
+});
+```
+
+## Managing Focus in React Native
+
+`window`에서 이벤트 리스너 대신, React Native는 [`AppState` 모듈](https://reactnative.dev/docs/appstate#app-states)을 통해 포커스 정보를 제공합니다. `AppState`의 "change" 이벤트를 사용하여 앱 상태가 "active"로 변경될 때 업데이트를 트리거할 수 있습니다:
+
+```tsx
+import { AppState } from "react-native";
+import { focusManager } from "@tanstack/react-query";
+
+function onAppStateChange(status: AppStateStatus) {
+  if (Platform.OS !== "web") {
+    focusManager.setFocused(status === "active");
+  }
+}
+
+useEffect(() => {
+  const subscription = AppState.addEventListener("change", onAppStateChange);
+
+  return () => subscription.remove();
+}, []);
+```
+
+## Managing focus state
+
+```tsx
+import { focusManager } from "@tanstack/react-query";
+
+// 기본 포커스 상태를 오버라이드합니다.
+focusManager.setFocused(true);
+
+// 기본 포커스 체크로 되돌립니다.
+focusManager.setFocused(undefined);
+```
