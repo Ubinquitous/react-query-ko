@@ -1,0 +1,67 @@
+---
+id: query-retries
+title: Query Retries
+---
+
+## Query Retries
+
+`useQuery`로 수행된 query가 실패할 경우 (query 함수가 에러를 발생시키는 경우), TanStack Query는 해당 query 요청이 최대 재시도 횟수(기본값은 `3`회)에 도달하지 않았거나, 재시도가 허용되는지를 결정하는 함수가 제공된 경우 자동으로 재시도합니다.
+
+재시도 설정은 글로벌 레벨에서 또는 개별 query 레벨에서 모두 가능합니다.
+
+- `retry = false`로 설정하면 재시도가 비활성화됩니다.
+- `retry = 6`으로 설정하면 실패한 요청을 6번 재시도한 후 최종적으로 에러를 표시합니다.
+- `retry = true`로 설정하면 실패한 요청을 무한히 재시도합니다.
+- `retry = (failureCount, error) => ...`으로 설정하면 요청이 실패한 이유에 따라 사용자 정의 로직을 적용할 수 있습니다.
+
+> 서버에서는 서버 렌더링 속도를 최대화하기 위해 기본적으로 재시도 횟수가 `0`으로 설정됩니다.
+
+```tsx
+import { useQuery } from "@tanstack/react-query";
+
+// 특정 query에 대해 재시도를 설정합니다
+const result = useQuery({
+  queryKey: ["todos", 1],
+  queryFn: fetchTodoListPage,
+  retry: 10, // 실패한 요청을 10번 재시도한 후 에러를 표시합니다
+});
+```
+
+> `error` 속성의 내용은 `useQuery`의 응답 속성 중 `failureReason`의 일부로 포함됩니다. 따라서 위 예시에서 오류 내용은 처음 9번의 재시도 동안 `failureReason` 속성의 일부가 되며, 마지막 시도에서도 오류가 지속되면 최종적으로 `error` 속성에 포함됩니다.
+
+## Retry Delay
+
+기본적으로, TanStack Query에서 재시도는 요청이 실패한 직후에 즉시 이루어지지 않습니다. 일반적인 표준에 따라, 각 재시도 시도에는 점진적인 백오프 지연이 적용됩니다.
+
+기본 `retryDelay`는 시도할 때마다 두 배로 증가하며 (`1000`ms부터 시작), 최대 30초를 초과하지 않습니다:
+
+```tsx
+// 모든 query에 대해 설정
+import {
+QueryCache,
+QueryClient,
+QueryClientProvider,
+} from '@tanstack/react-query'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+  queries: {
+    retryDelay: (attemptIndex) => Math.min(1000 \* 2 \*\* attemptIndex, 30000),
+  },
+},
+})
+
+function App() {
+  return <QueryClientProvider client={queryClient}>...</QueryClientProvider>
+}
+```
+
+권장되지는 않지만, Provider와 개별 query 옵션 모두에서 `retryDelay` 함수나 정수를 재정의할 수 있습니다. 정수로 설정된 경우 지연 시간은 항상 동일하게 유지됩니다:
+
+```tsx
+const result = useQuery({
+  queryKey: ["todos"],
+  queryFn: fetchTodoList,
+  retryDelay: 1000, // 몇 번의 재시도가 이루어지든 항상 1000ms 후에 재시도합니다
+});
+```
