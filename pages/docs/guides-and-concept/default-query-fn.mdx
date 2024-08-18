@@ -1,0 +1,58 @@
+---
+id: default-query-function
+title: Default Query Function
+---
+
+## Defualt Query Function
+
+앱 전체에서 동일한 쿼리 함수를 공유하고, TanStack Query에 **default Query Function**을 제공해서 쿼리 키만으로 어떤 데이터를 가져와야 할지 식별할 수 있습니다:
+
+[//]: # "예제"
+
+```tsx
+// 쿼리 키를 받는 기본 쿼리 함수 정의
+const defaultQueryFn = async ({ queryKey }) => {
+  const { data } = await axios.get(
+    `https://jsonplaceholder.typicode.com${queryKey[0]}`
+  );
+  return data;
+};
+
+// 기본 쿼리 함수를 기본 옵션으로 앱에 제공
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: defaultQueryFn,
+    },
+  },
+});
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <YourApp />
+    </QueryClientProvider>
+  );
+}
+
+// 키만 전달하면 됩니다!
+function Posts() {
+  const { status, data, error, isFetching } = useQuery({
+    queryKey: ["/posts"],
+  });
+
+  // ...
+}
+
+// 쿼리 함수(queryFn)를 생략하고 실행할 수도 있습니다.
+function Post({ postId }) {
+  const { status, data, error, isFetching } = useQuery({
+    queryKey: [`/posts/${postId}`],
+    enabled: !!postId,
+  });
+
+  // ...
+}
+```
+
+기본 쿼리 함수(queryFn)를 오버라이드하고 싶다면, 평소에 사용하던 쿼리 함수를 옵션에 명시해주면 됩니다.
