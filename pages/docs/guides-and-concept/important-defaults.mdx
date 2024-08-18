@@ -21,7 +21,7 @@ title: Important Defaults
   > 이 기능을 변경하려면, `refetchOnMount`, `refetchOnWindowFocus`, `refetchOnReconnect` 및 `refetchInterval`과 같은 옵션을 사용할 수 있습니다.
 
 - 더 이상 활성 인스턴스가 없는 쿼리 결과(`useQuery`, `useInfiniteQuery` 또는 쿼리 옵저버)는 "비활성"으로 표시되며 나중에 다시 사용될 경우를 대비하여 캐시에 남아 있습니다.
-- 기본적으로 "비활성" 쿼리는 **5분** 후에 가비지 컬렉션됩니다.
+- 기본적으로 "비활성" 쿼리는 **5분** 후에 가비지 컬렉션에 의해 삭제됩니다.
 
   > 이를 변경하려면, 쿼리의 기본 `gcTime` 값을 `1000 * 60 * 5` 밀리초 외의 값으로 조정할 수 있습니다.
 
