@@ -1,0 +1,58 @@
+---
+id: does-this-replace-client-state
+title: Does TanStack Query replace Redux, MobX or other global state managers?
+---
+
+## Does Tanstack Query replace Redux, MobX or other global state managers?
+
+우선 몇 가지 중요한 사항을 짚어보겠습니다:
+
+- TanStack Query는 **서버 상태** 라이브러리로, 서버와 클라이언트 간의 비동기 작업을 관리하는 역할을 합니다.
+- Redux, MobX, Zustand 등은 **클라이언트 상태** 라이브러리로, 비동기 데이터를 저장할 수는 있지만 TanStack Query와 같은 도구에 비해 비효율적입니다.
+
+이 점들을 염두에 두고, 간단히 말하면 TanStack Query는 **클라이언트 상태에서 캐시 데이터를 관리하는 데 사용되는 많은 양의 코드들을 적은 양의 코드로 대체합니다.**
+
+대부분의 애플리케이션에서, TanStack Query로 모든 비동기 코드를 마이그레이션한 후 남는 **전역적으로 접근 가능한 클라이언트 상태**는 보통 매우 적습니다.
+
+> 여전히 많은 동기 클라이언트 전용 상태(예: 비주얼 디자이너나 음악 제작 애플리케이션 등)가 있는 경우가 있을 수 있으며, 이 경우에는 클라이언트 상태 관리자가 여전히 필요할 수 있습니다. 이 상황에서도 **TanStack Query가 로컬/클라이언트 상태 관리자를 대체하는 것은 아닙니다**. 그러나 TanStack Query를 대부분의 클라이언트 상태 관리자와 함께 사용하는 데는 문제가 없습니다.
+
+## Example
+
+여기 상태 관리 라이브러리로 관리되는 "전역" 상태가 있습니다:
+
+```tsx
+const globalState = {
+  projects,
+  teams,
+  tasks,
+  users,
+  themeMode,
+  sidebarStatus,
+};
+```
+
+현재 글로벌 상태 관리자는 `projects`, `teams`, `tasks`, `users` 총 4가지 유형의 서버 상태를 캐시하고 있습니다. 이 서버 리소스를 TanStack Query로 이동시키면, 남는 글로벌 상태는 다음과 같습니다:
+
+```tsx
+const globalState = {
+  themeMode,
+  sidebarStatus,
+};
+```
+
+이는 `useQuery`와 `useMutation`에 대한 몇 가지 훅 호출로 서버 상태를 관리하는 데 사용되었던 보일러플레이트 코드도 제거된다는 것을 의미합니다. 예를 들면:
+
+- 커넥터
+- 액션 생성자
+- 미들웨어
+- 리듀서
+- 로딩/오류/결과 상태
+- 컨텍스트
+
+이 모든 것들이 없어지면서, **"작은 상태를 관리하기 위해 전역 상태 관리 라이브러리를 사용하는 것이 가치가 있을까요?"**라고 자문할 수도 있습니다.
+
+**결정은 여러분에게 달려 있습니다!**
+
+하지만 TanStack Query의 역할은 분명합니다. 비동기 설정과 보일러플레이트 코드를 애플리케이션에서 제거하고 적은 양의 코드로 대체합니다.
+
+지금 바로 시도해 보세요!
