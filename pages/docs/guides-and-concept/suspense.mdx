@@ -1,0 +1,171 @@
+---
+id: suspense
+title: Suspense
+---
+
+## Suspense
+
+React Query는 React의 Suspense for Data Fetching API와 함께 사용할 수 있습니다. 이를 위해 전용 훅들이 제공됩니다:
+
+- [useSuspenseQuery](../../reference/useSuspenseQuery)
+- [useSuspenseInfiniteQuery](../../reference/useSuspenseInfiniteQuery)
+- [useSuspenseQueries](../../reference/useSuspenseQueries)
+
+Suspense 모드를 사용할 때는 `status` 상태와 `error` 객체가 필요하지 않으며, 대신 `React.Suspense` 컴포넌트의 사용(여기에는 `fallback` 속성과 React 오류 경계(error boundaries) 사용이 포함됩니다)으로 대체됩니다. Suspense 모드를 설정하는 방법에 대한 자세한 내용은 [Error Boundaries 리셋](#resetting-error-boundaries)과 [Suspense 예제](https://stackblitz.com/github/TanStack/query/tree/main/examples/react/suspense)를 참조하세요.
+
+변경 사항이 오류를 오류 경계로 전파되도록 하려면(`쿼리와 유사하게) `throwOnError`옵션을`true`로 설정할 수 있습니다.
+
+쿼리에 대한 Suspense 모드 활성화:
+
+```tsx
+import { useSuspenseQuery } from "@tanstack/react-query";
+
+const { data } = useSuspenseQuery({ queryKey, queryFn });
+```
+
+이는 TypeScript에서 잘 작동합니다. 왜냐하면 `data`는 정의된 것으로 보장되기 때문입니다(오류와 로딩 상태는 Suspense 및 오류 경계가 처리하므로).
+
+반대로, 쿼리를 조건적으로 활성화/비활성화할 수는 없습니다. 일반적으로 의존 쿼리의 경우, Suspense를 사용하면 하나의 컴포넌트 내의 모든 쿼리가 순차적으로 가져오므로, 이 방식이 필요하지 않습니다.
+
+이 쿼리에는 `placeholderData`도 존재하지 않습니다. 업데이트가 쿼리 키를 변경하는 경우 UI가 대체되어 `fallback`으로 전환되는 것을 방지하려면, 업데이트를 [startTransition](https://react.dev/reference/react/Suspense#preventing-unwanted-fallbacks)으로 래핑하세요.
+
+### throwOnError default
+
+모든 오류가 기본적으로 가장 가까운 오류 경계로 전달되는 것은 아닙니다 - 다른 데이터를 표시할 수 없는 경우에만 오류를 던집니다. 즉, 쿼리가 한 번이라도 캐시에서 데이터를 성공적으로 가져온 경우, 데이터가 `stale`하더라도 컴포넌트는 렌더링됩니다. 따라서 `throwOnError`의 기본값은 다음과 같습니다:
+
+```
+throwOnError: (error, query) => typeof query.state.data === 'undefined'
+```
+
+`throwOnError`를 변경할 수 없기 때문에(이는 `data`가 `undefined`가 될 수 있게 하므로), 모든 오류가 오류 경계에 의해 처리되도록 하려면 오류를 수동으로 던져야 합니다:
+
+```tsx
+import { useSuspenseQuery } from "@tanstack/react-query";
+
+const { data, error, isFetching } = useSuspenseQuery({ queryKey, queryFn });
+
+if (error && !isFetching) {
+  throw error;
+}
+
+// 데이터 렌더링 계속
+```
+
+## Resetting Error Boundaries
+
+쿼리에서 **suspense**나 **throwOnError**를 사용할 때, 오류가 발생한 후에 재렌더링할 때 쿼리가 다시 시도되도록 알려주는 방법이 필요합니다.
+
+쿼리 오류는 `QueryErrorResetBoundary` 컴포넌트나 `useQueryErrorResetBoundary` 훅을 사용하여 리셋할 수 있습니다.
+
+컴포넌트를 사용할 경우, 컴포넌트의 경계 내에서 모든 쿼리 오류를 리셋합니다:
+
+```tsx
+import { QueryErrorResetBoundary } from "@tanstack/react-query";
+import { ErrorBoundary } from "react-error-boundary";
+
+const App = () => (
+  <QueryErrorResetBoundary>
+    {({ reset }) => (
+      <ErrorBoundary
+        onReset={reset}
+        fallbackRender={({ resetErrorBoundary }) => (
+          <div>
+            There was an error!
+            <Button onClick={() => resetErrorBoundary()}>Try again</Button>
+          </div>
+        )}
+      >
+        <Page />
+      </ErrorBoundary>
+    )}
+  </QueryErrorResetBoundary>
+);
+```
+
+훅을 사용할 경우, 가장 가까운 `QueryErrorResetBoundary` 내에서 모든 쿼리 오류를 리셋합니다. 경계가 정의되지 않은 경우, 전역적으로 리셋됩니다:
+
+```tsx
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { ErrorBoundary } from "react-error-boundary";
+
+const App = () => {
+  const { reset } = useQueryErrorResetBoundary();
+  return (
+    <ErrorBoundary
+      onReset={reset}
+      fallbackRender={({ resetErrorBoundary }) => (
+        <div>
+          There was an error!
+          <Button onClick={() => resetErrorBoundary()}>Try again</Button>
+        </div>
+      )}
+    >
+      <Page />
+    </ErrorBoundary>
+  );
+};
+```
+
+## Fetch-on-render vs Render-as-you-fetch
+
+기본적으로, React Query는 **Suspense** 모드에서 추가 설정 없이도 **Fetch-on-render** 솔루션으로 매우 잘 작동합니다. 이는 컴포넌트가 마운트될 때 쿼리 요청을 트리거하고 대기 상태가 되지만, 컴포넌트를 임포트하고 마운트할 때만 발생한다는 의미입니다. 더 발전된 **Render-as-you-fetch** 모델을 구현하고 싶다면, [Prefetching](../prefetching) 기능을 라우팅 콜백 및/또는 사용자 상호작용 이벤트에서 사용하여 쿼리가 마운트되기 전에 로딩을 시작하고, 부모 컴포넌트를 임포트하거나 마운트하기 전에도 로딩을 시작할 수 있습니다.
+
+## Suspense on the Server with streaming
+
+Next.js를 사용하고 있다면, **실험적** 통합 패키지인 `@tanstack/react-query-next-experimental`을 사용할 수 있습니다. 이 패키지를 사용하면 클라이언트 컴포넌트에서 `useSuspenseQuery`를 호출하여 서버에서 데이터를 가져올 수 있으며, 결과는 SuspenseBoundary가 해결되면서 서버에서 클라이언트로 스트리밍됩니다.
+
+이를 구현하기 위해서는, 애플리케이션을 `ReactQueryStreamedHydration` 컴포넌트로 래핑하면 됩니다:
+
+```tsx
+// app/providers.tsx
+"use client";
+
+import {
+  isServer,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import * as React from "react";
+import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
+
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        // SSR에서는 기본 staleTime을 0보다 크게 설정하여 클라이언트에서 즉시 리패칭을 방지합니다.
+        staleTime: 60 * 1000,
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined = undefined;
+
+function getQueryClient() {
+  if (isServer) {
+    // 서버: 항상 새로운 쿼리 클라이언트를 생성합니다.
+    return makeQueryClient();
+  } else {
+    // 브라우저: 기존 클라이언트가 없으면 새로운 클라이언트를 생성합니다.
+    // React가 초기 렌더링 중에 대기 상태가 될 때 새로운 클라이언트를 재생성하지 않도록 매우 중요합니다.
+    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    return browserQueryClient;
+  }
+}
+
+export function Providers(props: { children: React.ReactNode }) {
+  // NOTE: React가 대기 상태가 되는 코드와 이 코드 사이에 Suspense Boundary가 없으면,
+  //       초기 렌더링 중에 React가 클라이언트를 버릴 수 있으므로 useState를 사용하지 않는 것이 좋습니다.
+  const queryClient = getQueryClient();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryStreamedHydration>
+        {props.children}
+      </ReactQueryStreamedHydration>
+    </QueryClientProvider>
+  );
+}
+```
+
+자세한 정보는 [NextJs Suspense 스트리밍 예제](../../examples/nextjs-suspense-streaming) 및 [고급 렌더링 및 Hydration](../advanced-ssr) 가이드를 참조하세요.
