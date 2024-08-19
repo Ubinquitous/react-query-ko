@@ -1,0 +1,86 @@
+{
+  "QueryClient": {
+    "title": "QueryClient"
+  },
+  "QueryCache": {
+    "title": "QueryCache"
+  },
+  "MutationCache": {
+    "title": "MutationCache"
+  },
+  "QueryObserver": {
+    "title": "QueryObserver"
+  },
+  "InfiniteQueryObserver": {
+    "title": "InfiniteQueryObserver"
+  },
+  "QueriesObserver": {
+    "title": "QueriesObserver"
+  },
+  "focusManager": {
+    "title": "focusManager"
+  },
+  "onlineManager": {
+    "title": "onlineManager"
+  },
+  "notifyManager": {
+    "title": "notifyManager"
+  },
+  "useQuery": {
+    "title": "useQuery"
+  },
+  "useQueries": {
+    "title": "useQueries"
+  },
+  "useInfiniteQuery": {
+    "title": "useInfiniteQuery"
+  },
+  "useMutation": {
+    "title": "useMutation"
+  },
+  "useIsFetching": {
+    "title": "useIsFetching"
+  },
+  "useIsMutating": {
+    "title": "useIsMutating"
+  },
+  "useMutationState": {
+    "title": "useMutationState"
+  },
+  "useSuspenseQuery": {
+    "title": "useSuspenseQuery"
+  },
+  "useSuspenseInfiniteQuery": {
+    "title": "useSuspenseInfiniteQuery"
+  },
+  "useSuspenseQueries": {
+    "title": "useSuspenseQueries"
+  },
+  "QueryClientProvider": {
+    "title": "QueryClientProvider"
+  },
+  "useQueryClient": {
+    "title": "useQueryClient"
+  },
+  "queryOptions": {
+    "title": "queryOptions"
+  },
+  "infiniteQueryOptions": {
+    "title": "infiniteQueryOptions"
+  },
+  "usePrefetchQuery": {
+    "title": "usePrefetchQuery"
+  },
+  "usePrefetchInfiniteQuery": {
+    "title": "usePrefetchInfiniteQuery"
+  },
+  "QueryErrorResetBoundary": {
+    "title": "QueryErrorResetBoundary"
+  },
+  "useQueryErrorResetBoundary": {
+    "title": "useQueryErrorResetBoundary"
+  },
+  "hydration": {
+    "title": "hydration"
+  }
+}
