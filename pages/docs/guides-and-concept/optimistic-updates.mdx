@@ -1,0 +1,194 @@
+---
+id: optimistic-updates
+title: Optimistic Updates
+---
+
+## Optimistic Updates
+
+React Query는 뮤테이션이 완료되기 전에 UI를 낙관적으로 업데이트하는 두 가지 방법을 제공합니다. `onMutate` 옵션을 사용하여 캐시를 직접 업데이트하거나, `useMutation` 결과에서 반환된 `variables`를 활용하여 UI를 업데이트할 수 있습니다.
+
+## Via the UI
+
+이 방법은 캐시와 직접 상호작용하지 않기 때문에 더 간단합니다.
+
+[//]: # "ExampleUI1"
+
+```tsx
+const addTodoMutation = useMutation({
+  mutationFn: (newTodo: string) => axios.post("/api/data", { text: newTodo }),
+  // 쿼리 무효화에서 Promise를 _반환_ 해야
+  // 뮤테이션이 `pending` 상태로 유지됩니다
+  onSettled: async () => {
+    return await queryClient.invalidateQueries({ queryKey: ["todos"] });
+  },
+});
+
+const { isPending, submittedAt, variables, mutate, isError } = addTodoMutation;
+```
+
+[//]: # "ExampleUI1"
+
+그 후 `addTodoMutation.variables`에 접근할 수 있으며, 여기에는 추가된 할 일이 포함됩니다. UI 목록에서, 뮤테이션이 `isPending`인 동안 목록에 항목을 추가할 수 있습니다:
+
+[//]: # "ExampleUI2"
+
+```tsx
+<ul>
+  {todoQuery.items.map((todo) => (
+    <li key={todo.id}>{todo.text}</li>
+  ))}
+  {isPending && <li style={{ opacity: 0.5 }}>{variables}</li>}
+</ul>
+```
+
+[//]: # "ExampleUI2"
+
+뮤테이션이 진행 중일 때 다른 `opacity`를 가진 임시 항목을 렌더링합니다. 뮤테이션이 완료되면, 항목은 자동으로 더 이상 렌더링되지 않습니다. 리패칭이 성공하면 목록에서 항목을 "정상 항목"으로 볼 수 있어야 합니다.
+
+뮤테이션이 오류가 발생하면 항목도 사라집니다. 그러나 `isError` 상태를 확인하여 계속 표시할 수도 있으며, `variables`는 뮤테이션 오류가 발생해도 _지워지지 않으므로_ 여전히 접근할 수 있으며, 재시도 버튼을 표시할 수도 있습니다:
+
+[//]: # "ExampleUI3"
+
+```tsx
+{
+  isError && (
+    <li style={{ color: "red" }}>
+      {variables}
+      <button onClick={() => mutate(variables)}>Retry</button>
+    </li>
+  );
+}
+```
+
+[//]: # "ExampleUI3"
+
+### If the mutation and the query don't live in the same component
+
+이 접근 방식은 뮤테이션과 쿼리가 같은 컴포넌트에 있을 때 매우 잘 작동합니다. 그러나 `useMutationState` 훅을 사용하여 다른 컴포넌트에서 모든 뮤테이션에 접근할 수도 있습니다. `mutationKey`와 함께 사용하는 것이 가장 좋습니다:
+
+[//]: # "ExampleUI4"
+
+```tsx
+// 앱의 어딘가에서
+const { mutate } = useMutation({
+  mutationFn: (newTodo: string) => axios.post("/api/data", { text: newTodo }),
+  onSettled: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+  mutationKey: ["addTodo"],
+});
+
+// 다른 곳에서 변수 접근
+const variables = useMutationState<string>({
+  filters: { mutationKey: ["addTodo"], status: "pending" },
+  select: (mutation) => mutation.state.variables,
+});
+```
+
+[//]: # "ExampleUI4"
+
+`variables`는 `Array`가 될 것입니다. 왜냐하면 동시에 여러 뮤테이션이 실행될 수 있기 때문입니다. 항목에 대한 고유한 키가 필요하면 `mutation.state.submittedAt`을 선택할 수도 있습니다. 이는 동시에 진행되는 낙관적인 업데이트를 표시하는 데에도 유용합니다.
+
+## Via the cache
+
+뮤테이션을 수행하기 전에 상태를 낙관적으로 업데이트할 때, 뮤테이션이 실패할 가능성이 있습니다. 대부분의 실패 경우에는 낙관적인 쿼리에 대해 리패칭을 트리거하여 원래 서버 상태로 되돌릴 수 있습니다. 그러나 때로는 리패칭이 제대로 작동하지 않을 수 있으며, 뮤테이션 오류가 서버 문제를 나타낼 수도 있어 리패칭이 불가능할 수 있습니다. 이 경우, 업데이트를 롤백하는 방법을 선택할 수 있습니다.
+
+이를 위해, `useMutation`의 `onMutate` 핸들러 옵션은 나중에 `onError` 및 `onSettled` 핸들러에 마지막 인수로 전달될 값을 반환할 수 있습니다. 대부분의 경우, 롤백 함수를 전달하는 것이 가장 유용합니다.
+
+### Updating a list of todos when adding a new todo
+
+[//]: # "Example"
+
+```tsx
+const queryClient = useQueryClient();
+
+useMutation({
+  mutationFn: updateTodo,
+  // mutate가 호출될 때:
+  onMutate: async (newTodo) => {
+    // 나가는 리패칭 취소
+    // (낙관적인 업데이트가 덮어쓰이지 않도록)
+    await queryClient.cancelQueries({ queryKey: ["todos"] });
+
+    // 이전 값을 스냅샷으로 저장
+    const previousTodos = queryClient.getQueryData(["todos"]);
+
+    // 새로운 값으로 낙관적으로 업데이트
+    queryClient.setQueryData(["todos"], (old) => [...old, newTodo]);
+
+    // 스냅샷된 값과 함께 컨텍스트 객체 반환
+    return { previousTodos };
+  },
+  // 뮤테이션이 실패할 경우,
+  // onMutate에서 반환된 컨텍스트를 사용하여 롤백
+  onError: (err, newTodo, context) => {
+    queryClient.setQueryData(["todos"], context.previousTodos);
+  },
+  // 오류 또는 성공 후 항상 리패칭:
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ["todos"] });
+  },
+});
+```
+
+[//]: # "Example"
+
+### Updating a single todo
+
+[//]: # "Example2"
+
+```tsx
+useMutation({
+  mutationFn: updateTodo,
+  // mutate가 호출될 때:
+  onMutate: async (newTodo) => {
+    // 나가는 리패칭 취소
+    // (낙관적인 업데이트가 덮어쓰이지 않도록)
+    await queryClient.cancelQueries({ queryKey: ["todos", newTodo.id] });
+
+    // 이전 값을 스냅샷으로 저장
+    const previousTodo = queryClient.getQueryData(["todos", newTodo.id]);
+
+    // 새로운 값으로 낙관적으로 업데이트
+    queryClient.setQueryData(["todos", newTodo.id], newTodo);
+
+    // 이전 및 새로운 할 일과 함께 컨텍스트 반환
+    return { previousTodo, newTodo };
+  },
+  // 뮤테이션이 실패할 경우, 위에서 반환한 컨텍스트 사용
+  onError: (err, newTodo, context) => {
+    queryClient.setQueryData(
+      ["todos", context.newTodo.id],
+      context.previousTodo
+    );
+  },
+  // 오류 또는 성공 후 항상 리패칭:
+  onSettled: (newTodo) => {
+    queryClient.invalidateQueries({ queryKey: ["todos", newTodo.id] });
+  },
+});
+```
+
+[//]: # "Example2"
+
+`onError`와 `onSuccess` 핸들러 대신 `onSettled` 함수를 사용할 수도 있습니다:
+
+[//]: # "Example3"
+
+```tsx
+useMutation({
+  mutationFn: updateTodo,
+  // ...
+  onSettled: (newTodo, error, variables, context) => {
+    if (error) {
+      // 오류 발생 시 처리
+    }
+  },
+});
+```
+
+[//]: # "Example3"
+
+## When to use what
+
+낙관적인 결과를 표시해야 하는 곳이 하나만 있는 경우, `variables`를 사용하여 직접 UI를 업데이트하는 접근 방식이 코드가 적고 일반적으로 이해하기 쉽습니다. 예를 들어, 롤백 처리를 전혀 할 필요가 없습니다.
+
+그러나 화면에 여러 곳에서 업데이트를 알아야 하는 경우, 캐시를 직접 조작하는 것이 자동으로 이를 처리합니다.
