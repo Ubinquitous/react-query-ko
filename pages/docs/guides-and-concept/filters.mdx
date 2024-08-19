@@ -1,0 +1,92 @@
+---
+id: filters
+title: Filters
+---
+
+## Filters
+
+TanStack Query의 일부 메서드는 `QueryFilters` 또는 `MutationFilters` 객체를 받습니다.
+
+## `Query Filters`
+
+쿼리 필터는 특정 조건을 가진 객체로, 쿼리와 일치하는 쿼리를 필터링합니다:
+
+```tsx
+// 모든 쿼리 취소
+await queryClient.cancelQueries();
+
+// `posts`로 시작하는 키를 가진 비활성 쿼리 모두 제거
+queryClient.removeQueries({ queryKey: ["posts"], type: "inactive" });
+
+// 모든 활성 쿼리 refetching
+await queryClient.refetchQueries({ type: "active" });
+
+// `posts`로 시작하는 키를 가진 모든 활성 쿼리 refetching
+await queryClient.refetchQueries({ queryKey: ["posts"], type: "active" });
+```
+
+쿼리 필터 객체는 다음 속성을 지원합니다:
+
+- `queryKey?: QueryKey`
+  - 이 속성을 설정하여 일치할 쿼리 키를 정의합니다.
+- `exact?: boolean`
+  - 쿼리 키로 포괄적으로 쿼리를 검색하고 싶지 않은 경우, `exact: true` 옵션을 전달하여 지정한 쿼리 키와 정확히 일치하는 쿼리만 반환할 수 있습니다.
+- `type?: 'active' | 'inactive' | 'all'`
+  - 기본값은 `all`입니다.
+  - `active`로 설정하면 활성 쿼리와 일치합니다.
+  - `inactive`로 설정하면 비활성 쿼리와 일치합니다.
+- `stale?: boolean`
+  - `true`로 설정하면 오래된 쿼리와 일치합니다.
+  - `false`로 설정하면 신선한 쿼리와 일치합니다.
+- `fetchStatus?: FetchStatus`
+  - `fetching`으로 설정하면 현재 데이터를 가져오는 쿼리와 일치합니다.
+  - `paused`로 설정하면 데이터를 가져오려 했지만 `paused` 상태인 쿼리와 일치합니다.
+  - `idle`로 설정하면 데이터를 가져오지 않는 쿼리와 일치합니다.
+- `predicate?: (query: Query) => boolean`
+  - 이 프레디케이트 함수는 모든 일치하는 쿼리에 대한 최종 필터로 사용됩니다. 다른 필터가 지정되지 않은 경우, 이 함수는 캐시에 있는 모든 쿼리에 대해 평가됩니다.
+
+## `Mutation Filters`
+
+뮤테이션 필터는 특정 조건을 가진 객체로, 뮤테이션과 일치하는 뮤테이션을 필터링합니다:
+
+```tsx
+// 모든 데이터 변형 중인 뮤테이션 수 가져오기
+await queryClient.isMutating();
+
+// mutationKey로 뮤테이션 필터링
+await queryClient.isMutating({ mutationKey: ["post"] });
+
+// 프레디케이트 함수를 사용하여 뮤테이션 필터링
+await queryClient.isMutating({
+  predicate: (mutation) => mutation.options.variables?.id === 1,
+});
+```
+
+뮤테이션 필터 객체는 다음 속성을 지원합니다:
+
+- `mutationKey?: MutationKey`
+  - 일치할 뮤테이션 키를 정의합니다.
+- `exact?: boolean`
+  - `exact: true` 옵션을 전달하여 지정한 뮤테이션 키와 정확히 일치하는 뮤테이션만 반환할 수 있습니다.
+- `status?: MutationStatus`
+  - 뮤테이션의 상태에 따라 필터링할 수 있습니다.
+- `predicate?: (mutation: Mutation) => boolean`
+  - 모든 일치하는 뮤테이션에 대한 최종 필터로 사용됩니다. 다른 필터가 지정되지 않은 경우, 이 함수는 캐시에 있는 모든 뮤테이션에 대해 평가됩니다.
+
+## Utils
+
+### `matchQuery`
+
+```tsx
+const isMatching = matchQuery(filters, query);
+```
+
+쿼리가 제공된 쿼리 필터 집합과 일치하는지 여부를 나타내는 불리언 값을 반환합니다.
+
+### `matchMutation`
+
+```tsx
+const isMatching = matchMutation(filters, mutation);
+```
+
+뮤테이션이 제공된 뮤테이션 필터 집합과 일치하는지 여부를 나타내는 불리언 값을 반환합니다.
