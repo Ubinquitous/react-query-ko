@@ -37,7 +37,7 @@ await queryClient.refetchQueries({ queryKey: ["posts"], type: "active" });
   - `inactive`로 설정하면 비활성 쿼리와 일치합니다.
 - `stale?: boolean`
   - `true`로 설정하면 오래된 쿼리와 일치합니다.
-  - `false`로 설정하면 신선한 쿼리와 일치합니다.
+  - `false`로 설정하면 fresh한 쿼리와 일치합니다.
 - `fetchStatus?: FetchStatus`
   - `fetching`으로 설정하면 현재 데이터를 가져오는 쿼리와 일치합니다.
   - `paused`로 설정하면 데이터를 가져오려 했지만 `paused` 상태인 쿼리와 일치합니다.
