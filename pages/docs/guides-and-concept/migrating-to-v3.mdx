@@ -1,0 +1,291 @@
+---
+id: migrating-to-react-query-3
+title: Migrating to React Query 3
+---
+
+## Migrating to React Query 3
+
+이전 버전의 React Query는 훌륭했으며, 많은 새로운 기능과 향상된 경험을 제공했습니다. 하지만 React Query v3은 이러한 기능들을 더욱 다듬어 개선했습니다. 이제 새로운 버전으로 마이그레이션할 때 알아야 할 주요 변경사항을 살펴보겠습니다.
+
+## Overview
+
+- 더 확장 가능하고 테스트 가능한 캐시 구성
+- 개선된 SSR 지원
+- 데이터 지연 (이전의 usePaginatedQuery) 어디서나 사용 가능!
+- 양방향 무한 쿼리 지원
+- 쿼리 데이터 선택기!
+- 쿼리와/또는 mutation의 기본값을 사용 전에 완전히 설정 가능
+- 선택적 렌더링 최적화의 세분화
+- 새로운 `useQueries` 훅! (가변 길이 병렬 쿼리 실행)
+- `useIsFetching()` 훅의 쿼리 필터 지원!
+- mutation에 대한 재시도/오프라인/재생 지원
+- React 외부에서 쿼리/뮤테이션 관찰
+- React Query의 핵심 로직을 원하는 곳에서 사용 가능!
+- `react-query/devtools`를 통한 번들링/동시 Devtools
+- 웹 저장소에 캐시 지속성 (실험적 기능: `react-query/persistQueryClient-experimental`와 `react-query/createWebStoragePersistor-experimental`)
+
+## Breaking Changes
+
+### `QueryCache` has been separated into `QueryClient`, and lower level `QueryCache` and `MutationCache` instances
+
+`QueryCache`는 모든 쿼리를 포함하고, `MutationCache`는 모든 mutation을 포함하며, `QueryClient`를 통해 구성 설정 및 상호작용을 할 수 있습니다.
+
+이 변경의 장점:
+
+- 다양한 유형의 캐시를 지원합니다.
+- 서로 다른 구성의 여러 클라이언트가 동일한 캐시를 사용할 수 있습니다.
+- 클라이언트를 사용하여 쿼리를 추적하고 SSR에서 공유 캐시를 사용할 수 있습니다.
+- 클라이언트 API가 일반 사용에 더 집중됩니다.
+- 개별 구성 요소를 테스트하기 쉬워졌습니다.
+
+새 `QueryClient()`를 생성하면 `QueryCache`와 `MutationCache`가 자동으로 생성됩니다.
+
+```tsx
+import { QueryClient } from "react-query";
+
+const queryClient = new QueryClient();
+```
+
+### `ReactQueryConfigProvider` and `ReactQueryCacheProvider` have been replaced with `QueryClientProvider`
+
+쿼리와 mutation의 기본 옵션은 이제 `QueryClient`에서 지정할 수 있습니다:
+
+**이제는 `defaultOptions`로 변경되었습니다**
+
+```tsx
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // 쿼리 옵션
+    },
+    mutations: {
+      // mutation 옵션
+    },
+  },
+});
+```
+
+이제 `QueryClientProvider` 컴포넌트를 사용하여 `QueryClient`를 애플리케이션에 연결합니다:
+
+```tsx
+import { QueryClient, QueryClientProvider } from "react-query";
+
+const queryClient = new QueryClient();
+
+function App() {
+  return <QueryClientProvider client={queryClient}>...</QueryClientProvider>;
+}
+```
+
+### The default `QueryCache` has been removed. **This time it is really gone!**
+
+이전에 폐기 예정으로 언급되었던 기본 `QueryCache`가 더 이상 생성되거나 패키지에서 내보내지 않습니다. **이제 `new QueryClient()` 또는 `new QueryCache()`를 사용하여 직접 생성해야 합니다 (이후 `new QueryClient({ queryCache })`에 전달할 수 있습니다)**
+
+### The deprecated `makeQueryCache` utility has been removed
+
+드디어 제거되었습니다 :)
+
+### `QueryCache.prefetchQuery()` has been moved to `QueryClient.prefetchQuery()`
+
+새로운 `QueryClient.prefetchQuery()` 함수는 비동기 함수이며 **쿼리의 데이터를 반환하지 않습니다**. 데이터를 필요로 하는 경우, 새 `QueryClient.fetchQuery()` 함수를 사용하세요.
+
+```tsx
+// 쿼리 사전 가져오기:
+await queryClient.prefetchQuery("posts", fetchPosts);
+
+// 쿼리 가져오기:
+try {
+  const data = await queryClient.fetchQuery("posts", fetchPosts);
+} catch (error) {
+  // 오류 처리
+}
+```
+
+### `ReactQueryErrorResetBoundary` and `QueryCache.resetErrorBoundaries()` have been replaced with `QueryErrorResetBoundary` and `useQueryErrorResetBoundary()`
+
+이들은 이전과 동일한 경험을 제공하지만, 어떤 컴포넌트 트리를 리셋할지 선택할 수 있는 제어가 추가되었습니다. 더 많은 정보는 다음을 참조하세요:
+
+- [QueryErrorResetBoundary](../../reference/QueryErrorResetBoundary)
+- [useQueryErrorResetBoundary](../../reference/useQueryErrorResetBoundary)
+
+### `QueryCache.getQuery()` has been replaced with `QueryCache.find()`
+
+이제 `QueryCache.find()`를 사용하여 캐시에서 개별 쿼리를 찾아야 합니다.
+
+### `QueryCache.getQueries()` has been moved to `QueryCache.findAll()`
+
+이제 `QueryCache.findAll()`을 사용하여 캐시에서 여러 쿼리를 찾아야 합니다.
+
+### `QueryCache.isFetching` has been moved to `QueryClient.isFetching()`
+
+**이제는 속성이 아닌 함수로 변경되었습니다**
+
+### `useQueryCache` has been replaced with `useQueryClient`
+
+이 훅은 컴포넌트 트리에 제공된 `queryClient`를 반환하며, 이름만 변경된 것 외에는 크게 수정할 필요가 없습니다.
+
+### Query keys are no longer automatically propagated to query functions
+
+인라인 함수를 사용하는 것이 쿼리 함수에 매개변수를 전달하는 권장 방법입니다:
+
+```tsx
+// 이전
+useQuery(["post", id], (_key, id) => fetchPost(id));
+
+// 새로운 방법
+useQuery(["post", id], () => fetchPost(id));
+```
+
+인라인 함수를 사용하지 않으려면, 새로 전달된 `QueryFunctionContext`를 사용할 수 있습니다:
+
+```tsx
+useQuery(["post", id], (context) => fetchPost(context.queryKey[1]));
+```
+
+### Pagination parameters for `useInfiniteQuery` are now passed through `QueryFunctionContext.pageParam`
+
+이전에는 쿼리 함수의 마지막 쿼리 키 매개변수로 추가되었지만, 일부 패턴에서는 어려움이 있었습니다.
+
+```tsx
+// 이전
+useInfiniteQuery(["posts"], (_key, pageParam = 0) => fetchPosts(pageParam));
+
+// 새로운 방법
+useInfiniteQuery(["posts"], ({ pageParam = 0 }) => fetchPosts(pageParam));
+```
+
+### `usePaginatedQuery()` has been replaced with `keepPreviousData` option
+
+새로운 `keepPreviousData` 옵션은 `useQuery`와 `useInfiniteQuery` 모두에서 사용할 수 있으며, 데이터에 대한 "지연" 효과를 제공합니다:
+
+```tsx
+import { useQuery } from "react-query";
+
+function Page({ page }) {
+  const { data } = useQuery(["page", page], fetchPage, {
+    keepPreviousData: true,
+  });
+}
+```
+
+### `useInfiniteQuery()` now supports bidirectional pagination
+
+`useInfiniteQuery()` 인터페이스는 양방향 무한 리스트를 완전히 지원하도록 변경되었습니다.
+
+- `options.getFetchMore`는 `options.getNextPageParam`으로 이름이 변경되었습니다.
+- `queryResult.canFetchMore`는 `queryResult.hasNextPage`로 이름이 변경되었습니다.
+- `queryResult.fetchMore`는 `queryResult.fetchNextPage`로 이름이 변경되었습니다.
+- `queryResult.isFetchingMore`는 `queryResult.isFetchingNextPage`로 이름이 변경되었습니다.
+- `options.getPreviousPageParam` 옵션이 추가되었습니다.
+- `queryResult.hasPreviousPage` 속성이 추가되었습니다.
+- `queryResult.fetchPreviousPage` 속성이 추가되었습니다.
+- `queryResult.isFetchingPreviousPage` 속성이 추가되었습니다.
+- 무한 쿼리의 `data`는 이제 `pages`와 페이지를 가져오는 데 사용된 `pageParams`를 포함하는 객체입니다: `{ pages: [data, data, data], pageParams: [...]}`
+
+한 방향:
+
+```tsx
+const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  useInfiniteQuery(
+    "projects",
+    ({ pageParam = 0 }) => fetchProjects(pageParam),
+    {
+      getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+    }
+  );
+```
+
+양방향:
+
+```tsx
+const {
+  data,
+  fetchNextPage,
+  fetchPreviousPage,
+  hasNextPage,
+  hasPreviousPage,
+  isFetchingNextPage,
+  isFetchingPreviousPage,
+} = useInfiniteQuery(
+  "projects",
+  ({ pageParam = 0 }) => fetchProjects(pageParam),
+  {
+    getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+    getPreviousPageParam: (firstPage, pages) => firstPage.prevCursor,
+  }
+);
+```
+
+방향이 반대인 경우:
+
+```tsx
+const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  useInfiniteQuery(
+    "projects",
+    ({ pageParam = 0 }) => fetchProjects(pageParam),
+    {
+      getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+      getPreviousPageParam: () => undefined,
+    }
+  );
+```
+
+### `useMutation()` now
+
+has `mutationFn` return data removed
+
+이제 `mutationFn`이 데이터를 반환하지 않고, `mutationResult.data`로 대체되었습니다.
+
+```tsx
+const mutation = useMutation(mutate, {
+  onSuccess: (data) => {
+    console.log(data);
+  },
+});
+```
+
+### Options' `mutationFn` now has `onError`, `onSuccess`, `onSettled` handlers that can access `context`
+
+이제 `context` 객체를 핸들러에서 직접 전달할 수 있으며, `mutation` 객체로부터 데이터와 함께 접근할 수 있습니다:
+
+```tsx
+const mutation = useMutation(mutate, {
+  onSuccess: (data, variables, context) => {
+    console.log(context);
+  },
+});
+```
+
+이제 `mutationFn`에서 `context`를 사용할 수 있습니다:
+
+```tsx
+const mutation = useMutation(
+  (variables) => mutate(variables),
+  {
+    onSuccess: (data, variables, context) => {
+      // Use context here
+    },
+  },
+  {
+    context: "someContext",
+  }
+);
+```
+
+### `queryClient.invalidateQueries()`, `queryClient.refetchQueries()` now support all parameters for query keys
+
+기존의 `queryClient.invalidateQueries()`는 쿼리 키에 대해 더 많은 유연성을 제공합니다:
+
+```tsx
+queryClient.invalidateQueries("posts");
+queryClient.invalidateQueries(["post", id]);
+queryClient.invalidateQueries({
+  predicate: (query) => query.queryKey.includes("post"),
+});
+```
+
+이제는 더 많은 유연성 있는 쿼리 키를 지원합니다.
+
+---
+
+이 문서가 마이그레이션에 도움이 되길 바라며, React Query의 최신 기능과 향상된 성능을 활용하시길 바랍니다!
