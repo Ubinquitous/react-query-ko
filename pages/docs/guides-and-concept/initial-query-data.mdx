@@ -1,0 +1,142 @@
+---
+id: initial-query-data
+title: Initial Query Data
+---
+
+## Initial Query Data
+
+쿼리에 필요한 초기 데이터를 캐시로 공급하는 방법에는 여러 가지가 있습니다:
+
+- 선언적으로:
+  - `initialData`를 제공하여 쿼리의 캐시를 비워진 상태로 미리 채울 수 있습니다.
+- 명령적으로:
+  - [쿼리 데이터를 미리 가져오기 위해 `queryClient.prefetchQuery` 사용](../../../react/guides/prefetching)
+  - [쿼리 데이터를 수동으로 캐시에 넣기 위해 `queryClient.setQueryData` 사용](../../../react/guides/prefetching)
+
+## Using `initialData` to prepopulate a query
+
+앱에 이미 쿼리의 초기 데이터가 있는 경우 이를 쿼리에 직접 제공할 수 있습니다. 이 경우, `config.initialData` 옵션을 사용하여 쿼리의 초기 데이터를 설정하고 초기 로딩 상태를 건너뛸 수 있습니다!
+
+> 중요한 점: `initialData`는 캐시에 저장되므로, 이 옵션에 자리 표시자, 불완전한 데이터 또는 부분적인 데이터를 제공하는 대신 `placeholderData`를 사용하는 것이 좋습니다.
+
+```tsx
+const result = useQuery({
+  queryKey: ["todos"],
+  queryFn: () => fetch("/todos"),
+  initialData: initialTodos,
+});
+```
+
+### `staleTime` and `initialDataUpdatedAt`
+
+기본적으로, `initialData`는 방금 가져온 것처럼 완전히 fresh한 것으로 처리됩니다. 이는 `staleTime` 옵션에 어떻게 해석되는지에도 영향을 미칩니다.
+
+- `initialData`로 쿼리 옵저버를 구성하고 `staleTime`을 설정하지 않으면(기본값 `staleTime: 0`), 쿼리가 마운트될 때 즉시 다시 가져옵니다:
+
+  ```tsx
+  // initialTodos를 즉시 표시하지만, 마운트 후에도 즉시 다시 todos를 가져옵니다.
+  const result = useQuery({
+    queryKey: ["todos"],
+    queryFn: () => fetch("/todos"),
+    initialData: initialTodos,
+  });
+  ```
+
+- `initialData`와 `1000`ms의 `staleTime`으로 쿼리 옵저버를 구성하면, 데이터는 쿼리 함수에서 방금 가져온 것처럼 동일한 시간 동안 fresh한 것으로 간주됩니다.
+
+  ```tsx
+  // initialTodos를 즉시 표시하지만, 1000ms 후에 또 다른 상호작용 이벤트가 발생할 때까지는 다시 가져오지 않습니다.
+  const result = useQuery({
+    queryKey: ["todos"],
+    queryFn: () => fetch("/todos"),
+    initialData: initialTodos,
+    staleTime: 1000,
+  });
+  ```
+
+- 만약 `initialData`가 완전히 fresh하지 않다면 어떨까요? 그럴 때는 가장 정확한 마지막 구성인 `initialDataUpdatedAt` 옵션을 사용하는 것이 좋습니다. 이 옵션을 사용하면, 초기 데이터가 마지막으로 업데이트된 시간을 밀리초 단위로 나타내는 숫자형 JS 타임스탬프를 전달할 수 있습니다. 예를 들어 `Date.now()`에서 제공하는 값을 사용할 수 있습니다. 유닉스 타임스탬프가 있는 경우, 이를 JS 타임스탬프로 변환하려면 1000을 곱해야 합니다.
+
+  ```tsx
+  // initialTodos를 즉시 표시하지만, 1000ms 후에 또 다른 상호작용 이벤트가 발생할 때까지는 다시 가져오지 않습니다.
+  const result = useQuery({
+    queryKey: ["todos"],
+    queryFn: () => fetch("/todos"),
+    initialData: initialTodos,
+    staleTime: 60 * 1000, // 1분
+    // 이것은 10초 전 또는 10분 전일 수 있습니다.
+    initialDataUpdatedAt: initialTodosUpdatedTimestamp, // 예: 1608412420052
+  });
+  ```
+
+  이 옵션을 사용하면 staleTime이 원래 목적에 사용되어야 하는지 판단할 수 있으며, `initialData`가 `staleTime`보다 오래된 경우 마운트 시 데이터를 다시 가져올 수 있도록 합니다. 위 예시에서, 데이터는 1분 이내에 fresh해야 하며, 쿼리에 `initialData`가 마지막으로 업데이트된 시간을 힌트로 제공하여 쿼리가 데이터를 다시 가져올지 여부를 스스로 판단할 수 있도록 합니다.
+
+  > 데이터를 **미리 가져온 데이터**로 취급하려면 `prefetchQuery` 또는 `fetchQuery` API를 사용하여 캐시를 미리 채우고 `staleTime`을 `initialData`와 독립적으로 구성하는 것이 좋습니다.
+
+### Initial Data Function
+
+쿼리의 초기 데이터를 접근하는 과정이 집중적이거나 매 렌더링마다 실행하고 싶지 않은 경우, `initialData` 값을 함수로 전달할 수 있습니다. 이 함수는 쿼리가 초기화될 때 한 번만 실행되어 소중한 메모리와 CPU를 절약할 수 있습니다:
+
+```tsx
+const result = useQuery({
+  queryKey: ["todos"],
+  queryFn: () => fetch("/todos"),
+  initialData: () => getExpensiveTodos(),
+});
+```
+
+### Initial Data from Cache
+
+일부 상황에서는 다른 쿼리의 캐시된 결과에서 쿼리의 초기 데이터를 제공할 수 있습니다. 좋은 예로는 todo 목록 쿼리에서 개별 todo 항목을 검색하여, 이를 개별 todo 쿼리의 초기 데이터로 사용하는 경우입니다:
+
+```tsx
+const result = useQuery({
+  queryKey: ["todo", todoId],
+  queryFn: () => fetch("/todos"),
+  initialData: () => {
+    // 이 todo 쿼리의 초기 데이터로 'todos' 쿼리에서 todo를 사용합니다.
+    return queryClient.getQueryData(["todos"])?.find((d) => d.id === todoId);
+  },
+});
+```
+
+### Initial Data from the cache with `initialDataUpdatedAt`
+
+캐시에서 초기 데이터를 가져오면 데이터를 조회하는 소스 쿼리가 오래되었을 가능성이 큽니다. 쿼리가 즉시 다시 가져오는 것을 방지하기 위해 인위적인 `staleTime`을 사용하는 대신, 소스 쿼리의 `dataUpdatedAt`을 `initialDataUpdatedAt`에 전달하는 것이 좋습니다. 이를 통해 초기 데이터가 제공된 경우에도 쿼리 인스턴스가 데이터를 다시 가져와야 하는지 여부를 결정할 수 있습니다.
+
+```tsx
+const result = useQuery({
+  queryKey: ["todos", todoId],
+  queryFn: () => fetch(`/todos/${todoId}`),
+  initialData: () =>
+    queryClient.getQueryData(["todos"])?.find((d) => d.id === todoId),
+  initialDataUpdatedAt: () =>
+    queryClient.getQueryState(["todos"])?.dataUpdatedAt,
+});
+```
+
+### Conditional Initial Data from Cache
+
+소스 쿼리가 오래되었을 경우, 캐시된 데이터를 사용하지 않고 서버에서 데이터를 가져오는 것이 나을 수 있습니다. 이 결정을 쉽게 하기 위해, `queryClient.getQueryState` 메서드를 사용하여 소스 쿼리에 대한 더 많은 정보를 얻을 수 있습니다. 여기에는 쿼리가 얼마나 fresh한지 판단할 수 있는 `state.dataUpdatedAt` 타임스탬프가 포함됩니다:
+
+```tsx
+const result = useQuery({
+  queryKey: ["todo", todoId],
+  queryFn: () => fetch(`/todos/${todoId}`),
+  initialData: () => {
+    // 쿼리 상태 가져오기
+    const state = queryClient.getQueryState(["todos"]);
+
+    // 쿼리가 존재하고 데이터가 10초 이상 되지 않았다면...
+    if (state && Date.now() - state.dataUpdatedAt <= 10 * 1000) {
+      // 개별 todo 반환
+      return state.data.find((d) => d.id === todoId);
+    }
+
+    // 그렇지 않으면 undefined를 반환하고 하드 로딩 상태에서 가져오기!
+  },
+});
+```
+
+## Further reading
+
+`Initial Data`와 `Placeholder Data`의 비교에 대해 알아보려면 [커뮤니티 자료](../../community/tkdodos-blog#9-placeholder-and-initial-data-in-react-query)를 참조하세요.
