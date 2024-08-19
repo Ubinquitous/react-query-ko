@@ -1,0 +1,93 @@
+---
+id: paginated-queries
+title: Paginated / Lagged Queries
+---
+
+페이징된 데이터를 렌더링하는 것은 매우 일반적인 UI 패턴이며, TanStack Query에서는 쿼리 키에 페이지 정보를 포함시킴으로써 쉽게 처리할 수 있습니다:
+
+[//]: # "Example"
+
+```tsx
+const result = useQuery({
+  queryKey: ["projects", page],
+  queryFn: fetchProjects,
+});
+```
+
+[//]: # "Example"
+
+하지만 이 간단한 예제를 실행해 보면, 다음과 같은 이상한 현상을 경험할 수 있습니다:
+
+**UI가 `success`와 `pending` 상태를 오가는 이유는 각 페이지가 완전히 새로운 쿼리로 처리되기 때문입니다.**
+
+이 경험은 최적이 아니며, 현재 많은 도구들이 이러한 방식으로 작동하는 것이 사실입니다. 그러나 TanStack Query는 다릅니다! TanStack Query에는 `placeholderData`라는 멋진 기능이 있어서 이 문제를 해결할 수 있습니다.
+
+## Better Paginated Queries with `placeholderData`
+
+다음 예제에서는 페이지 인덱스(또는 커서)를 증가시키는 상황을 고려해 보겠습니다. `useQuery`를 사용하면 **기술적으로 잘 작동하긴 하지만**, UI가 페이지나 커서가 바뀔 때마다 다른 쿼리가 생성되고 파괴되어 `success`와 `pending` 상태를 오가는 문제가 발생합니다. `placeholderData`를 `(previousData) => previousData` 또는 TanStack Query에서 제공하는 `keepPreviousData` 함수를 설정하면 다음과 같은 이점이 있습니다:
+
+- **이전 성공적인 데이터가 새로운 데이터가 요청되는 동안 사용 가능**하므로 쿼리 키가 변경되더라도 데이터가 유지됩니다.
+- 새로운 데이터가 도착하면 이전 `data`가 원활하게 교체되어 새로운 데이터를 보여줍니다.
+- 현재 쿼리가 제공하는 데이터를 알기 위한 `isPlaceholderData`가 제공됩니다.
+
+[//]: # "Example2"
+
+```tsx
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import React from "react";
+
+function Todos() {
+  const [page, setPage] = React.useState(0);
+
+  const fetchProjects = (page = 0) =>
+    fetch("/api/projects?page=" + page).then((res) => res.json());
+
+  const { isPending, isError, error, data, isFetching, isPlaceholderData } =
+    useQuery({
+      queryKey: ["projects", page],
+      queryFn: () => fetchProjects(page),
+      placeholderData: keepPreviousData,
+    });
+
+  return (
+    <div>
+      {isPending ? (
+        <div>Loading...</div>
+      ) : isError ? (
+        <div>Error: {error.message}</div>
+      ) : (
+        <div>
+          {data.projects.map((project) => (
+            <p key={project.id}>{project.name}</p>
+          ))}
+        </div>
+      )}
+      <span>Current Page: {page + 1}</span>
+      <button
+        onClick={() => setPage((old) => Math.max(old - 1, 0))}
+        disabled={page === 0}
+      >
+        Previous Page
+      </button>
+      <button
+        onClick={() => {
+          if (!isPlaceholderData && data.hasMore) {
+            setPage((old) => old + 1);
+          }
+        }}
+        // 다음 페이지 버튼을 비활성화하여 다음 페이지가 있는지 확인
+        disabled={isPlaceholderData || !data?.hasMore}
+      >
+        Next Page
+      </button>
+      {isFetching ? <span> Loading...</span> : null}
+    </div>
+  );
+}
+```
+
+[//]: # "Example2"
+
+## Lagging Infinite Query results with `placeholderData`
+
+다소 드물지만, `placeholderData` 옵션은 `useInfiniteQuery` 훅과도 완벽하게 작동하여 사용자가 무한 쿼리 키가 시간에 따라 변경되는 동안 캐시된 데이터를 계속 볼 수 있게 해줍니다.
