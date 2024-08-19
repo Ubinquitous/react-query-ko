@@ -1,0 +1,493 @@
+---
+id: migrating-to-tanstack-query-5
+title: Migrating to TanStack Query v5
+---
+
+## Migrating to TanStack Query v5
+
+## Breaking Changes
+
+v5는 상위 버전이기 때문에, 몇 가지 주의해야 할 호환성 변경 사항이 있습니다:
+
+### Supports a single signature, one object
+
+이전에는 useQuery와 관련된 함수들이 TypeScript에서 여러 가지 오버로드를 지원했습니다. 즉, 함수가 호출될 수 있는 다양한 방식이 있었습니다. 이는 유지보수하기 어렵고, 첫 번째와 두 번째 매개변수의 타입을 확인하기 위해 런타임 체크가 필요했습니다. 따라서 옵션을 올바르게 생성하는 데 문제가 있었습니다.
+
+이제는 오직 객체 형식만 지원합니다.
+
+```tsx
+-useQuery(key, fn, options) + // [!code --]
+  useQuery({ queryKey, queryFn, ...options }) - // [!code ++]
+  useInfiniteQuery(key, fn, options) + // [!code --]
+  useInfiniteQuery({ queryKey, queryFn, ...options }) - // [!code ++]
+  useMutation(fn, options) + // [!code --]
+  useMutation({ mutationFn, ...options }) - // [!code ++]
+  useIsFetching(key, filters) + // [!code --]
+  useIsFetching({ queryKey, ...filters }) - // [!code ++]
+  useIsMutating(key, filters) + // [!code --]
+  useIsMutating({ mutationKey, ...filters }); // [!code ++]
+```
+
+```tsx
+-queryClient.isFetching(key, filters) + // [!code --]
+  queryClient.isFetching({ queryKey, ...filters }) - // [!code ++]
+  queryClient.ensureQueryData(key, filters) + // [!code --]
+  queryClient.ensureQueryData({ queryKey, ...filters }) - // [!code ++]
+  queryClient.getQueriesData(key, filters) + // [!code --]
+  queryClient.getQueriesData({ queryKey, ...filters }) - // [!code ++]
+  queryClient.setQueriesData(key, updater, filters, options) + // [!code --]
+  queryClient.setQueriesData({ queryKey, ...filters }, updater, options) - // [!code ++]
+  queryClient.removeQueries(key, filters) + // [!code --]
+  queryClient.removeQueries({ queryKey, ...filters }) - // [!code ++]
+  queryClient.resetQueries(key, filters, options) + // [!code --]
+  queryClient.resetQueries({ queryKey, ...filters }, options) - // [!code ++]
+  queryClient.cancelQueries(key, filters, options) + // [!code --]
+  queryClient.cancelQueries({ queryKey, ...filters }, options) - // [!code ++]
+  queryClient.invalidateQueries(key, filters, options) + // [!code --]
+  queryClient.invalidateQueries({ queryKey, ...filters }, options) - // [!code ++]
+  queryClient.refetchQueries(key, filters, options) + // [!code --]
+  queryClient.refetchQueries({ queryKey, ...filters }, options) - // [!code ++]
+  queryClient.fetchQuery(key, fn, options) + // [!code --]
+  queryClient.fetchQuery({ queryKey, queryFn, ...options }) - // [!code ++]
+  queryClient.prefetchQuery(key, fn, options) + // [!code --]
+  queryClient.prefetchQuery({ queryKey, queryFn, ...options }) - // [!code ++]
+  queryClient.fetchInfiniteQuery(key, fn, options) + // [!code --]
+  queryClient.fetchInfiniteQuery({ queryKey, queryFn, ...options }) - // [!code ++]
+  queryClient.prefetchInfiniteQuery(key, fn, options) + // [!code --]
+  queryClient.prefetchInfiniteQuery({ queryKey, queryFn, ...options }); // [!code ++]
+```
+
+```tsx
+-queryCache.find(key, filters) + // [!code --]
+  queryCache.find({ queryKey, ...filters }) - // [!code ++]
+  queryCache.findAll(key, filters) + // [!code --]
+  queryCache.findAll({ queryKey, ...filters }); // [!code ++]
+```
+
+### `queryClient.getQueryData` now accepts queryKey only as an Argument
+
+`queryClient.getQueryData`의 인자는 `queryKey`만 허용되도록 변경되었습니다.
+
+```tsx
+-queryClient.getQueryData(queryKey, filters) + // [!code --]
+  queryClient.getQueryData(queryKey); // [!code ++]
+```
+
+### `queryClient.getQueryState` now accepts queryKey only as an Argument
+
+`queryClient.getQueryState`의 인자 또한 `queryKey`만 허용되도록 변경되었습니다.
+
+```tsx
+-queryClient.getQueryState(queryKey, filters) + // [!code --]
+  queryClient.getQueryState(queryKey); // [!code ++]
+```
+
+#### Codemod
+
+호환성 변경 사항으로 인한 마이그레이션을 쉽게 하기 위해, v5에는 코드 변환 도구(codemod)가 제공됩니다.
+
+> 이 코드는 호환성 변경 사항에 대한 마이그레이션을 돕기 위해 최선을 다해 작성되었습니다. 생성된 코드를 꼼꼼히 검토해 주세요! 또한, 코드 변환 도구가 찾을 수 없는 엣지 케이스가 있을 수 있으므로 로그 출력을 주의 깊게 확인해 주세요.
+
+`.js` 또는 `.jsx` 파일에 대해 이 도구를 실행하려면, 아래 명령어를 사용하세요:
+
+```
+npx jscodeshift@latest ./path/to/src/ \
+  --extensions=js,jsx \
+  --transform=./node_modules/@tanstack/react-query/build/codemods/src/v5/remove-overloads/remove-overloads.cjs
+```
+
+`.ts` 또는 `.tsx` 파일에 대해 이 도구를 실행하려면, 아래 명령어를 사용하세요:
+
+```
+npx jscodeshift@latest ./path/to/src/ \
+  --extensions=ts,tsx \
+  --parser=tsx \
+  --transform=./node_modules/@tanstack/react-query/build/codemods/src/v5/remove-overloads/remove-overloads.cjs
+```
+
+**주의:** `TypeScript`의 경우, `tsx`를 파서로 사용해야 합니다. 그렇지 않으면 코드 변환 도구가 제대로 적용되지 않을 수 있습니다!
+
+**참고:** 코드 변환 도구를 적용하면 코드 포맷이 깨질 수 있으므로, 코드 변환 도구를 적용한 후에는 `prettier`와/또는 `eslint`를 실행하는 것을 잊지 마세요!
+
+코드 변환 도구가 작동하는 방식에 대한 몇 가지 설명:
+
+- 일반적으로, 첫 번째 매개변수가 객체 표현식이고 "queryKey" 또는 "mutationKey" 속성을 포함하는 경우(변환되는 훅/메서드 호출에 따라 다름), 코드가 이미 새로운 서명과 일치하므로 코드 변환 도구는 이를 수정하지 않습니다. 🎉
+- 위 조건이 충족되지 않는 경우, 코드 변환 도구는 첫 번째 매개변수가 배열 표현식이거나 배열 표현식을 참조하는 식별자인지 확인합니다. 이 경우, 코드 변환 도구는 이를 객체 표현식으로 변환하고, 이를 첫 번째 매개변수로 설정합니다.
+- 객체 매개변수가 추론될 수 있는 경우, 코드 변환 도구는 기존 속성을 새로 생성된 객체로 복사하려고 시도합니다.
+- 코드 변환 도구가 사용법을 추론할 수 없는 경우, 콘솔에 파일 이름과 사용된 줄 번호가 포함된 메시지를 남깁니다. 이 경우, 수동으로 마이그레이션을 진행해야 합니다.
+- 변환 결과 오류가 발생하면, 콘솔에서 예상치 못한 일이 발생했다는 메시지를 볼 수 있습니다. 이 경우, 수동으로 마이그레이션을 진행해야 합니다.
+
+### Callbacks on useQuery (and QueryObserver) have been removed
+
+`onSuccess`, `onError`, `onSettled`는 Queries에서 제거되었습니다. Mutations에서는 변경되지 않았습니다. 이 변경의 이유와 대신 해야 할 작업에 대한 자세한 내용은 [이 RFC](https://github.com/TanStack/query/discussions/5279)를 참조해 주세요.
+
+### The `refetchInterval` callback function only gets `query` passed
+
+이 변경은 콜백 호출 방식을 간소화합니다 (`refetchOnWindowFocus`, `refetchOnMount`, `refetchOnReconnect` 콜백 모두 쿼리만 전달받음), 그리고 콜백이 `select`로 변환된 데이터를 받을 때 발생하던 타입 문제를 수정합니다.
+
+```tsx
+- refetchInterval: number | false | ((data: TData | undefined, query: Query) => number | false | undefined) // [!code --]
++ refetchInterval: number | false | ((query: Query) => number | false | undefined) // [!code ++]
+```
+
+여전히 `query.state.data`를 통해 데이터에 접근할 수 있지만, 이는 `select`로 변환된 데이터가 아닙니다. 변환된 데이터에 접근해야 할 경우, `query.state.data`에서 다시 변환을 호출할 수 있습니다.
+
+### The `remove` method has been removed from useQuery
+
+이전에는 `remove` 메서드를 사용하여 쿼리를 쿼리 캐시에서 제거했지만, 이를 관찰자에게 알리지 않았습니다. 이 메서드는 예를 들어 사용자가 로그아웃할 때 더 이상 필요 없는 데이터를 명령적으로 제거할 때 유용했습니다.
+
+하지만 쿼리가 여전히 활성 상태일 때 이 작업을 수행하는 것은 의미가 없습니다. 이는 다음 렌더링에서 하드 로딩 상태를 유발하기 때문입니다.
+
+쿼리를 여전히 제거해야 하는 경우, `queryClient.removeQueries({queryKey: key})`를 사용할 수 있습니다.
+
+```tsx
+const queryClient = useQueryClient();
+const query = useQuery({ queryKey, queryFn });
+
+-query.remove() + // [!code --]
+  queryClient.removeQueries({ queryKey }); // [!code ++]
+```
+
+### The minimum required TypeScript version is now 4.7
+
+주로 타입 추론에 대한 중요한 수정이 포함되었기 때문입니다. 자세한 내용은 [이 TypeScript 이슈](https://github.com/microsoft/TypeScript/issues/43371)를 참조해 주세요.
+
+### The `isDataEqual` option has been removed from useQuery
+
+이전에는 이 함수가 쿼리의 해결된 데이터로 이전 `data` (`true`) 또는 새 데이터 (`false`)를 사용할지 여부를 나타내는 데 사용되었습니다.
+
+동일한 기능은 `structuralSharing`에 함수를 전달하여 구현할 수 있습니다:
+
+```tsx
+ import { replaceEqualDeep } from '@tanstack/react-query'
+
+- isDataEqual: (oldData, newData) => customCheck(oldData, newData) // [!code --]
++ structuralSharing: (oldData, newData) => customCheck(oldData, newData) ? oldData : replaceEqualDeep(oldData, newData) // [!code ++]
+```
+
+### The deprecated custom logger has been removed
+
+사용자 정의 로거는 이미 4 버전에서 사용 중단(deprecated) 되었으며, 이번 버전에서 제거되었습니다. 로깅은 개발 모드에서만 영향을 미쳤으며, 이 모드에서 사용자 정의 로거를 전달할 필요는 없습니다.
+
+### Supported Browsers
+
+브라우저 리스트를 업데이트하여 더 현대적이고 성능이 우수하며 작은 번들을 생성하도록 했습니다. 요구 사항에 대한 자세한 내용은 [여기](../../installation#requirements)를 읽어보세요.
+
+### Private class fields and methods
+
+TanStack Query는 항상 클래스에서 private 필드와 메서드를 가지고 있었지만, 실제로는 `TypeScript`에서만 private이었습니다. 이제 [ECMAScript Private class features](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields)를 사용하므로, 이러한 필드는 이제 진정으로 private이며 런타임에서 외부에서 접근할 수 없습니다.
+
+### Rename `cacheTime` to `gcTime`
+
+거의 모든 사람이 `cacheTime`을 잘못 이해합니다. `cacheTime`은 "데이터가 캐시되는 시간"처럼 들리지만, 실제로는 그렇지 않습니다.
+
+`cacheTime`은 쿼리가 여전히 사용 중일 때는 아무런 동작을 하지 않습니다. 쿼리가 사용되지 않게 되면, 그 시간 이후에 데이터가 "가비지 수집"되어 캐시가 커지는 것을 방지합니다.
+
+`gc`는 "가비지 수집" 시간을 의미합니다. 약간 더 기술적이지만, 컴퓨터 과학에서는 꽤 [잘 알려진 약어](<https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)>)입니다.
+
+```tsx
+const MINUTE = 1000 * 60;
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+-      cacheTime: 10 * MINUTE, // [!code --]
++      gcTime: 10 * MINUTE, // [!code ++]
+    },
+  },
+})
+```
+
+### The `useErrorBoundary` option has been renamed to `throwOnError`
+
+`useErrorBoundary` 옵션을 더 프레임워크에 구애받지 않게 하고, 훅의 `use` 접두사와 `ErrorBoundary` 컴포넌트 이름과의 혼동을 피하기 위해, 기능을 더 정확하게 반영하도록 `throwOnError`로 이름이 변경되었습니다.
+
+### TypeScript: `Error` is now the default type for errors instead of `unknown`
+
+JavaScript에서는 무엇이든 `throw` 할 수 있지만 (`unknown`이 가장 적절한 타입), 거의 항상 `Error` (또는 `Error`의 서브클래스)가 던져집니다. 이 변경은 대부분의 경우 TypeScript에서 `error` 필드를 더 쉽게 다룰 수 있게 합니다.
+
+`Error`가 아닌 것을 던지려면 이제 제너릭 타입을 직접 설정해야 합니다:
+
+```ts
+useQuery<number, string>({
+  queryKey: ["some-query"],
+  queryFn: async () => {
+    if (Math.random() > 0.5) {
+      throw "some error";
+    }
+    return 42;
+  },
+});
+```
+
+다른 종류의 오류를 전역적으로 설정하는 방법은 [타입스크립트 가이드](../../typescript#registering-a-global-error)를 참조해보세요.
+
+### eslint `prefer-query-object-syntax` rule is removed
+
+현재 지원되는 유일한 구문이 객체 구문이기 때문에, 이 규칙은 더 이상 필요하지 않습니다.
+
+### Removed `keepPreviousData` in favor of `placeholderData` identity function
+
+`keepPreviousData` 옵션과 `isPreviousData` 플래그가 제거되었습니다. 이들은 대부분 `placeholderData`와 `isPlaceholderData` 플래그가 수행하는 것과 같은 기능을 했기 때문입니다.
+
+`keepPreviousData`와 동일한 기능을 달성하기 위해, `placeholderData`에 이전 쿼리의 `data`를 인수로 추가하였습니다. `placeholderData`는 항등 함수(identity function)를 받아들입니다. 따라서, `placeholderData`에 항등 함수를 제공하거나 Tanstack Query에 포함된 `keepPreviousData` 함수를 사용할 수 있습니다.
+
+> 주의할 점은, `useQueries`는 `placeholderData` 함수에서 `previousData`를 인수로 받지 않는다는 것입니다. 이는 배열로 전달된 쿼리의 동적 성질로 인해 `placeholderData`와 `queryFn`의 결과 형태가 다를 수 있기 때문입니다.
+
+```tsx
+import {
+   useQuery,
++  keepPreviousData // [!code ++]
+} from "@tanstack/react-query";
+
+const {
+   data,
+-  isPreviousData, // [!code --]
++  isPlaceholderData, // [!code ++]
+} = useQuery({
+  queryKey,
+  queryFn,
+- keepPreviousData: true, // [!code --]
++ placeholderData: keepPreviousData // [!code ++]
+});
+```
+
+Tanstack Query에서 항등 함수는 제공된 인수(즉, 데이터)를 변경하지 않고 항상 반환하는 함수를 의미합니다.
+
+```ts
+useQuery({
+  queryKey,
+  queryFn,
+  placeholderData: (previousData, previousQuery) => previousData, // `keepPreviousData`와 동일한 동작을 하는 항등 함수
+});
+```
+
+이 변경 사항에는 다음과 같은 몇 가지 주의 사항이 있습니다:
+
+- `placeholderData`는 항상 `success` 상태로 설정되며, `keepPreviousData`는 이전 쿼리의 상태를 제공했습니다. 이 상태는 데이터가 성공적으로 가져와졌고, 이후 백그라운드에서 다시 가져오는 도중 오류가 발생하면 `error`일 수 있습니다. 그러나 오류 자체는 공유되지 않았으므로, `placeholderData`의 동작을 유지하기로 결정했습니다.
+- `keepPreviousData`는 이전 데이터의 `dataUpdatedAt` 타임스탬프를 제공했지만, `placeholderData`에서는 `dataUpdatedAt`이 `0`으로 유지됩니다. 화면에 타임스탬프를 지속적으로 표시하려는 경우 불편할 수 있습니다. 그러나 `useEffect`를 사용하여 이를 해결할 수 있습니다.
+
+  ```ts
+  const [updatedAt, setUpdatedAt] = useState(0);
+
+  const { data, dataUpdatedAt } = useQuery({
+    queryKey: ["projects", page],
+    queryFn: () => fetchProjects(page),
+  });
+
+  useEffect(() => {
+    if (dataUpdatedAt > updatedAt) {
+      setUpdatedAt(dataUpdatedAt);
+    }
+  }, [dataUpdatedAt]);
+  ```
+
+### Window focus refetching no longer listens to the `focus` event
+
+이제 `visibilitychange` 이벤트만 사용됩니다. 이는 `visibilitychange` 이벤트를 지원하는 브라우저만 지원하기 때문에 가능합니다. 이 변경으로 인해 발생했던 여러 문제들이 [여기](https://github.com/TanStack/query/pull/4805)에 나열된 대로 해결됩니다.
+
+### Network status no longer relies on the `navigator.onLine` property
+
+`navigator.onLine`은 Chromium 기반 브라우저에서 제대로 작동하지 않습니다. 이와 관련하여 [많은 문제들](https://bugs.chromium.org/p/chromium/issues/list?q=navigator.online)이 있어, 쿼리가 잘못 `offline`으로 표시되는 경우가 발생했습니다.
+
+이 문제를 해결하기 위해, 이제는 항상 `online: true`로 시작하고 `online` 및 `offline` 이벤트만을 통해 상태를 업데이트합니다.
+
+이렇게 하면 false negative의 가능성은 줄어들겠지만, 서비스 워커를 통해 로드되는 오프라인 앱에서는 인터넷 연결 없이도 작동할 수 있기 때문에 false positive가 발생할 수도 있습니다.
+
+### Removed custom `context` prop in favor of custom `queryClient` instance
+
+v4에서는 모든 react-query 훅에 사용자 정의 `context`를 전달할 수 있는 기능을 도입했습니다. 이를 통해 MicroFrontends를 사용할 때 적절한 격리가 가능했습니다.
+
+하지만 `context`는 리액트 전용 기능입니다. `context`가 하는 일은 `queryClient`에 접근할 수 있게 하는 것입니다. 동일한 격리를 직접 사용자 정의 `queryClient`를 전달하여도 달성할 수 있습니다. 이렇게 하면 다른 프레임워크들도 프레임워크에 구애받지 않고 동일한 기능을 사용할 수 있습니다.
+
+```tsx
+import { queryClient } from './my-client'
+
+const { data } = useQuery(
+  {
+    queryKey: ['users', id],
+    queryFn: () => fetch(...),
+-   context: customContext // [!code --]
+  },
++  queryClient, // [!code ++]
+)
+```
+
+### Removed `refetchPage` in favor of `maxPages`
+
+v4에서는 무한 쿼리에서 `refetchPage` 함수를 사용하여 다시 가져올 페이지를 정의할 수 있는 기능을 도입했습니다.
+
+하지만 모든 페이지를 다시 가져오는 것은 UI 불일치 문제를 초래할 수 있습니다. 또한, 이 옵션은 `queryClient.refetchQueries`와 같은 곳에서도 사용 가능하지만, 무한 쿼리에만 적용되며 "일반" 쿼리에는 적용되지 않습니다.
+
+v5에서는 무한 쿼리에서 쿼리 데이터와 다시 가져올 페이지 수를 제한할 수 있는 새로운 `maxPages` 옵션을 도입했습니다. 이 새로운 기능은 `refetchPage` 기능이 처음에 식별된 사용 사례를 처리하되, 관련된 문제는 해결합니다.
+
+### New `dehydrate` API
+
+`dehydrate`에 전달할 수 있는 옵션이 간소화되었습니다. 쿼리와 뮤테이션은 항상 탈수(dehydrated)됩니다 (기본 함수 구현에 따라). 이 동작을 변경하려면, 제거된 불리언 옵션 `dehydrateMutations` 및 `dehydrateQueries` 대신, 함수 형태의 `shouldDehydrateQuery` 또는 `shouldDehydrateMutation`을 구현할 수 있습니다. 쿼리/뮤테이션을 전혀 탈수하지 않는 이전 동작을 얻으려면, `() => false`를 전달하면 됩니다.
+
+```tsx
+- dehydrateMutations?: boolean // [!code --]
+- dehydrateQueries?: boolean // [!code --]
+```
+
+### Infinite queries now need a `initialPageParam`
+
+이전에는 `queryFn`에 `pageParam`으로 `undefined`를 전달했으며, `queryFn` 함수 서명에서 `pageParam` 매개변수에 기본값을 할당할 수 있었습니다. 이 방법은 `queryCache`에 `undefined`를 저장하게 되어 직렬화할 수 없는 문제가 있었습니다.
+
+이제는 무한 쿼리 옵션에 명시적인 `initialPageParam`을 전달해야 합니다. 이는 첫 번째 페이지의 `pageParam`으로 사용됩니다:
+
+```tsx
+useInfiniteQuery({
+   queryKey,
+-  queryFn: ({ pageParam = 0 }) => fetchSomething(pageParam), // [!code --]
++  queryFn: ({ pageParam }) => fetchSomething(pageParam), // [!code ++]
++  initialPageParam: 0, // [!code ++]
+   getNextPageParam: (lastPage) => lastPage.next,
+})
+```
+
+### Manual mode for infinite queries has been removed
+
+이전에는 `fetchNextPage`나 `fetchPreviousPage`에 직접 `pageParam` 값을 전달하여 `getNextPageParam` 또는 `getPreviousPageParam`에서 반환된 `pageParams`를 덮어쓸 수 있었습니다. 이 기능은 리패치와 함께 전혀 작동하지 않았고, 널리 알려지거나 사용되지 않았습니다. 이제는 무한 쿼리에 대해 `getNextPageParam`이 필수로 요구됩니다.
+
+### Returning `null` from `getNextPageParam` or `getPreviousPageParam` now indicates that there is no further page available
+
+v4에서는 더 이상 페이지가 없다는 것을 나타내기 위해 명시적으로 `undefined`를 반환해야 했습니다. 이제 이 검사를 넓혀 `null`도 포함되도록 했습니다.
+
+### No retries on the server
+
+서버에서는 `retry`가 이제 기본값으로 `3`이 아닌 `0`으로 설정됩니다. 사전 패칭에서는 항상 기본값이 `0` retries였지만, `suspense`가 활성화된 쿼리가 이제 서버에서 직접 실행될 수 있기 때문에 (React 18부터), 서버에서는 재시도를 전혀 하지 않도록 해야 합니다.
+
+### `status: loading` has been changed to `status: pending` and `isLoading` has been changed to `isPending` and `isInitialLoading` has now been renamed to `isLoading`
+
+`loading` 상태는 `pending`으로 이름이 변경되었고, 파생된 `isLoading` 플래그도 `isPending`으로 변경되었습니다.
+
+뮤테이션의 경우에도 `status`가 `loading`에서 `pending`으로 변경되었고, `isLoading` 플래그는 `isPending`으로 변경되었습니다.
+
+마지막으로, 쿼리에는 `isPending && isFetching`으로 구현된 새로운 파생 `isLoading` 플래그가 추가되었습니다. 이는 `isLoading`과 `isInitialLoading`이 동일한 상태를 나타내지만, `isInitialLoading`은 더 이상 사용되지 않으며 다음 주요 버전에서 제거될 예정입니다.
+
+이 변경의 이유를 이해하려면 [v5 로드맵 논의](https://github.com/TanStack/query/discussions/4252)를 확인하세요.
+
+### `hashQueryKey` has been renamed to `hashKey`
+
+이는 뮤테이션 키도 해시화하고, `useIsMutating`과 `useMutationState`의 `predicate` 함수 내에서도 사용될 수 있기 때문입니다.
+
+### The minimum required React version is now 18.0
+
+React Query v5는 React 18.0 이상의 버전을 요구합니다. 이는 새로운 `useSyncExternalStore` 훅을 사용하기 때문이며, 이 훅은 React 18.0 이후에만 제공됩니다. 이전에는 React에서 제공하는 shim을 사용해왔습니다.
+
+### The `contextSharing` prop has been removed from QueryClientProvider
+
+이전에는 `contextSharing` 속성을 사용하여 쿼리 클라이언트 컨텍스트의 첫 번째 (및 최소 하나의) 인스턴스를 창 전체에서 공유할 수 있었습니다. 이를 통해 TanStack Query가 서로 다른 번들이나 마이크로 프론트엔드에서 사용되더라도 동일한 컨텍스트 인스턴스를 사용할 수 있었습니다.
+
+v5에서 사용자 정의 컨텍스트 prop이 제거됨에 따라, [사용자 정의 컨텍스트 prop을 사용자 정의 queryClient 인스턴스로 교체](#removed-custom-context-prop-in-favor-of-custom-queryclient-instance)하는 섹션을 참조하세요. 애플리케이션의 여러 패키지에서 동일한 쿼리 클라이언트를 공유하려면, 공유된 사용자 정의 `queryClient` 인스턴스를 직접 전달하면 됩니다.
+
+### No longer using `unstable_batchedUpdates` as the batching function in React and React Native
+
+`unstable_batchedUpdates` 함수는 React 18에서 noop이므로, 더 이상 `react-query`에서 자동으로 배칭 함수로 설정되지 않습니다.
+
+프레임워크가 사용자 정의 배칭 함수를 지원하는 경우, `notifyManager.setBatchNotifyFunction`을 호출하여 TanStack Query에 이를 알려줄 수 있습니다.
+
+예를 들어, `solid-query`에서 배칭 함수를 설정하는 방법은 다음과 같습니다:
+
+```ts
+import { notifyManager } from "@tanstack/query-core";
+import { batch } from "solid-js";
+
+notifyManager.setBatchNotifyFunction(batch);
+```
+
+### Hydration API changes
+
+동시성 기능과 전환을 더 잘 지원하기 위해 탈수 API에 몇 가지 변경 사항을 적용했습니다. `Hydrate` 컴포넌트는 `HydrationBoundary`로 이름이 변경되었고, `useHydrate` 훅은 제거되었습니다.
+
+`HydrationBoundary`는 이제 뮤테이션을 탈수하지 않고 오직 쿼리만 탈수합니다. 뮤테이션을 탈수하려면 저수준 `hydrate` API 또는 `persistQueryClient` 플러그인을 사용하세요.
+
+마지막으로, 쿼리가 탈수되는 타이밍이 약간 변경되었습니다. 새로운 쿼리는 여전히 렌더링 단계에서 탈수되어 SSR이 정상적으로 작동하지만, 캐시에 이미 존재하는 쿼리는 이제 효과 내에서 탈수됩니다 (캐시에 있는 데이터보다 새 데이터가 더 신선한 경우). 애플리케이션 시작 시 한 번만 탈수하는 경우에는 영향을 미치지 않겠지만, 서버 컴포넌트를 사용하고 페이지 탐색 시 새 데이터를 전달하는 경우, 페이지가 즉시 다시 렌더링되기 전에 이전 데이터가 잠시 나타날 수 있습니다.
+
+이 마지막 변경 사항은 기술적으로는 파괴적이며, 페이지 전환이 완전히 완료되기 전에 기존 페이지의 콘텐츠를 조기 업데이트하지 않도록 하기 위해 적용되었습니다. 특별한 조치는 필요하지 않습니다.
+
+```tsx
+- import { Hydrate } from '@tanstack/react-query' // [!code --]
++ import { HydrationBoundary } from '@tanstack/react-query' // [!code ++]
+
+
+- <Hydrate state={dehydratedState}> // [!code --]
++ <HydrationBoundary state={dehydratedState}> // [!code ++]
+  <App />
+- </Hydrate> // [!code --]
++ </HydrationBoundary> // [!code ++]
+```
+
+## New Features 🚀
+
+v5에도 새로운 기능들이 추가되었습니다:
+
+### Simplified optimistic updates
+
+이제 `useMutation`에서 반환된 `variables`를 활용하여 낙관적 업데이트를 간소화할 수 있습니다:
+
+```tsx
+const queryInfo = useTodos();
+const addTodoMutation = useMutation({
+  mutationFn: (newTodo: string) => axios.post("/api/data", { text: newTodo }),
+  onSettled: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+});
+
+if (queryInfo.data) {
+  return (
+    <ul>
+      {queryInfo.data.items.map((todo) => (
+        <li key={todo.id}>{todo.text}</li>
+      ))}
+      {addTodoMutation.isPending && (
+        <li key={String(addTodoMutation.submittedAt)} style={{ opacity: 0.5 }}>
+          {addTodoMutation.variables}
+        </li>
+      )}
+    </ul>
+  );
+}
+```
+
+여기에서는 UI가 변할 때만 변화를 주고 직접적으로 캐시에 데이터를 작성하지 않습니다. 이는 낙관적 업데이트를 표시해야 할 단 하나의 장소만 있을 때 가장 잘 작동합니다. 자세한 내용은 [낙관적 업데이트 문서](../optimistic-updates)를 참조하세요.
+
+### Limited, Infinite Queries with new maxPages option
+
+무한 쿼리는 무한 스크롤이나 페이지네이션이 필요할 때 매우 유용합니다. 하지만 더 많은 페이지를 가져올수록 더 많은 메모리를 소모하게 되고, 쿼리 리패칭 과정이 페이지가 순차적으로 리패칭되면서 느려질 수 있습니다.
+
+버전 5에서는 `maxPages`라는 새로운 옵션을 제공하여, 개발자가 쿼리 데이터에 저장되고 리패칭되는 페이지 수를 제한할 수 있습니다. `maxPages` 값을 UX와 리패칭 성능에 맞게 조정할 수 있습니다.
+
+무한 리스트는 양방향이어야 하며, 따라서 `getNextPageParam`과 `getPreviousPageParam` 모두 정의되어야 합니다.
+
+### Infinite Queries can prefetch multiple pages
+
+무한 쿼리도 일반 쿼리처럼 사전 패칭이 가능합니다. 기본적으로는 쿼리의 첫 페이지만 사전 패칭되어 주어진 쿼리 키 아래에 저장됩니다. 여러 페이지를 사전 패칭하고 싶다면 `pages` 옵션을 사용할 수 있습니다. 자세한 정보는 [사전 패칭 가이드](../prefetching)를 읽어보세요.
+
+### New `combine` option for `useQueries`
+
+자세한 내용은 [useQueries 문서](../../reference/useQueries#combine)를 참조하세요.
+
+### Experimental `fine grained storage persister`
+
+자세한 내용은 [experimental_createPersister 문서](../../../react/plugins/createPersister)를 참조하세요.
+
+### Typesafe way to create Query Options
+
+자세한 내용은 [TypeScript 문서](../../typescript#typing-query-options)를 참조하세요.
+
+### new hooks for suspense
+
+v5에서는 데이터 패칭을 위한 서스펜스가 드디어 "안정적"이 되었습니다. `useSuspenseQuery`, `useSuspenseInfiniteQuery`, `useSuspenseQueries` 훅을 추가했습니다. 이 훅들을 사용하면 `data`가 타입 레벨에서 잠재적으로 `undefined`가 되지 않습니다:
+
+```js
+const { data: post } = useSuspenseQuery({
+  // ^? const post: Post
+  queryKey: ["post", postId],
+  queryFn: () => fetchPost(postId),
+});
+```
+
+실험적인 `suspense: boolean` 플래그는 쿼리 훅에서 제거되었습니다.
+
+자세한 내용은 [서스펜스 문서](../suspense)를 참조하세요.
