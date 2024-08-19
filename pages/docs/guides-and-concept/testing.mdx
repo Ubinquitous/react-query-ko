@@ -1,0 +1,190 @@
+---
+id: testing
+title: Testing
+---
+
+## Testing
+
+React Query는 훅을 통해 작동합니다. 우리가 제공하는 훅이든, 이를 감싸는 커스텀 훅이든 관계없이 말입니다.
+
+React 17 이하 버전에서는 이러한 커스텀 훅의 단위 테스트를 [React Hooks Testing Library](https://react-hooks-testing-library.com/)를 사용하여 작성할 수 있습니다.
+
+다음 명령어로 설치할 수 있습니다:
+
+```sh
+npm install @testing-library/react-hooks react-test-renderer --save-dev
+```
+
+(`react-test-renderer` 라이브러리는 `@testing-library/react-hooks`의 동반 종속성으로 필요하며, 사용 중인 React 버전과 일치해야 합니다.)
+
+_참고_: React 18 이상에서는 `renderHook`이 `@testing-library/react` 패키지에서 직접 제공되므로 `@testing-library/react-hooks`는 더 이상 필요하지 않습니다.
+
+## Our First Test
+
+설치가 완료되면, 간단한 테스트를 작성할 수 있습니다. 다음과 같은 커스텀 훅이 있다고 가정해봅시다:
+
+```tsx
+export function useCustomHook() {
+  return useQuery({ queryKey: ["customHook"], queryFn: () => "Hello" });
+}
+```
+
+React 17 이하 버전에서는 다음과 같이 테스트를 작성할 수 있습니다:
+
+```tsx
+const queryClient = new QueryClient();
+const wrapper = ({ children }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
+const { result, waitFor } = renderHook(() => useCustomHook(), { wrapper });
+
+await waitFor(() => result.current.isSuccess);
+
+expect(result.current.data).toEqual("Hello");
+```
+
+React 18 이상 버전에서는 `waitFor`의 의미가 변경되었으므로 위 테스트를 다음과 같이 수정해야 합니다:
+
+```tsx
+import { renderHook, waitFor } from "@testing-library/react";
+
+...
+
+const { result } = renderHook(() => useCustomHook(), { wrapper });
+
+await waitFor(() => expect(result.current.isSuccess).toBe(true));
+```
+
+여기서 `QueryClient`와 `QueryClientProvider`를 빌드하는 커스텀 래퍼를 제공하고 있습니다. 이는 테스트가 다른 테스트와 완전히 독립적으로 실행되도록 보장하는 데 도움을 줍니다.
+
+이 래퍼를 한 번만 작성할 수도 있지만, 이 경우 `QueryClient`가 매 테스트 전에 지워지도록 해야 하며, 테스트가 동시에 실행되지 않도록 해야 합니다. 그렇지 않으면 한 테스트가 다른 테스트의 결과에 영향을 미칠 수 있습니다.
+
+## Turn off retries
+
+물론입니다! 아래는 요청하신 내용을 한국어로 번역한 것입니다.
+
+---
+
+라이브러리는 기본적으로 세 번의 재시도와 지수 백오프를 적용합니다. 따라서 오류가 발생하는 쿼리를 테스트하려는 경우 테스트가 타임아웃될 가능성이 높습니다. 재시도를 끄는 가장 쉬운 방법은 `QueryClientProvider`를 사용하는 것입니다. 위의 예제를 확장해 보겠습니다:
+
+```tsx
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // ✅ 재시도 끄기
+      retry: false,
+    },
+  },
+});
+const wrapper = ({ children }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+```
+
+이렇게 하면 컴포넌트 트리의 모든 쿼리에서 "재시도 없음"으로 설정됩니다. 중요한 점은, 이는 실제 `useQuery`가 명시적으로 재시도가 설정되어 있지 않을 때만 작동한다는 것입니다. 만약 쿼리가 5회의 재시도를 설정했다면, 기본값은 여전히 적용되지 않으며, 기본값은 오직 대체로만 사용됩니다.
+
+## Set gcTime to Infinity with Jest
+
+Jest를 사용하는 경우, `gcTime`을 `Infinity`로 설정하여 "Jest did not exit one second after the test run completed" 오류 메시지를 방지할 수 있습니다. 이는 서버에서의 기본 동작이며, `gcTime`을 명시적으로 설정할 경우에만 필요합니다.
+
+## Testing Network Calls
+
+React Query의 주요 사용 목적은 네트워크 요청을 캐시하는 것이므로, 코드가 올바른 네트워크 요청을 하고 있는지 테스트하는 것이 중요합니다.
+
+이것을 테스트할 수 있는 방법은 여러 가지가 있지만, 이 예제에서는 [nock](https://www.npmjs.com/package/nock)을 사용할 것입니다.
+
+다음과 같은 커스텀 훅이 있다고 가정해 봅시다:
+
+```tsx
+function useFetchData() {
+  return useQuery({
+    queryKey: ["fetchData"],
+    queryFn: () => request("/api/data"),
+  });
+}
+```
+
+이것에 대한 테스트는 다음과 같이 작성할 수 있습니다:
+
+```tsx
+const queryClient = new QueryClient();
+const wrapper = ({ children }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
+const expectation = nock("http://example.com").get("/api/data").reply(200, {
+  answer: 42,
+});
+
+const { result, waitFor } = renderHook(() => useFetchData(), { wrapper });
+
+await waitFor(() => {
+  return result.current.isSuccess;
+});
+
+expect(result.current.data).toEqual({ answer: 42 });
+```
+
+여기에서는 `waitFor`을 사용하여 쿼리 상태가 요청이 성공했음을 나타낼 때까지 기다립니다. 이렇게 하면 훅이 완료되었고 올바른 데이터를 가지고 있는지 알 수 있습니다. _참고_: React 18을 사용할 때는 위에서 설명한 대로 `waitFor`의 의미가 변경되었습니다.
+
+## Testing Load More / Infinite Scroll
+
+먼저, 우리의 API 응답을 모킹해야 합니다:
+
+```tsx
+function generateMockedResponse(page) {
+  return {
+    page: page,
+    items: [...]
+  }
+}
+```
+
+그런 다음, `nock` 구성에서 페이지에 따라 응답을 구분할 수 있어야 하며, 이를 위해 `uri`를 사용할 것입니다.
+`uri`의 값은 `"/?page=1"` 또는 `"/?page=2"`와 같은 형식이 됩니다.
+
+```tsx
+const expectation = nock("http://example.com")
+  .persist()
+  .query(true)
+  .get("/api/data")
+  .reply(200, (uri) => {
+    const url = new URL(`http://example.com${uri}`);
+    const { page } = Object.fromEntries(url.searchParams);
+    return generateMockedResponse(page);
+  });
+```
+
+(`.persist()`를 사용하여 이 엔드포인트에서 여러 번 호출할 수 있도록 합니다.)
+
+이제 안전하게 테스트를 실행할 수 있으며, 데이터 어설션이 통과할 때까지 기다리는 것이 중요합니다:
+
+```tsx
+const { result, waitFor } = renderHook(() => useInfiniteQueryCustomHook(), {
+  wrapper,
+});
+
+await waitFor(() => result.current.isSuccess);
+
+expect(result.current.data.pages).toStrictEqual(generateMockedResponse(1));
+
+result.current.fetchNextPage();
+
+await waitFor(() =>
+  expect(result.current.data.pages).toStrictEqual([
+    ...generateMockedResponse(1),
+    ...generateMockedResponse(2),
+  ])
+);
+
+expectation.done();
+```
+
+_참고_: React 18을 사용할 때는 위에서 설명한 대로 `waitFor`의 의미가 변경되었습니다.
+
+## Further reading
+
+추가적인 팁과 `mock-service-worker`를 사용하는 대안 설정 방법에 대해서는 [Testing React Query](../../community/tkdodos-blog#5-testing-react-query)에서 확인해 보세요.
+
+---
