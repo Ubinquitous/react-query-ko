@@ -1,0 +1,223 @@
+---
+id: infinite-queries
+title: Infinite Queries
+---
+
+기존 데이터에 "더 불러오기"를 추가하거나 "무한 스크롤"하는 리스트를 렌더링하는 것은 매우 일반적인 UI 패턴입니다. TanStack Query는 이러한 종류의 리스트를 쿼리하기 위해 `useQuery`의 유용한 버전인 `useInfiniteQuery`를 지원합니다.
+
+`useInfiniteQuery`를 사용할 때는 몇 가지가 다릅니다:
+
+- `data`는 이제 응답값 뿐만 아니라 infinite query 데이터 전체를 포함하는 객체입니다:
+  - `data.pages`는 가져온 페이지를 포함하는 배열입니다.
+  - `data.pageParams`는 페이지를 가져오기 위해 사용된 페이지 매개변수를 포함하는 배열입니다.
+- `fetchNextPage`와 `fetchPreviousPage` 함수가 제공됩니다 (`fetchNextPage`는 필수입니다).
+- `initialPageParam` 옵션(필수)이 제공되며, 초기 페이지 매개변수를 지정하는 데 사용됩니다.
+- `getNextPageParam`과 `getPreviousPageParam` 옵션이 제공되며, 더 많은 데이터를 로드할 수 있는지와 이를 가져오기 위한 정보를 결정하는 데 사용됩니다. 이 정보는 쿼리 함수에 추가 매개변수로 제공됩니다.
+- `hasNextPage` 불리언 값이 제공되며, `getNextPageParam`이 `null`이나 `undefined`가 아닌 값을 반환하면 `true`입니다.
+- `hasPreviousPage` 불리언 값이 제공되며, `getPreviousPageParam`이 `null`이나 `undefined`가 아닌 값을 반환하면 `true`입니다.
+- `isFetchingNextPage`와 `isFetchingPreviousPage` 불리언 값이 제공되어 백그라운드 새로 고침 상태와 더 많은 로드 상태를 구별할 수 있습니다.
+
+> 참고: `initialData` 또는 `placeholderData` 옵션은 `data.pages`와 `data.pageParams` 속성을 가진 객체의 구조와 일치해야 합니다.
+
+## Example
+
+API가 `cursor` 인덱스를 기반으로 3개씩 `projects` 페이지를 반환하고, 다음 그룹의 프로젝트를 가져오기 위해 사용할 수 있는 커서를 반환한다고 가정해 봅시다:
+
+```tsx
+fetch("/api/projects?cursor=0");
+// { data: [...], nextCursor: 3}
+fetch("/api/projects?cursor=3");
+// { data: [...], nextCursor: 6}
+fetch("/api/projects?cursor=6");
+// { data: [...], nextCursor: 9}
+fetch("/api/projects?cursor=9");
+// { data: [...] }
+```
+
+이 정보를 사용하여 "더 불러오기" UI를 다음과 같이 만들 수 있습니다:
+
+- `useInfiniteQuery`가 기본적으로 첫 번째 데이터 그룹을 요청하도록 기다립니다.
+- `getNextPageParam`에서 다음 쿼리 정보를 반환합니다.
+- `fetchNextPage` 함수를 호출합니다.
+
+```tsx
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+function Projects() {
+  const fetchProjects = async ({ pageParam }) => {
+    const res = await fetch("/api/projects?cursor=" + pageParam);
+    return res.json();
+  };
+
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ["projects"],
+    queryFn: fetchProjects,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+  });
+
+  return status === "pending" ? (
+    <p>Loading...</p>
+  ) : status === "error" ? (
+    <p>Error: {error.message}</p>
+  ) : (
+    <>
+      {data.pages.map((group, i) => (
+        <React.Fragment key={i}>
+          {group.data.map((project) => (
+            <p key={project.id}>{project.name}</p>
+          ))}
+        </React.Fragment>
+      ))}
+      <div>
+        <button
+          onClick={() => fetchNextPage()}
+          disabled={!hasNextPage || isFetchingNextPage}
+        >
+          {isFetchingNextPage
+            ? "Loading more..."
+            : hasNextPage
+            ? "Load More"
+            : "Nothing more to load"}
+        </button>
+      </div>
+      <div>{isFetching && !isFetchingNextPage ? "Fetching..." : null}</div>
+    </>
+  );
+}
+```
+
+`fetchNextPage`를 호출하면서 진행 중인 fetch가 있는 경우, 백그라운드에서 데이터 새로 고침이 덮어씌워질 위험이 있습니다. 이 상황은 목록을 렌더링하고 동시에 `fetchNextPage`를 트리거할 때 특히 중요합니다.
+
+Infinite Query에 대해 동시에 진행 중인 fetch가 하나만 있어야 합니다. 모든 페이지에 대해 단일 캐시 항목이 공유되므로 동시에 두 번 가져오기를 시도하면 데이터가 덮어쓰일 수 있습니다.
+
+동시 가져오기를 허용하려면 `fetchNextPage` 내에서 `{ cancelRefetch: false }` 옵션을 사용할 수 있습니다 (기본값: true).
+
+충돌 없이 원활한 쿼리 프로세스를 보장하려면, 특히 사용자가 해당 호출을 직접 제어하지 않는 경우 쿼리가 `isFetching` 상태가 아닌지 확인하는 것이 좋습니다.
+
+```jsx
+<List onEndReached={() => !isFetching && fetchNextPage()} />
+```
+
+## What happens when an infinite query needs to be refetched?
+
+무한 쿼리가 `stale` 상태가 되어 다시 가져와야 할 때, 각 그룹은 `순차적으로` 가져옵니다. 이를 통해 기본 데이터가 변형되더라도 오래된 커서를 사용하지 않으며 중복되거나 기록이 누락되는 것을 방지할 수 있습니다. 무한 쿼리의 결과가 쿼리 캐시에서 제거되면, 페이지네이션은 초기 상태에서 다시 시작되며 처음 그룹만 요청됩니다.
+
+## What if I want to implement a bi-directional infinite list?
+
+양방향 리스트는 `getPreviousPageParam`, `fetchPreviousPage`, `hasPreviousPage`, `isFetchingPreviousPage` 속성과 함수를 사용하여 구현할 수 있습니다.
+
+```tsx
+useInfiniteQuery({
+  queryKey: ["projects"],
+  queryFn: fetchProjects,
+  initialPageParam: 0,
+  getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+  getPreviousPageParam: (firstPage, pages) => firstPage.prevCursor,
+});
+```
+
+## What if I want to show the pages in reversed order?
+
+때때로 페이지를 역순으로 표시하고 싶을 수 있습니다. 이 경우 `select` 옵션을 사용할 수 있습니다:
+
+```tsx
+useInfiniteQuery({
+  queryKey: ["projects"],
+  queryFn: fetchProjects,
+  select: (data) => ({
+    pages: [...data.pages].reverse(),
+    pageParams: [...data.pageParams].reverse(),
+  }),
+});
+```
+
+## What if I want to manually update the infinite query?
+
+### Manually removing first page:
+
+```tsx
+queryClient.setQueryData(["projects"], (data) => ({
+  pages: data.pages.slice(1),
+  pageParams: data.pageParams.slice(1),
+}));
+```
+
+### Manually removing a single value from an individual page:
+
+```tsx
+const newPagesArray =
+  oldPagesArray?.pages.map((page) =>
+    page.filter((val) => val.id !== updatedId)
+  ) ?? [];
+
+queryClient.setQueryData(["projects"], (data) => ({
+  pages: newPagesArray,
+  pageParams: data.pageParams,
+}));
+```
+
+### Keep only the first page:
+
+```tsx
+queryClient.setQueryData(["projects"], (data) => ({
+  pages: data.pages.slice(0, 1),
+  pageParams: data.pageParams.slice(0, 1),
+}));
+```
+
+항상 페이지와 페이지 매개변수의 동일한 데이터 구조를 유지해야 합니다!
+
+## What if I want to limit the number of pages?
+
+일부 사용 사례에서는 성능과 UX를 개선하기 위해 쿼리 데이터에 저장된 페이지 수를 제한할 수 있습니다:
+
+- 사용자가 많은 수의 페이지를 로드할 수 있는 경우 (메모리 사용)
+- 수십 페이지를 포함하는 무한 쿼리를 다시 가져와야 하는 경우 (네트워크 사용: 모든 페이지가 순차적으로 가져와짐)
+
+해결 방법은 `maxPages` 옵션을 사용하여 페이지 수를 제한하는 "제한된 무한 쿼리"를 사용하는 것입니다. 이는 `getNextPageParam`과 `getPreviousPageParam`과 함께 사용하여 필요할 때 양방향으로 페이지를 가져올 수 있습니다.
+
+다음 예제에서는 쿼리 데이터 페이지 배열에 3페이지만 유지됩니다. 다시 가져와야 할 경우, 3페이지만 순차적으로 다시 가져옵니다.
+
+```tsx
+useInfiniteQuery({
+  queryKey: ["projects"],
+  queryFn: fetchProjects,
+  initialPageParam: 0,
+  getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+  getPreviousPageParam: (firstPage, pages) => firstPage.prevCursor,
+  maxPages: 3,
+});
+```
+
+## What if my API doesn't return a cursor?
+
+API가 커서를 반환하지 않는 경우, `pageParam`을 커서로 사용할 수 있습니다. `getNextPageParam`과 `getPreviousPageParam`이 현재 페이지의 `pageParam`을 받으므로, 이를 사용하여 다음 / 이전 페이지 매개변수를 계산할 수 있습니다.
+
+```tsx
+return useInfiniteQuery({
+  queryKey: ["projects"],
+  queryFn: fetchProjects,
+  initialPageParam: 0,
+  getNextPageParam: (lastPage, allPages, lastPageParam) => {
+    if (lastPage.length === 0) {
+      return undefined;
+    }
+    return lastPageParam + 1;
+  },
+  getPreviousPageParam: (firstPage, allPages, firstPageParam) => {
+    if (firstPageParam <= 1) {
+      return undefined;
+    }
+    return firstPageParam - 1;
+  },
+});
+```
