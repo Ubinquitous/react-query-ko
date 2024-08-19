@@ -1,40 +1,11 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## React Query 한글 번역 문서
 
-## Getting Started
+어색한 표현이 있는지, 글을 읽었을 때 잘 이해가 되는지 꼭 확인하고 publish하기  
+이해가 안될 경우, 추가적인 원문을 작성하여 문서를 읽는 개발자가 해당 개념을 이해할 수 있게 도와야 함.  
+쉽고 올바른 이해를 위해서라면 원문의 글을 수정하거나 추가하는 것도 허용됨. (번역의 1순위 목표는 독자의 이해를 위함)
 
-First, run the development server:
+## TODO
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- 모든 문서 최소 두 번씩 첨삭
+- 스타일 번갈아 확인하며 동일한지 다시 확인
+- 유비쿼터스 랭귀지 설정하고 컨벤션에 따라 문서 키워드 재작성하기
