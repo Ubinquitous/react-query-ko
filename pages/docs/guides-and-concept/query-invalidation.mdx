@@ -1,0 +1,135 @@
+---
+id: query-invalidation
+title: Query Invalidation
+---
+
+## Query Invalidation
+
+쿼리가 다시 가져와지기 전에 쿼리가 오래된 상태로 유지되기를 기다리는 것은 항상 효과적이지 않습니다. 특히 사용자가 작업을 수행하여 쿼리의 데이터가 사실상 오래된 경우에는 그렇습니다. 이러한 경우를 위해 `QueryClient`는 `invalidateQueries` 메서드를 제공하여 쿼리를 똑똑하게 오래된 상태로 표시하고, 필요에 따라 다시 가져올 수 있게 합니다!
+
+[//]: # "Example"
+
+```tsx
+// 캐시의 모든 쿼리 무효화
+queryClient.invalidateQueries();
+// `todos`로 시작하는 키를 가진 모든 쿼리 무효화
+queryClient.invalidateQueries({ queryKey: ["todos"] });
+```
+
+[//]: # "Example"
+
+> 참고: 다른 라이브러리들이 정규화된 캐시를 사용하는 경우, 새로운 데이터로 로컬 쿼리를 업데이트하려 시도할 때, TanStack Query는 정규화된 캐시를 유지하는 데 필요한 수작업을 피할 수 있는 도구를 제공하며, 대신 **목표 지향적 무효화, 백그라운드 리패칭, 그리고 궁극적으로 원자적 업데이트**를 권장합니다.
+
+`invalidateQueries`로 쿼리를 무효화하면 두 가지 일이 발생합니다:
+
+- 쿼리가 오래된 상태로 표시됩니다. 이 오래된 상태는 `useQuery` 또는 관련 훅에서 사용하는 `staleTime` 구성을 무시합니다.
+- 쿼리가 현재 `useQuery` 또는 관련 훅을 통해 렌더링 중일 경우, 백그라운드에서 다시 가져옵니다.
+
+## Query Matching with `invalidateQueries`
+
+`invalidateQueries`와 `removeQueries` (및 다른 부분 쿼리 매칭을 지원하는 API)를 사용할 때, 쿼리 키의 접두사를 사용하여 여러 쿼리를 매칭하거나, 특정 쿼리와 정확히 매칭할 수 있습니다. 사용할 수 있는 필터의 종류에 대한 정보는 [쿼리 필터](../filters#query-filters)를 참조하세요.
+
+다음 예제에서는 `todos` 접두사를 사용하여 쿼리 키가 `todos`로 시작하는 모든 쿼리를 무효화할 수 있습니다:
+
+[//]: # "Example2"
+
+```tsx
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+// QueryClient를 컨텍스트에서 가져옵니다
+const queryClient = useQueryClient();
+
+queryClient.invalidateQueries({ queryKey: ["todos"] });
+
+// 아래의 두 쿼리가 무효화됩니다
+const todoListQuery = useQuery({
+  queryKey: ["todos"],
+  queryFn: fetchTodoList,
+});
+const todoListQuery = useQuery({
+  queryKey: ["todos", { page: 1 }],
+  queryFn: fetchTodoList,
+});
+```
+
+[//]: # "Example2"
+
+특정 변수를 가진 쿼리를 무효화하려면 `invalidateQueries` 메서드에 더 구체적인 쿼리 키를 전달할 수 있습니다:
+
+[//]: # "Example3"
+
+```tsx
+queryClient.invalidateQueries({
+  queryKey: ["todos", { type: "done" }],
+});
+
+// 아래의 쿼리가 무효화됩니다
+const todoListQuery = useQuery({
+  queryKey: ["todos", { type: "done" }],
+  queryFn: fetchTodoList,
+});
+
+// 그러나, 아래의 쿼리는 무효화되지 않습니다
+const todoListQuery = useQuery({
+  queryKey: ["todos"],
+  queryFn: fetchTodoList,
+});
+```
+
+[//]: # "Example3"
+
+`invalidateQueries` API는 매우 유연하므로, **오직** `todos` 쿼리만 무효화하려는 경우, `exact: true` 옵션을 `invalidateQueries` 메서드에 전달할 수 있습니다:
+
+[//]: # "Example4"
+
+```tsx
+queryClient.invalidateQueries({
+  queryKey: ["todos"],
+  exact: true,
+});
+
+// 아래의 쿼리가 무효화됩니다
+const todoListQuery = useQuery({
+  queryKey: ["todos"],
+  queryFn: fetchTodoList,
+});
+
+// 그러나, 아래의 쿼리는 무효화되지 않습니다
+const todoListQuery = useQuery({
+  queryKey: ["todos", { type: "done" }],
+  queryFn: fetchTodoList,
+});
+```
+
+[//]: # "Example4"
+
+더 많은 세분화가 필요한 경우, `invalidateQueries` 메서드에 프레디케이트 함수를 전달할 수 있습니다. 이 함수는 쿼리 캐시에서 각 `Query` 인스턴스를 받고, 해당 쿼리를 무효화할지 여부를 `true` 또는 `false`로 반환할 수 있습니다:
+
+[//]: # "Example5"
+
+```tsx
+queryClient.invalidateQueries({
+  predicate: (query) =>
+    query.queryKey[0] === "todos" && query.queryKey[1]?.version >= 10,
+});
+
+// 아래의 쿼리가 무효화됩니다
+const todoListQuery = useQuery({
+  queryKey: ["todos", { version: 20 }],
+  queryFn: fetchTodoList,
+});
+
+// 아래의 쿼리도 무효화됩니다
+const todoListQuery = useQuery({
+  queryKey: ["todos", { version: 10 }],
+  queryFn: fetchTodoList,
+});
+
+// 그러나, 아래의 쿼리는 무효화되지 않습니다
+const todoListQuery = useQuery({
+  queryKey: ["todos", { version: 5 }],
+  queryFn: fetchTodoList,
+});
+```
+
+[//]: # "Example5"
