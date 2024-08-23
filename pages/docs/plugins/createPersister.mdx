@@ -1,0 +1,137 @@
+---
+id: createPersister
+title: experimental_createPersister
+---
+
+## createPersister (Experimental)
+
+## Installation
+
+이 유틸리티는 별도의 패키지로 제공되며, `'@tanstack/query-persist-client-core'`로 임포트할 수 있습니다.
+
+```bash
+npm install @tanstack/query-persist-client-core
+```
+
+또는
+
+```bash
+pnpm add @tanstack/query-persist-client-core
+```
+
+또는
+
+```bash
+yarn add @tanstack/query-persist-client-core
+```
+
+또는
+
+```bash
+bun add @tanstack/query-persist-client-core
+```
+
+> 참고: 이 유틸리티는 `@tanstack/react-query-persist-client` 패키지에도 포함되어 있으므로, 해당 패키지를 사용하는 경우 별도로 설치할 필요는 없습니다.
+
+## Usage
+
+- `experimental_createPersister` 함수를 임포트합니다.
+- 새 `experimental_createPersister`를 생성합니다.
+  - `AsyncStorage` 또는 `Storage` 인터페이스를 따르는 어떤 `storage`도 사용할 수 있습니다. 아래 예제에서는 React Native의 async-storage를 사용합니다.
+- 생성한 `persister`를 Query의 옵션으로 전달합니다. 이는 `QueryClient`의 `defaultOptions`에 전달하거나, 특정 `useQuery` 훅 인스턴스에 전달할 수 있습니다.
+  - `persister`를 `defaultOptions`로 전달하면, 모든 쿼리가 제공된 `storage`에 저장됩니다. `filters`를 사용하여 대상을 좁힐 수도 있습니다. `persistClient` 플러그인과는 달리, 전체 `QueryClient`를 하나의 항목으로 저장하는 것이 아니라, 각 쿼리를 개별적으로 저장합니다. 이때 쿼리 해시가 키로 사용됩니다.
+  - 특정 `useQuery` 훅에 `persister`를 제공하면, 오직 이 쿼리만 저장됩니다.
+
+이 방식으로 전체 `QueryClient`를 저장할 필요 없이, 애플리케이션에서 저장할 가치가 있는 쿼리만 선택할 수 있습니다. 각 쿼리는 지연 복원(lazy restoration)되며 (쿼리가 처음 사용될 때), 저장됩니다 (각 `queryFn` 실행 후). 따라서 저장 빈도를 조절할 필요는 없습니다. `staleTime`도 복원 후 존중되며, 데이터가 `stale`로 간주되면 복원 직후 다시 가져옵니다. 데이터가 `fresh`인 경우, `queryFn`은 실행되지 않습니다.
+
+쿼리를 메모리에서 제거하는 것은 저장된 데이터에 영향을 주지 않습니다. 즉, 쿼리는 메모리에 짧은 시간 동안만 유지되어 **메모리 효율**을 높일 수 있습니다. 다음에 사용될 때, 저장된 저장소에서 다시 복원됩니다.
+
+```tsx
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { QueryClient } from "@tanstack/react-query";
+import { experimental_createPersister } from "@tanstack/query-persist-client-core";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 30, // 30초
+      persister: experimental_createPersister({
+        storage: AsyncStorage,
+        maxAge: 1000 * 60 * 60 * 12, // 12시간
+      }),
+    },
+  },
+});
+```
+
+### Adapted defaults
+
+`createPersister` 플러그인은 기술적으로 `queryFn`을 래핑하므로, `queryFn`이 실행되지 않으면 복원되지 않습니다. 따라서, 네트워크와 쿼리 사이의 캐싱 계층으로 작동합니다. 이로 인해 persister를 사용할 때 기본 `networkMode`는 `'offlineFirst'`로 설정됩니다. 이를 통해 네트워크 연결이 없더라도 지속적인 저장소에서 복원할 수 있습니다.
+
+## API
+
+### `experimental_createPersister`
+
+```tsx
+experimental_createPersister(options: StoragePersisterOptions)
+```
+
+#### `Options`
+
+```tsx
+export interface StoragePersisterOptions {
+  /** 캐시에서 항목을 설정하고 검색하는 데 사용되는 storage 클라이언트.
+   * SSR의 경우 `undefined`를 전달합니다.
+   */
+  storage: AsyncStorage | Storage | undefined | null;
+  /**
+   * 데이터를 저장소에 직렬화하는 방법.
+   * @default `JSON.stringify`
+   */
+  serialize?: (persistedQuery: PersistedQuery) => string;
+  /**
+   * 저장소에서 데이터를 역직렬화하는 방법.
+   * @default `JSON.parse`
+   */
+  deserialize?: (cachedString: string) => PersistedQuery;
+  /**
+   * 기존 캐시를 강제로 무효화할 수 있는 고유한 문자열.
+   * 동일한 buster 문자열을 공유하지 않는 경우 캐시가 무효화됩니다.
+   */
+  buster?: string;
+  /**
+   * 캐시의 최대 허용 연령(밀리초).
+   * 이 시간보다 오래된 저장된 캐시는 폐기됩니다.
+   * @default 24시간
+   */
+  maxAge?: number;
+  /**
+   * 저장소 키에 사용할 접두사.
+   * 저장소 키는 접두사와 쿼리 해시를 결합한 형태입니다. `prefix-queryHash`.
+   */
+  prefix?: string;
+  /**
+   * 어떤 쿼리를 저장할지 좁히는 필터.
+   */
+  filters?: QueryFilters;
+}
+
+interface AsyncStorage {
+  getItem: (key: string) => Promise<string | undefined | null>;
+  setItem: (key: string, value: string) => Promise<unknown>;
+  removeItem: (key: string) => Promise<void>;
+}
+```
+
+기본 옵션은 다음과 같습니다:
+
+```tsx
+{
+  prefix = 'tanstack-query',
+  maxAge = 1000 * 60 * 60 * 24,
+  serialize = JSON.stringify,
+  deserialize = JSON.parse,
+}
+```
+
+이 설정은 쿼리 데이터를 저장하고 관리하는 방식을 정의합니다. `storage`는 데이터를 저장하고 불러오는 데 사용되며, `prefix`는 저장소 키의 접두사입니다. `maxAge`는 캐시의 최대 연령을 설정하고, `serialize`와 `deserialize`는 데이터의 직렬화 및 역직렬화 방법을 정의합니다. `buster`는 캐시를 강제로 무효화하는 데 사용되는 고유 문자열입니다. `filters`는 저장할 쿼리를 선택하는 데 사용됩니다.
