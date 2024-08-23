@@ -1,0 +1,158 @@
+---
+id: createSyncStoragePersister
+title: createSyncStoragePersister
+---
+
+## createSyncStoragePersister
+
+## Installation
+
+이 유틸리티는 별도의 패키지로 제공되며, `'@tanstack/query-sync-storage-persister'`로 임포트할 수 있습니다.
+
+```bash
+npm install @tanstack/query-sync-storage-persister @tanstack/react-query-persist-client
+```
+
+또는
+
+```bash
+pnpm add @tanstack/query-sync-storage-persister @tanstack/react-query-persist-client
+```
+
+또는
+
+```bash
+yarn add @tanstack/query-sync-storage-persister @tanstack/react-query-persist-client
+```
+
+또는
+
+```bash
+bun add @tanstack/query-sync-storage-persister @tanstack/react-query-persist-client
+```
+
+## Usage
+
+- `createSyncStoragePersister` 함수를 임포트합니다.
+- 새 `syncStoragePersister`를 생성합니다.
+- 이 `persister`를 [`persistQueryClient`](../persistQueryClient) 함수에 전달합니다.
+
+```tsx
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24시간
+    },
+  },
+});
+
+const localStoragePersister = createSyncStoragePersister({
+  storage: window.localStorage,
+});
+// const sessionStoragePersister = createSyncStoragePersister({ storage: window.sessionStorage })
+
+persistQueryClient({
+  queryClient,
+  persister: localStoragePersister,
+});
+```
+
+## Retries
+
+Persistence가 실패할 수 있습니다. 예를 들어, 저장소의 사용 가능한 공간을 초과하는 경우입니다. `retry` 함수를 제공하여 오류를 우아하게 처리할 수 있습니다.
+
+`retry` 함수는 저장하려고 시도한 `persistedClient`와 `error`, `errorCount`를 입력으로 받습니다. 이 함수는 다시 저장을 시도할 새로운 `PersistedClient`를 반환해야 합니다. 만약 *undefined*가 반환되면, 더 이상의 저장 시도가 없습니다.
+
+```tsx
+export type PersistRetryer = (props: {
+  persistedClient: PersistedClient;
+  error: Error;
+  errorCount: number;
+}) => PersistedClient | undefined;
+```
+
+### Predefined strategies
+
+기본적으로는 재시도가 발생하지 않습니다. 미리 정의된 전략 중 하나를 사용하여 재시도를 처리할 수 있습니다. 이들은 `@tanstack/react-query-persist-client`에서 임포트할 수 있습니다:
+
+- `removeOldestQuery`
+  - 가장 오래된 쿼리를 제거한 새로운 `PersistedClient`를 반환합니다.
+
+```tsx
+const localStoragePersister = createSyncStoragePersister({
+  storage: window.localStorage,
+  retry: removeOldestQuery,
+});
+```
+
+## API
+
+### `createSyncStoragePersister`
+
+이 함수를 호출하여 나중에 `persistQueryClient`와 함께 사용할 수 있는 syncStoragePersister를 생성합니다.
+
+```tsx
+createSyncStoragePersister(options: CreateSyncStoragePersisterOptions)
+```
+
+### `Options`
+
+```tsx
+interface CreateSyncStoragePersisterOptions {
+  /** 캐시에서 항목을 설정하고 검색하는 데 사용되는 storage 클라이언트 (window.localStorage 또는 window.sessionStorage) */
+  storage: Storage | undefined | null;
+  /** 캐시를 저장할 때 사용할 키 */
+  key?: string;
+  /** 과도한 저장을 방지하기 위해,
+   * 캐시를 디스크에 저장하는 빈도를 조절할 시간(ms) */
+  throttleTime?: number;
+  /** 데이터를 저장소에 직렬화하는 방법 */
+  serialize?: (client: PersistedClient) => string;
+  /** 저장소에서 데이터를 역직렬화하는 방법 */
+  deserialize?: (cachedString: string) => PersistedClient;
+  /** 오류 발생 시 persistence를 재시도하는 방법 **/
+  retry?: PersistRetryer;
+}
+```
+
+기본 옵션은 다음과 같습니다:
+
+```tsx
+{
+  key = `REACT_QUERY_OFFLINE_CACHE`,
+  throttleTime = 1000,
+  serialize = JSON.stringify,
+  deserialize = JSON.parse,
+}
+```
+
+#### `serialize`와 `deserialize` 옵션
+
+`localStorage`에 저장할 수 있는 데이터 양에는 제한이 있습니다. 더 많은 데이터를 `localStorage`에 저장해야 하는 경우, `serialize`와 `deserialize` 함수를 재정의하여 [lz-string](https://github.com/pieroxy/lz-string/)과 같은 라이브러리를 사용하여 데이터를 압축하고 압축을 해제할 수 있습니다.
+
+```tsx
+import { QueryClient } from "@tanstack/react-query";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+
+import { compress, decompress } from "lz-string";
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: Infinity } },
+});
+
+persistQueryClient({
+  queryClient: queryClient,
+  persister: createSyncStoragePersister({
+    storage: window.localStorage,
+    serialize: (data) => compress(JSON.stringify(data)),
+    deserialize: (data) => JSON.parse(decompress(data)),
+  }),
+  maxAge: Infinity,
+});
+```
+
+이 설정은 `localStorage`에 저장할 데이터의 양을 초과할 경우를 대비해 데이터를 압축하여 저장할 수 있게 합니다. `compress`와 `decompress` 함수를 사용하여 데이터를 압축하고 압축을 해제하여 `localStorage`의 저장 용량을 효율적으로 사용할 수 있습니다.
