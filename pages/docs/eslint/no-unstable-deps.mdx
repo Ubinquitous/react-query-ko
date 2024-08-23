@@ -1,0 +1,57 @@
+---
+id: no-unstable-deps
+title: Disallow Putting the Result of Query Hooks Directly in a React Hook Dependency Array
+---
+
+## Disallow Putting the Result of Query Hooks Directly in a React Hook Dependency Array
+
+다음 쿼리 훅에서 반환된 객체는 참조적으로 안정적이지 않습니다:
+
+- `useQuery`
+- `useSuspenseQuery`
+- `useQueries`
+- `useSuspenseQueries`
+- `useInfiniteQuery`
+- `useSuspenseInfiniteQuery`
+- `useMutation`
+
+이 훅들에서 반환된 객체는 React 훅의 의존성 배열에 직접 넣어서는 안 됩니다 (예: `useEffect`, `useMemo`, `useCallback`). 대신, 쿼리 훅의 반환 값을 구조 분해하고, 구조 분해된 값을 React 훅의 의존성 배열에 전달해야 합니다.
+
+## 규칙 세부사항
+
+이 규칙에 대한 **잘못된** 코드 예제:
+
+```tsx
+/* eslint "@tanstack/query/no-unstable-deps": "warn" */
+import { useCallback } from "React";
+import { useMutation } from "@tanstack/react-query";
+
+function Component() {
+  const mutation = useMutation({ mutationFn: (value: string) => value });
+  const callback = useCallback(() => {
+    mutation.mutate("hello");
+  }, [mutation]);
+  return null;
+}
+```
+
+이 규칙에 대한 **올바른** 코드 예제:
+
+```tsx
+/* eslint "@tanstack/query/no-unstable-deps": "warn" */
+import { useCallback } from "React";
+import { useMutation } from "@tanstack/react-query";
+
+function Component() {
+  const { mutate } = useMutation({ mutationFn: (value: string) => value });
+  const callback = useCallback(() => {
+    mutate("hello");
+  }, [mutate]);
+  return null;
+}
+```
+
+## 속성
+
+- [x] ✅ 추천됨
+- [ ] 🔧 자동 수정 불가
