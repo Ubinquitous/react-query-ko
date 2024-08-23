@@ -1,0 +1,47 @@
+---
+id: exhaustive-deps
+title: Exhaustive Dependencies for Query Keys
+---
+
+## Exhaustive Dependencies for Query Keys
+
+쿼리 키는 쿼리 함수의 종속성 배열로 간주되어야 합니다. 쿼리 함수 내에서 사용되는 모든 변수는 쿼리 키에 추가해야 합니다. 이는 쿼리가 독립적으로 캐시되고 변수 변경 시 쿼리가 자동으로 다시 가져와지도록 보장합니다.
+
+## Rule Details
+
+이 규칙에 대한 **잘못된** 코드 예제:
+
+```tsx
+/* eslint "@tanstack/query/exhaustive-deps": "error" */
+
+useQuery({
+  queryKey: ["todo"],
+  queryFn: () => api.getTodo(todoId),
+});
+
+const todoQueries = {
+  detail: (id) => ({ queryKey: ["todo"], queryFn: () => api.getTodo(id) }),
+};
+```
+
+이 규칙에 대한 **올바른** 코드 예제:
+
+```tsx
+useQuery({
+  queryKey: ["todo", todoId],
+  queryFn: () => api.getTodo(todoId),
+});
+
+const todoQueries = {
+  detail: (id) => ({ queryKey: ["todo", id], queryFn: () => api.getTodo(id) }),
+};
+```
+
+## When Not To Use It
+
+쿼리 키의 규칙에 신경 쓰지 않는 경우 이 규칙을 사용할 필요가 없습니다.
+
+## Attributes
+
+- [x] ✅ 추천됨
+- [x] 🔧 자동 수정 가능
