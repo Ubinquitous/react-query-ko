@@ -1,0 +1,217 @@
+---
+id: useMutation
+title: useMutation
+---
+
+## useMutation
+
+```tsx
+const {
+  data,
+  error,
+  isError,
+  isIdle,
+  isPending,
+  isPaused,
+  isSuccess,
+  failureCount,
+  failureReason,
+  mutate,
+  mutateAsync,
+  reset,
+  status,
+  submittedAt,
+  variables,
+} = useMutation({
+  mutationFn,
+  gcTime,
+  meta,
+  mutationKey,
+  networkMode,
+  onError,
+  onMutate,
+  onSettled,
+  onSuccess,
+  retry,
+  retryDelay,
+  scope,
+  throwOnError,
+});
+
+mutate(variables, {
+  onError,
+  onSettled,
+  onSuccess,
+});
+```
+
+물론입니다! 다음은 `mutationOptions`의 한국어 번역입니다:
+
+---
+
+## `mutationOptions`
+
+```tsx
+mutationOptions({
+  mutationFn,
+  ...options,
+});
+```
+
+**Options**
+
+- `mutationFn: (variables: TVariables) => Promise<TData>`
+
+  - **필수**, 하지만 기본적인 mutation 함수가 정의되지 않은 경우에만.
+  - 비동기 작업을 수행하고 프로미스를 반환하는 함수입니다.
+  - `variables`는 `mutate`가 `mutationFn`에 전달할 객체입니다.
+
+- `gcTime: number | Infinity`
+
+  - 사용되지 않거나 비활성화된 캐시 데이터가 메모리에 유지되는 시간(밀리초)입니다. Mutation의 캐시가 사용되지 않거나 비활성화될 때 이 기간 후에 캐시 데이터가 가비지 컬렉션됩니다. 여러 캐시 시간이 지정된 경우 가장 긴 시간이 사용됩니다.
+  - `Infinity`로 설정하면 가비지 컬렉션이 비활성화됩니다.
+  - 참고: 최대 허용 시간은 약 24일입니다. [자세히 보기](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#maximum_delay_value).
+
+- `mutationKey: unknown[]`
+
+  - 선택 사항입니다.
+  - Mutation 키를 설정하여 `queryClient.setMutationDefaults`로 설정한 기본값을 상속할 수 있습니다.
+
+- `networkMode: 'online' | 'always' | 'offlineFirst'`
+
+  - 선택 사항입니다.
+  - 기본값은 `'online'`입니다.
+  - [네트워크 모드](../../guides/network-mode)에서 자세한 정보를 확인할 수 있습니다.
+
+- `onMutate: (variables: TVariables) => Promise<TContext | void> | TContext | void`
+
+  - 선택 사항입니다.
+  - 이 함수는 mutation 함수가 실행되기 전에 호출되며 mutation 함수가 받을 변수와 동일한 변수를 전달받습니다.
+  - 성공을 기대하고 자원에 대해 낙관적인 업데이트를 수행하는 데 유용합니다.
+  - 이 함수에서 반환된 값은 `onError` 및 `onSettled` 함수로 전달되며, mutation 실패 시 낙관적인 업데이트를 롤백하는 데 유용합니다.
+
+- `onSuccess: (data: TData, variables: TVariables, context: TContext) => Promise<unknown> | unknown`
+
+  - 선택 사항입니다.
+  - 이 함수는 mutation이 성공할 때 호출되며 mutation의 결과를 전달받습니다.
+  - 프로미스가 반환되면, 진행하기 전에 프로미스를 기다리고 해결합니다.
+
+- `onError: (err: TError, variables: TVariables, context?: TContext) => Promise<unknown> | unknown`
+
+  - 선택 사항입니다.
+  - 이 함수는 mutation에서 오류가 발생할 때 호출되며 오류를 전달받습니다.
+  - 프로미스가 반환되면, 진행하기 전에 프로미스를 기다리고 해결합니다.
+
+- `onSettled: (data: TData, error: TError, variables: TVariables, context?: TContext) => Promise<unknown> | unknown`
+
+  - 선택 사항입니다.
+  - 이 함수는 mutation이 성공적으로 완료되거나 오류가 발생할 때 호출되며 데이터 또는 오류를 전달받습니다.
+  - 프로미스가 반환되면, 진행하기 전에 프로미스를 기다리고 해결합니다.
+
+- `retry: boolean | number | (failureCount: number, error: TError) => boolean`
+
+  - 기본값은 `0`입니다.
+  - `false`로 설정하면 실패한 mutation은 재시도되지 않습니다.
+  - `true`로 설정하면 실패한 mutation은 무한히 재시도됩니다.
+  - `number`로 설정하면, 예를 들어 `3`, 실패한 mutation은 해당 숫자에 도달할 때까지 재시도됩니다.
+
+- `retryDelay: number | (retryAttempt: number, error: TError) => number`
+
+  - 이 함수는 `retryAttempt` 정수와 실제 오류를 받아 다음 시도 전에 적용할 지연 시간을 밀리초로 반환합니다.
+  - `attempt => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 1000, 30 * 1000)` 함수는 지수적 백오프를 적용합니다.
+  - `attempt => attempt * 1000` 함수는 선형 백오프를 적용합니다.
+
+- `scope: { id: string }`
+
+  - 선택 사항입니다.
+  - 기본값은 고유한 id입니다 (그래서 모든 mutations가 병렬로 실행됩니다).
+  - 동일한 scope id를 가진 mutations는 직렬로 실행됩니다.
+
+- `throwOnError: undefined | boolean | (error: TError) => boolean`
+
+  - 기본값은 글로벌 쿼리 설정의 `throwOnError` 값으로 `undefined`입니다.
+  - `true`로 설정하면 mutation 오류가 렌더링 단계에서 발생하고 가장 가까운 오류 경계로 전파됩니다.
+  - `false`로 설정하면 오류가 오류 경계로 전파되는 동작이 비활성화됩니다.
+  - 함수로 설정하면 오류를 전달받고 오류를 오류 경계에서 표시할지 (`true`) 아니면 상태로 반환할지 (`false`)를 결정하는 boolean 값을 반환해야 합니다.
+
+- `meta: Record<string, unknown>`
+
+  - 선택 사항입니다.
+  - 설정하면 mutation 캐시 항목에 추가 정보를 저장할 수 있으며, 필요한 곳에서 사용할 수 있습니다. 이 정보는 `mutation`이 가능한 곳에서 접근할 수 있습니다 (예: `onError`, `onSuccess` 함수의 `MutationCache`).
+
+- `queryClient?: QueryClient`
+  - 커스텀 `QueryClient`를 지정하려면 이 옵션을 사용합니다. 그렇지 않으면, 가장 가까운 컨텍스트에서 제공된 것이 사용됩니다.
+
+**Returns**
+
+- `mutate: (variables: TVariables, { onSuccess, onSettled, onError }) => void`
+
+  - 변수를 사용하여 mutation을 트리거하고 추가 콜백 옵션을 처리할 수 있는 mutation 함수입니다.
+  - `variables: TVariables`
+    - 선택 사항입니다.
+    - `mutationFn`에 전달할 변수 객체입니다.
+  - `onSuccess: (data: TData, variables: TVariables, context: TContext) => void`
+    - 선택 사항입니다.
+    - 이 함수는 mutation이 성공할 때 호출되며 mutation의 결과를 전달받습니다.
+    - 반환값은 무시됩니다.
+  - `onError: (err: TError, variables: TVariables, context: TContext | undefined) => void`
+    - 선택 사항입니다.
+    - 이 함수는 mutation에서 오류가 발생할 때 호출되며 오류를 전달받습니다.
+    - 반환값은 무시됩니다.
+  - `onSettled: (data: TData | undefined, error: TError | null, variables: TVariables, context: TContext | undefined) => void`
+    - 선택 사항입니다.
+    - 이 함수는 mutation이 성공적으로 완료되거나 오류가 발생할 때 호출되며 데이터 또는 오류를 전달받습니다.
+    - 반환값은 무시됩니다.
+  - 여러 요청을 할 경우, `onSuccess`는 마지막 호출이 완료된 후에만 호출됩니다.
+
+- `mutateAsync: (variables: TVariables, { onSuccess, onSettled, onError }) => Promise<TData>`
+
+  - `mutate`와 비슷하지만 프로미스를 반환하며, 이를 기다릴 수 있습니다.
+
+- `status: string`
+
+  - 다음 중 하나입니다:
+    - `idle` - mutation 함수가 실행되기 전의 초기 상태.
+    - `pending` - mutation이 현재 실행 중일 때.
+    - `error` - 마지막 mutation 시도가 오류를 초래했을 때.
+    - `success` - 마지막 mutation 시도가 성공했을 때.
+
+- `isIdle`, `isPending`, `isSuccess`, `isError`: `status`에서 파생된 boolean 변수입니다.
+
+- `isPaused: boolean`
+
+  - mutation이 `paused` 상태일 때 `true`입니다.
+  - [네트워크 모드](../../guides/network-mode)에서 자세한 정보를 확인할 수 있습니다.
+
+- `data: undefined | unknown`
+
+  - 기본값은 `undefined`입니다.
+  - 마지막으로 성공적으로 해결된 mutation 데이터입니다.
+
+- `error: null | TError`
+
+  - mutation에서 오류가 발생한 경우의 오류 객체입니다.
+
+- `reset: () => void`
+
+  - mutation의 내부 상태를 초기 상태로 재설정하는 함수입니다.
+
+- `failureCount: number`
+
+  - mutation의 실패 횟수입니다.
+  - mutation이 실패할 때마다 증가합니다.
+  - mutation이 성공하면 `0`으로 재설정됩니다.
+
+- `failureReason: null | TError`
+
+  - mutation 재시도의 실패 원인입니다.
+  - mutation이 성공하면 `null`로 재설정됩니다.
+
+- `submittedAt: number`
+
+  - mutation이 제출된 시점의 타임스탬프입니다.
+  - 기본값은 `0`입니다.
+
+- `variables: undefined | TVariables`
+  - `mutationFn`에 전달된 `variables` 객체입니다.
+  - 기본값은 `undefined`입니다.
