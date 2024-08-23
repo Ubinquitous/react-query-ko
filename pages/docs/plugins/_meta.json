@@ -1,0 +1,17 @@
+{
+  "persistQueryClient": {
+    "title": "persistQueryClient"
+  },
+  "createSyncStoragePersister": {
+    "title": "createSyncStoragePersister"
+  },
+  "createAsyncStoragePersister": {
+    "title": "createAsyncStoragePersister"
+  },
+  "broadcastQueryClient": {
+    "title": "broadcastQueryClient (Experimental)"
+  },
+  "createPersister": {
+    "title": "createPersister (Experimental)"
+  }
+}
