@@ -1,0 +1,39 @@
+---
+id: usePrefetchInfiniteQuery
+title: usePrefetchInfiniteQuery
+---
+
+## usePrefetchInfiniteQuery
+
+```tsx
+usePrefetchInfiniteQuery(options);
+```
+
+**Options**
+
+`usePrefetchInfiniteQuery`에 전달할 수 있는 옵션은 [`queryClient.prefetchInfiniteQuery`](../../../../reference/QueryClient#queryclientprefetchinfinitequery)와 동일합니다. 다음은 필수로 제공해야 하는 옵션들입니다:
+
+- `queryKey: QueryKey`
+
+  - **필수**
+  - 렌더링 중에 prefetch할 query key입니다.
+
+- `queryFn: (context: QueryFunctionContext) => Promise<TData>`
+
+  - **필수, 그러나 기본 query 함수가 정의되지 않은 경우에만**. 기본 query 함수에 대한 자세한 내용은 [Default Query Function](../../guides/default-query-function)을 참조하세요.
+
+- `initialPageParam: TPageParam`
+
+  - **필수**
+  - 첫 페이지를 가져올 때 사용할 기본 페이지 파라미터입니다.
+
+- `getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => TPageParam | undefined | null`
+
+  - **필수**
+  - 이 query에 대한 새로운 데이터가 수신될 때, 이 함수는 무한 데이터 리스트의 마지막 페이지와 모든 페이지의 전체 배열, 그리고 페이지 파라미터 정보를 받습니다.
+  - 이 함수는 query 함수의 마지막 선택적 파라미터로 전달될 **단일 변수**를 반환해야 합니다.
+  - 다음 페이지가 없음을 나타내려면 `undefined` 또는 `null`을 반환합니다.
+
+- **Returns**
+
+`usePrefetchInfiniteQuery`는 아무것도 반환하지 않습니다. 이는 단지 render 중에 prefetch를 실행하는 용도로 사용되며, [`useSuspenseInfiniteQuery`](../useSuspenseInfiniteQuery)를 사용하는 컴포넌트를 감싸는 suspense boundary 전에 호출해야 합니다.
