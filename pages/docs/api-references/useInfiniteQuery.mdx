@@ -1,0 +1,89 @@
+---
+id: useInfiniteQuery
+title: useInfiniteQuery
+---
+
+## useInfiniteQuery
+
+```tsx
+const {
+  fetchNextPage,
+  fetchPreviousPage,
+  hasNextPage,
+  hasPreviousPage,
+  isFetchingNextPage,
+  isFetchingPreviousPage,
+  ...result
+} = useInfiniteQuery({
+  queryKey,
+  queryFn: ({ pageParam }) => fetchPage(pageParam),
+  initialPageParam: 1,
+  ...options,
+  getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) =>
+    lastPage.nextCursor,
+  getPreviousPageParam: (firstPage, allPages, firstPageParam, allPageParams) =>
+    firstPage.prevCursor,
+});
+```
+
+**Options**
+
+`useInfiniteQuery`의 옵션은 [`useQuery` 훅](../useQuery)과 동일하지만, 다음 옵션이 추가됩니다:
+
+- `queryFn: (context: QueryFunctionContext) => Promise<TData>`
+  - **필수, 단 기본 쿼리 함수가 정의되지 않은 경우에만** [`defaultQueryFn`](../../guides/default-query-function)
+  - 쿼리가 데이터를 요청할 때 사용할 함수입니다.
+  - [QueryFunctionContext](../../guides/query-functions#queryfunctioncontext)를 받습니다.
+  - 데이터 또는 오류를 반환하는 Promise를 반환해야 합니다.
+- `initialPageParam: TPageParam`
+  - **필수**
+  - 첫 페이지를 가져올 때 사용할 기본 페이지 파라미터입니다.
+- `getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => TPageParam | undefined | null`
+  - **필수**
+  - 이 쿼리에 대한 새로운 데이터를 수신할 때, 이 함수는 무한 데이터 리스트의 마지막 페이지와 전체 페이지 배열, 페이지 파라미터 정보를 받습니다.
+  - 쿼리 함수의 마지막 선택적 파라미터로 전달될 **단일 변수**를 반환해야 합니다.
+  - 다음 페이지가 없음을 나타내려면 `undefined` 또는 `null`을 반환합니다.
+- `getPreviousPageParam: (firstPage, allPages, firstPageParam, allPageParams) => TPageParam | undefined | null`
+  - 새로운 데이터를 수신할 때, 이 함수는 무한 데이터 리스트의 첫 페이지와 전체 페이지 배열, 페이지 파라미터 정보를 받습니다.
+  - 쿼리 함수의 마지막 선택적 파라미터로 전달될 **단일 변수**를 반환해야 합니다.
+  - 이전 페이지가 없음을 나타내려면 `undefined` 또는 `null`을 반환합니다.
+- `maxPages: number | undefined`
+  - 무한 쿼리 데이터에서 저장할 최대 페이지 수입니다.
+  - 최대 페이지 수에 도달하면, 새로운 페이지를 가져올 때 페이지 배열의 첫 번째 또는 마지막 페이지가 제거됩니다(지정된 방향에 따라).
+  - `undefined` 또는 `0`일 경우, 페이지 수는 무제한입니다.
+  - 기본값은 `undefined`입니다.
+  - `maxPages` 값이 `0`보다 클 경우, 필요한 경우 양 방향에서 페이지를 가져올 수 있도록 `getNextPageParam`과 `getPreviousPageParam`이 적절히 정의되어야 합니다.
+
+**Returns**
+
+`useInfiniteQuery`의 반환 속성은 [`useQuery` 훅](../useQuery)과 동일하지만, 다음 속성과 `isRefetching` 및 `isRefetchError`의 작은 차이가 있습니다:
+
+- `data.pages: TData[]`
+  - 모든 페이지를 포함하는 배열입니다.
+- `data.pageParams: unknown[]`
+  - 모든 페이지 파라미터를 포함하는 배열입니다.
+- `isFetchingNextPage: boolean`
+  - `fetchNextPage`로 다음 페이지를 가져오는 동안 `true`입니다.
+- `isFetchingPreviousPage: boolean`
+  - `fetchPreviousPage`로 이전 페이지를 가져오는 동안 `true`입니다.
+- `fetchNextPage: (options?: FetchNextPageOptions) => Promise<UseInfiniteQueryResult>`
+  - 다음 "페이지"의 결과를 가져오는 함수입니다.
+  - `options.cancelRefetch: boolean`이 `true`로 설정되면, `fetchNextPage`를 반복 호출할 때마다 `queryFn`이 호출됩니다. 이전 호출의 결과는 무시됩니다. `false`로 설정하면, 첫 호출이 완료될 때까지 반복 호출이 아무 효과도 없습니다. 기본값은 `true`입니다.
+- `fetchPreviousPage: (options?: FetchPreviousPageOptions) => Promise<UseInfiniteQueryResult>`
+  - 이전 "페이지"의 결과를 가져오는 함수입니다.
+  - `options.cancelRefetch: boolean`은 `fetchNextPage`와 동일합니다.
+- `hasNextPage: boolean`
+  - 다음 페이지를 가져올 수 있으면 `true`입니다(`getNextPageParam` 옵션을 통해 알 수 있음).
+- `hasPreviousPage: boolean`
+  - 이전 페이지를 가져올 수 있으면 `true`입니다(`getPreviousPageParam` 옵션을 통해 알 수 있음).
+- `isFetchNextPageError: boolean`
+  - 다음 페이지를 가져오는 동안 쿼리가 실패하면 `true`입니다.
+- `isFetchPreviousPageError: boolean`
+  - 이전 페이지를 가져오는 동안 쿼리가 실패하면 `true`입니다.
+- `isRefetching: boolean`
+  - 백그라운드에서 리패칭이 진행 중일 때 `true`입니다. 이는 초기 `pending` 상태나 다음 페이지 또는 이전 페이지의 가져오기는 포함하지 않습니다.
+  - `isFetching && !isPending && !isFetchingNextPage && !isFetchingPreviousPage`와 동일합니다.
+- `isRefetchError: boolean`
+  - 페이지를 리패칭하는 동안 쿼리가 실패하면 `true`입니다.
+
+`fetchNextPage`와 같은 명령형 fetch 호출은 기본 리패칭 동작에 영향을 줄 수 있으며, 이는 오래된 데이터를 초래할 수 있습니다. 이러한 함수는 사용자 동작에 응답하여 호출하거나 `hasNextPage && !isFetching`과 같은 조건을 추가하여 호출하는 것이 좋습니다.
