@@ -1,0 +1,61 @@
+---
+id: stable-query-client
+title: Stable Query Client
+---
+
+`QueryClient`은 `QueryCache`를 포함하므로, 애플리케이션의 라이프사이클 동안 단 하나의 `QueryClient` 인스턴스만 생성하는 것이 좋습니다. 매 렌더링 시마다 새로운 인스턴스를 생성해서는 안 됩니다.
+
+> 예외: 비동기 서버 컴포넌트 내부에서는 새로운 `QueryClient`를 생성하는 것이 허용됩니다. 비동기 함수는 서버에서 한 번만 호출되기 때문입니다.
+
+## 규칙 세부사항
+
+이 규칙에 대한 **잘못된** 코드 예제:
+
+```tsx
+/* eslint "@tanstack/query/stable-query-client": "error" */
+
+function App() {
+  const queryClient = new QueryClient();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Home />
+    </QueryClientProvider>
+  );
+}
+```
+
+이 규칙에 대한 **올바른** 코드 예제:
+
+```tsx
+function App() {
+  const [queryClient] = useState(() => new QueryClient());
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Home />
+    </QueryClientProvider>
+  );
+}
+```
+
+```tsx
+const queryClient = new QueryClient();
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Home />
+    </QueryClientProvider>
+  );
+}
+```
+
+```tsx
+async function App() {
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery(options);
+}
+```
+
+## 속성
+
+- [x] ✅ 추천됨
+- [x] 🔧 자동 수정 가능
