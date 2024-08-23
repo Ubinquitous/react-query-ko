@@ -1,0 +1,27 @@
+---
+id: useIsMutating
+title: useIsMutating
+---
+
+## useIsMutating
+
+`useIsMutating`은 애플리케이션이 현재 데이터 변경 작업을 수행 중인 `number`를 반환하는 선택적 훅입니다 (전체 애플리케이션의 로딩 인디케이터에 유용합니다).
+
+```tsx
+import { useIsMutating } from "@tanstack/react-query";
+// 현재 몇 개의 변이 작업이 진행 중인가요?
+const isMutating = useIsMutating();
+// 'posts' 접두사와 일치하는 변이 작업이 몇 개 진행 중인가요?
+const isMutatingPosts = useIsMutating({ mutationKey: ["posts"] });
+```
+
+**옵션**
+
+- `filters?: MutationFilters`: [변이 필터](../../guides/filters#mutation-filters)
+- `queryClient?: QueryClient`
+  - 커스텀 `QueryClient`를 사용하려면 이 옵션을 사용합니다. 그렇지 않으면 가장 가까운 컨텍스트의 `QueryClient`가 사용됩니다.
+
+**반환값**
+
+- `isMutating: number`
+  - 애플리케이션이 현재 진행 중인 변이 작업의 수입니다.
