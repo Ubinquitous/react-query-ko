@@ -1,0 +1,21 @@
+---
+id: infiniteQueryOptions
+title: infiniteQueryOptions
+---
+
+## infiniteQueryOptions
+
+```tsx
+infiniteQueryOptions({
+  queryKey,
+  ...options,
+});
+```
+
+**옵션**
+
+`infiniteQueryOptions`에 전달할 수 있는 옵션은 [`useInfiniteQuery`](../useInfiniteQuery)에 전달할 수 있는 옵션과 같습니다. 일부 옵션은 `queryClient.prefetchInfiniteQuery`와 같은 함수로 전달될 때 영향을 미치지 않지만, TypeScript는 이러한 추가 속성에 대해서도 문제를 일으키지 않습니다.
+
+- `queryKey: QueryKey`
+  - **필수**
+  - 옵션을 생성할 쿼리 키
