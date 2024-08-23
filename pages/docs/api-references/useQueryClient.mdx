@@ -1,0 +1,19 @@
+---
+id: useQueryClient
+title: useQueryClient
+---
+
+## useQueryClient
+
+`useQueryClient` 훅은 현재 `QueryClient` 인스턴스를 반환합니다.
+
+```tsx
+import { useQueryClient } from '@tanstack/react-query'
+
+const queryClient = useQueryClient(queryClient?: QueryClient)
+```
+
+**옵션**
+
+- `queryClient?: QueryClient`
+  - 사용자 정의 `QueryClient`를 사용하려면 이 옵션을 사용합니다. 그렇지 않으면 가장 가까운 컨텍스트에서 제공되는 `QueryClient`가 사용됩니다.
