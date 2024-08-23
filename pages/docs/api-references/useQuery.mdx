@@ -1,0 +1,335 @@
+---
+id: useQuery
+title: useQuery
+---
+
+## useQuery
+
+```tsx
+const {
+  data,
+  dataUpdatedAt,
+  error,
+  errorUpdatedAt,
+  failureCount,
+  failureReason,
+  fetchStatus,
+  isError,
+  isFetched,
+  isFetchedAfterMount,
+  isFetching,
+  isInitialLoading,
+  isLoading,
+  isLoadingError,
+  isPaused,
+  isPending,
+  isPlaceholderData,
+  isRefetchError,
+  isRefetching,
+  isStale,
+  isSuccess,
+  refetch,
+  status,
+} = useQuery(
+  {
+    queryKey,
+    queryFn,
+    gcTime,
+    enabled,
+    networkMode,
+    initialData,
+    initialDataUpdatedAt,
+    meta,
+    notifyOnChangeProps,
+    placeholderData,
+    queryKeyHashFn,
+    refetchInterval,
+    refetchIntervalInBackground,
+    refetchOnMount,
+    refetchOnReconnect,
+    refetchOnWindowFocus,
+    retry,
+    retryOnMount,
+    retryDelay,
+    select,
+    staleTime,
+    structuralSharing,
+    throwOnError,
+  },
+  queryClient
+);
+```
+
+**Options**
+
+- `queryKey: unknown[]`
+
+  - **필수**
+  - 이 query에 사용할 query key입니다.
+  - query key는 안정적인 해시로 해시화됩니다. 자세한 내용은 [Query Keys](../../guides/query-keys)를 참조하세요.
+  - 이 키가 변경되면 쿼리는 자동으로 업데이트됩니다 (`enabled`가 `false`로 설정되지 않은 한).
+
+- `queryFn: (context: QueryFunctionContext) => Promise<TData>`
+
+  - **필수, 그러나 기본 query 함수가 정의되지 않은 경우에만**. 기본 query 함수에 대한 자세한 내용은 [Default Query Function](../../guides/default-query-function)을 참조하세요.
+  - 쿼리가 데이터를 요청할 때 사용하는 함수입니다.
+  - [QueryFunctionContext](../../guides/query-functions#queryfunctioncontext)를 인자로 받습니다.
+  - 데이터를 반환하는 promise를 반환해야 하며, 데이터는 `undefined`일 수 없습니다.
+
+- `enabled: boolean | (query: Query) => boolean`
+
+  - 쿼리가 자동으로 실행되지 않도록 하려면 `false`로 설정합니다.
+  - [Dependent Queries](../../guides/dependent-queries)에 사용할 수 있습니다.
+
+- `networkMode: 'online' | 'always' | 'offlineFirst'`
+
+  - 선택 사항
+  - 기본값은 `'online'`입니다.
+  - [Network Mode](../../guides/network-mode)에서 자세한 내용을 확인하세요.
+
+- `retry: boolean | number | (failureCount: number, error: TError) => boolean`
+
+  - `false`로 설정하면 쿼리가 실패해도 기본적으로 재시도하지 않습니다.
+  - `true`로 설정하면 쿼리가 무한히 재시도합니다.
+  - `number`로 설정하면, 예를 들어 `3`으로 설정하면, 실패한 쿼리는 실패 횟수가 해당 숫자에 도달할 때까지 재시도합니다.
+  - 클라이언트에서는 기본값이 `3`, 서버에서는 기본값이 `0`입니다.
+
+- `retryOnMount: boolean`
+
+  - `false`로 설정하면, 쿼리에 오류가 있을 경우 마운트 시 재시도하지 않습니다. 기본값은 `true`입니다.
+
+- `retryDelay: number | (retryAttempt: number, error: TError) => number`
+
+  - 이 함수는 `retryAttempt` 정수와 실제 오류를 받아서 다음 시도 전의 지연 시간을 밀리초 단위로 반환합니다.
+  - `attempt => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 1000, 30 * 1000)`와 같은 함수는 지수적 백오프를 적용합니다.
+  - `attempt => attempt * 1000`과 같은 함수는 선형 백오프를 적용합니다.
+
+- `staleTime: number | ((query: Query) => number)`
+
+  - 선택 사항
+  - 기본값은 `0`입니다.
+  - 데이터가 오래된 것으로 간주되기까지의 시간입니다. 이 값은 정의된 hook에만 적용됩니다.
+  - `Infinity`로 설정하면 데이터가 결코 오래된 것으로 간주되지 않습니다.
+  - 함수로 설정하면, 그 함수는 쿼리와 함께 실행되어 `staleTime`을 계산합니다.
+
+- `gcTime: number | Infinity`
+
+  - 기본값은 `5 * 60 * 1000` (5분) 또는 SSR 중 `Infinity`입니다.
+  - 사용되지 않거나 비활성화된 캐시 데이터가 메모리에 남아 있는 시간입니다. 쿼리의 캐시가 사용되지 않거나 비활성화되면, 이 시간 이후에 캐시 데이터가 가비지 컬렉션됩니다. 여러 가비지 컬렉션 시간이 지정된 경우, 가장 긴 시간이 사용됩니다.
+  - 참고: 최대 허용 시간은 약 24일입니다. 자세한 내용은 [여기](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#maximum_delay_value)를 참조하세요.
+  - `Infinity`로 설정하면 가비지 컬렉션이 비활성화됩니다.
+
+- `queryKeyHashFn: (queryKey: QueryKey) => string`
+
+  - 선택 사항
+  - 지정된 경우, 이 함수는 `queryKey`를 문자열로 해시화하는 데 사용됩니다.
+
+- `refetchInterval: number | false | ((query: Query) => number | false | undefined)`
+
+  - 선택 사항
+  - 숫자로 설정하면, 모든 쿼리가 이 주기로 계속해서 재조회됩니다 (밀리초 단위).
+  - 함수로 설정하면, 이 함수는 쿼리와 함께 실행되어 주기를 계산합니다.
+
+- `refetchIntervalInBackground: boolean`
+
+  - 선택 사항
+  - `true`로 설정하면, `refetchInterval`로 설정된 쿼리는 탭/창이 백그라운드에 있을 때도 계속해서 재조회됩니다.
+
+- `refetchOnMount: boolean | "always" | ((query: Query) => boolean | "always")`
+
+  - 선택 사항
+  - 기본값은 `true`입니다.
+  - `true`로 설정하면, 데이터가 오래된 경우 쿼리는 마운트 시 재조회됩니다.
+  - `false`로 설정하면, 마운트 시 쿼리가 재조회되지 않습니다.
+  - `"always"`로 설정하면, 쿼리는 항상 마운트 시 재조회됩니다.
+  - 함수로 설정하면, 이 함수는 쿼리와 함께 실행되어 값을 계산합니다.
+
+- `refetchOnWindowFocus: boolean | "always" | ((query: Query) => boolean | "always")`
+  - 선택 사항
+  - 기본값은 `true`입니다.
+  - `true`로 설정하면, 데이터가 오래된 경우 쿼리는 창 포커스 시 재조회됩니다.
+  - `false`로 설정하면, 창 포커스 시 쿼리가 재조회되지 않습니다.
+  - `"always"`로 설정하면, 쿼리는 항상 창 포커스 시 재조회됩니다.
+  - 함수로 설정하면, 이 함수는 쿼리와 함께 실행되어 값을 계산합니다.
+- `refetchOnReconnect: boolean | "always" | ((query: Query) => boolean | "always")`
+
+  - 선택 사항
+  - 기본값은 `true`입니다.
+  - `true`로 설정하면, 데이터가 오래된 경우 쿼리는 재연결 시 재조회됩니다.
+  - `false`로 설정하면, 재연결 시 쿼리가 재조회되지 않습니다.
+  - `"always"`로 설정하면, 쿼리는 항상 재연결 시 재조회됩니다.
+  - 함수로 설정하면, 이 함수는 쿼리와 함께 실행되어 값을 계산합니다.
+
+- `notifyOnChangeProps: string[] | "all" | (() => string[] | "all" | undefined)`
+
+  - 선택 사항
+  - 설정하면, 나열된 속성이 변경될 때만 컴포넌트가 다시 렌더링됩니다.
+  - 예를 들어, `['data', 'error']`로 설정하면, `data`나 `error` 속성이 변경될 때만 컴포넌트가 다시 렌더링됩니다.
+  - `"all"`로 설정하면, 컴포넌트는 스마트 추적을 사용하지 않고 쿼리가 업데이트될 때마다 다시 렌더링됩니다.
+  - 함수로 설정하면, 이 함수는 속성 목록을 계산하기 위해 실행됩니다.
+  - 기본적으로, 속성 접근이 추적되며, 추적된 속성이 변경될 때만 컴포넌트가 다시 렌더링됩니다.
+
+- `select: (data: TData) => unknown`
+
+  - 선택 사항
+  - 이 옵션을 사용하여 쿼리 함수가 반환하는 데이터의 일부를 변환하거나 선택할 수 있습니다. 이는 반환된 `data` 값에 영향을 미치지만, 쿼리 캐시에 저장되는 데이터에는 영향을 미치지 않습니다.
+  - `select` 함수는 `data`가 변경되거나 `select` 함수 자체의 참조가 변경될 때만 실행됩니다. 최적화를 위해 함수를 `useCallback`으로 감싸는 것이 좋습니다.
+
+- `initialData: TData | () => TData`
+
+  - 선택 사항
+  - 설정하면, 이 값이 쿼리 캐시의 초기 데이터로 사용됩니다 (쿼리가 아직 생성되거나 캐시되지 않은 경우).
+  - 함수로 설정하면, 함수는 공유/루트 쿼리 초기화 중 **한 번** 호출되며, 동기적으로 `initialData`를 반환해야 합니다.
+  - 초기 데이터는 기본적으로 오래된 것으로 간주됩니다. `staleTime`이 설정되지 않은 경우.
+  - `initialData`는 캐시에 **저장**됩니다.
+
+- `initialDataUpdatedAt: number | (() => number | undefined)`
+
+  - 선택 사항
+  - 설정하면, 이 값이 `initialData`가 마지막으로 업데이트된 시간 (밀리초 단위)으로 사용됩니다.
+
+- `placeholderData: TData | (previousValue: TData | undefined; previousQuery: Query | undefined,) => TData`
+
+  - 선택 사항
+  - 설정하면, 이 값이 쿼리가 `pending` 상태일 때 이 특정 쿼리 옵저버의 자리 표시자 데이터로 사용됩니다.
+  - `placeholderData`는 **캐시에 저장되지** 않습니다.
+  - `placeholderData`에 함수를 제공하면, 첫 번째 인자로 이전에 관찰된 쿼리 데이터가 제공되고, 두 번째 인자로는 전체 이전 쿼리 인스턴스가 제공됩니다.
+
+- `structuralSharing: boolean | (oldData: unknown | undefined, newData: unknown) => unknown)`
+
+  - 선택 사항
+  - 기본값은 `true`입니다.
+  - `false`로 설정하면, 쿼리 결과 간의 구조적 공유가 비활성화됩니다.
+  - 함수로 설정하면, 이전 데이터와 새 데이터 값이 이 함수로 전달되며, 이 함수는 쿼리를 위한 해결된 데이터를 조합해야 합니다. 이렇게 하면, 비직렬화 가능한 값을 포함한 데이터에서도 참조를 유지하여 성능을 개선할 수 있습니다.
+
+- `throwOnError: undefined | boolean | (error: TError, query: Query) => boolean`
+
+  - 기본값은 전역 쿼리 설정의 `throwOnError` 값, 즉 `undefined`입니다.
+  - 렌더링 단계에서 오류를 발생시키고 가장 가까운 오류 경계로 전파하려면 `true`로 설정합니다.
+  - `false`로 설정하면, `suspense`의 기본 오류 경계로 오류를 발생시키는 동작이 비활성화됩니다.
+  - 함수로 설정하면, 오류와 쿼리가 전달되며, 함수는 오류를 오류 경계에 표시할지 (`true`) 상태로 반환할지 (`false`)를 나타내는 boolean 값을 반환해야 합니다.
+
+- `meta: Record<string, unknown>`
+
+  - 선택 사항
+  - 설정하면, 필요에 따라 쿼리 캐시 항목에 추가 정보를 저장합니다. 이는 `query`가 사용 가능한 모든 곳에서 접근할 수 있으며, `queryFn`에 제공되는 `QueryFunctionContext`의 일부이기도 합니다.
+
+- `queryClient?: QueryClient`
+  - 사용자 정의 QueryClient를 사용하려면 이 옵션을 사용합니다. 그렇지 않으면, 가장 가까운 컨텍스트에서 제공되는 QueryClient가 사용됩니다.
+
+**Returns**
+
+- `status: QueryStatus`
+
+  - 다음 중 하나입니다:
+    - `pending`: 캐시된 데이터가 없고 쿼리 시도가 아직 완료되지 않았습니다.
+    - `error`: 쿼리 시도가 오류를 발생시켰습니다. `error` 속성에는 시도된 가져오기에서 받은 오류가 포함됩니다.
+    - `success`: 쿼리가 오류 없이 응답을 받았고 데이터를 표시할 준비가 되었습니다. 쿼리의 `data` 속성에는 성공적인 가져오기에서 받은 데이터가 포함되며, 쿼리의 `enabled` 속성이 `false`로 설정되어 있고 아직 가져오지 않은 경우 `data`는 초기화 시 쿼리에 제공된 첫 번째 `initialData`입니다.
+
+- `isPending: boolean`
+
+  - 위의 `status` 변수에서 파생된 boolean 값으로, 편의를 위해 제공됩니다.
+
+- `isSuccess: boolean`
+
+  - 위의 `status` 변수에서 파생된 boolean 값으로, 편의를 위해 제공됩니다.
+
+- `isError: boolean`
+
+  - 위의 `status` 변수에서 파생된 boolean 값으로, 편의를 위해 제공됩니다.
+
+- `isLoadingError: boolean`
+
+  - 쿼리가 처음으로 가져오는 동안 실패한 경우 `true`입니다.
+
+- `isRefetchError: boolean`
+
+  - 쿼리를 재조회하는 동안 실패한 경우 `true`입니다.
+
+- `data: TData`
+
+  - 기본값은 `undefined`입니다.
+  - 쿼리에 대해 마지막으로 성공적으로 해결된 데이터입니다.
+
+- `dataUpdatedAt: number`
+
+  - 쿼리가 가장 최근에 `status`를 `"success"`로 반환한 시간의 타임스탬프입니다.
+
+- `error: null | TError`
+
+  - 기본값은 `null`입니다.
+  - 오류가 발생한 경우 쿼리의 오류 객체입니다.
+
+- `errorUpdatedAt: number`
+
+  - 쿼리가 가장 최근에 `status`를 `"error"`로 반환한 시간의 타임스탬프입니다.
+
+- `isStale: boolean`
+
+  - 캐시된 데이터가 무효화되었거나 데이터가 주어진 `staleTime`보다 오래된 경우 `true`입니다.
+
+- `isPlaceholderData: boolean`
+
+  - 데이터가 자리 표시자 데이터인 경우 `true`입니다.
+
+- `isFetched: boolean`
+
+  - 쿼리가 가져와진 경우 `true`입니다.
+
+- `isFetchedAfterMount: boolean`
+
+  - 컴포넌트가 마운트된 후 쿼리가 가져와진 경우 `true`입니다.
+  - 이 속성은 이전에 캐시된 데이터를 표시하지 않도록 하는 데 사용할 수 있습니다.
+
+- `fetchStatus: FetchStatus`
+
+  - `fetching`: `queryFn`이 실행 중일 때, 즉 초기 `pending` 상태 및 백그라운드 재조회가 포함됩니다.
+  - `paused`: 쿼리가 가져오기를 원했지만 `paused` 상태입니다.
+  - `idle`: 쿼리가 가져오지 않고 있습니다.
+  - 자세한 내용은 [Network Mode](../../guides/network-mode)를 참조하세요.
+
+- `isFetching: boolean`
+
+  - 위의 `fetchStatus` 변수에서 파생된 boolean 값으로, 편의를 위해 제공됩니다.
+
+- `isPaused: boolean`
+
+  - 위의 `fetchStatus` 변수에서 파생된 boolean 값으로, 편의를 위해 제공됩니다.
+
+- `isRefetching: boolean`
+
+  - 백그라운드 재조회가 진행 중일 때 `true`입니다. 초기 `pending` 상태는 포함되지 않습니다.
+  - `isFetching && !isPending`과 동일합니다.
+
+- `isLoading: boolean`
+
+  - 쿼리의 첫 번째 가져오기가 진행 중일 때 `true`입니다.
+  - `isFetching && isPending`과 동일합니다.
+
+- `isInitialLoading: boolean`
+
+  - **deprecated**
+  - `isLoading`의 별칭으로, 다음 주요 버전에서 제거됩니다.
+
+- `failureCount: number`
+
+  - 쿼리의 실패 횟수입니다.
+  - 쿼리가 실패할 때마다 증가합니다.
+  - 쿼리가 성공하면 `0`으로 리셋됩니다.
+
+- `failureReason: null | TError`
+
+  - 쿼리 재시도의 실패 원인입니다.
+  - 쿼리가 성공하면 `null`로 리셋됩니다.
+
+- `errorUpdateCount: number`
+
+  - 모든 오류의 합계입니다.
+
+- `refetch: (options: { throwOnError: boolean, cancelRefetch: boolean }) => Promise<UseQueryResult>`
+  - 쿼리를 수동으로 재조회하는 함수입니다.
+  - 쿼리가 오류가 발생하면 오류는 기록만 됩니다. 오류를 발생시키려면 `throwOnError: true` 옵션을 전달합니다.
+  - `cancelRefetch?: boolean`
+    - 기본값은 `true`입니다.
+      - 기본적으로 현재 실행 중인 요청은 새 요청이 발생하기 전에 취소됩니다.
+    - `false`로 설정하면, 이미 요청이 실행 중인 경우 재조회가 수행되지 않습니다.
