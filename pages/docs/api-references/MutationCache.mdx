@@ -1,0 +1,100 @@
+---
+id: MutationCache
+title: MutationCache
+---
+
+## MutationCache
+
+`MutationCache`는 mutations(변경 작업)의 저장소입니다.
+
+**일반적으로 `MutationCache`와 직접 상호작용하기보다는 `QueryClient`를 사용하는 것이 좋습니다.**
+
+```tsx
+import { MutationCache } from "@tanstack/react-query";
+
+const mutationCache = new MutationCache({
+  onError: (error) => {
+    console.log(error);
+  },
+  onSuccess: (data) => {
+    console.log(data);
+  },
+});
+```
+
+사용할 수 있는 메서드는 다음과 같습니다:
+
+- [`getAll`](#mutationcachegetall)
+- [`subscribe`](#mutationcachesubscribe)
+- [`clear`](#mutationcacheclear)
+
+**옵션**
+
+- `onError?: (error: unknown, variables: unknown, context: unknown, mutation: Mutation) => Promise<unknown> | unknown`
+  - 선택 사항
+  - 어떤 mutation에서 에러가 발생하면 호출됩니다.
+  - Promise를 반환하면, 그 Promise가 완료될 때까지 기다립니다.
+- `onSuccess?: (data: unknown, variables: unknown, context: unknown, mutation: Mutation) => Promise<unknown> | unknown`
+  - 선택 사항
+  - 어떤 mutation이 성공하면 호출됩니다.
+  - Promise를 반환하면, 그 Promise가 완료될 때까지 기다립니다.
+- `onSettled?: (data: unknown | undefined, error: unknown | null, variables: unknown, context: unknown, mutation: Mutation) => Promise<unknown> | unknown`
+  - 선택 사항
+  - 어떤 mutation이 성공하든 실패하든 상관없이 호출됩니다.
+  - Promise를 반환하면, 그 Promise가 완료될 때까지 기다립니다.
+- `onMutate?: (variables: unknown, mutation: Mutation) => Promise<unknown> | unknown`
+  - 선택 사항
+  - 어떤 mutation이 실행되기 전에 호출됩니다.
+  - Promise를 반환하면, 그 Promise가 완료될 때까지 기다립니다.
+
+## Global callbacks
+
+`MutationCache`의 `onError`, `onSuccess`, `onSettled`, `onMutate` 콜백은 전역적으로 이러한 이벤트를 처리하는 데 사용할 수 있습니다. 이 콜백들은 `QueryClient`에 제공된 `defaultOptions`와는 다릅니다:
+
+- `defaultOptions`는 각 Mutation에서 재정의할 수 있지만, 전역 콜백은 **항상** 호출됩니다.
+- `onMutate`는 context 값을 반환하는 것을 허용하지 않습니다.
+
+## `mutationCache.getAll`
+
+`getAll` 메서드는 캐시에 있는 모든 mutations를 반환합니다.
+
+> 참고: 대부분의 애플리케이션에서는 필요하지 않지만, 드물게 mutation에 대한 더 많은 정보가 필요할 때 유용할 수 있습니다.
+
+```tsx
+const mutations = mutationCache.getAll();
+```
+
+**반환값**
+
+- `Mutation[]`
+  - 캐시에서 가져온 Mutation 인스턴스들
+
+## `mutationCache.subscribe`
+
+`subscribe` 메서드는 mutation cache 전체에 구독하여 캐시의 안전하고 알려진 업데이트(예: mutation 상태 변경, mutation 업데이트, 추가 또는 제거 등)에 대해 알림을 받을 수 있습니다.
+
+```tsx
+const callback = (event) => {
+  console.log(event.type, event.mutation);
+};
+
+const unsubscribe = mutationCache.subscribe(callback);
+```
+
+**옵션**
+
+- `callback: (mutation?: MutationCacheNotifyEvent) => void`
+  - 캐시가 업데이트될 때마다 호출되는 함수입니다.
+
+**반환값**
+
+- `unsubscribe: Function => void`
+  - 이 함수는 캐시에서 콜백의 구독을 취소합니다.
+
+## `mutationCache.clear`
+
+`clear` 메서드는 캐시를 완전히 지우고 새로 시작할 수 있게 해줍니다.
+
+```tsx
+mutationCache.clear();
+```
