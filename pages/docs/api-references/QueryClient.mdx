@@ -1,0 +1,582 @@
+---
+id: QueryClient
+title: QueryClient
+---
+
+## `QueryClient`
+
+`QueryClient`는 cache와 상호작용하기 위해 사용됩니다.
+
+```tsx
+import { QueryClient } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity,
+    },
+  },
+});
+
+await queryClient.prefetchQuery({ queryKey: ["posts"], queryFn: fetchPosts });
+```
+
+사용할 수 있는 메서드는 다음과 같습니다:
+
+- [`queryClient.fetchQuery`](#queryclientfetchquery)
+- [`queryClient.fetchInfiniteQuery`](#queryclientfetchinfinitequery)
+- [`queryClient.prefetchQuery`](#queryclientprefetchquery)
+- [`queryClient.prefetchInfiniteQuery`](#queryclientprefetchinfinitequery)
+- [`queryClient.getQueryData`](#queryclientgetquerydata)
+- [`queryClient.ensureQueryData`](#queryclientensurequerydata)
+- [`queryClient.getQueriesData`](#queryclientgetqueriesdata)
+- [`queryClient.setQueryData`](#queryclientsetquerydata)
+- [`queryClient.getQueryState`](#queryclientgetquerystate)
+- [`queryClient.setQueriesData`](#queryclientsetqueriesdata)
+- [`queryClient.invalidateQueries`](#queryclientinvalidatequeries)
+- [`queryClient.refetchQueries`](#queryclientrefetchqueries)
+- [`queryClient.cancelQueries`](#queryclientcancelqueries)
+- [`queryClient.removeQueries`](#queryclientremovequeries)
+- [`queryClient.resetQueries`](#queryclientresetqueries)
+- [`queryClient.isFetching`](#queryclientisfetching)
+- [`queryClient.isMutating`](#queryclientismutating)
+- [`queryClient.getDefaultOptions`](#queryclientgetdefaultoptions)
+- [`queryClient.setDefaultOptions`](#queryclientsetdefaultoptions)
+- [`queryClient.getQueryDefaults`](#queryclientgetquerydefaults)
+- [`queryClient.setQueryDefaults`](#queryclientsetquerydefaults)
+- [`queryClient.getMutationDefaults`](#queryclientgetmutationdefaults)
+- [`queryClient.setMutationDefaults`](#queryclientsetmutationdefaults)
+- [`queryClient.getQueryCache`](#queryclientgetquerycache)
+- [`queryClient.getMutationCache`](#queryclientgetmutationcache)
+- [`queryClient.clear`](#queryclientclear)
+- [`queryClient.resumePausedMutations`](#queryclientresumepausedmutations)
+
+**Options**
+
+- `queryCache?: QueryCache`
+  - 선택 사항
+  - 이 클라이언트가 연결된 query cache입니다.
+- `mutationCache?: MutationCache`
+  - 선택 사항
+  - 이 클라이언트가 연결된 mutation cache입니다.
+- `defaultOptions?: DefaultOptions`
+  - 선택 사항
+  - 이 `queryClient`를 사용하는 모든 query와 mutation에 대한 기본값을 정의합니다.
+  - [hydration](../../framework/react/reference/hydration)을 위한 기본값도 정의할 수 있습니다.
+
+## `queryClient.fetchQuery`
+
+`fetchQuery`는 비동기 메서드로, query를 가져오고 cache에 저장하는 데 사용됩니다. 이 메서드는 데이터를 반환하거나, 오류가 발생할 경우 오류를 던집니다. 결과가 필요하지 않고 query만 가져오고 싶다면 `prefetchQuery` 메서드를 사용하세요.
+
+query가 이미 존재하고 데이터가 무효화되지 않았거나 주어진 `staleTime`보다 오래되지 않은 경우, cache에서 데이터를 반환합니다. 그렇지 않으면 최신 데이터를 가져오려 시도합니다.
+
+> `fetchQuery`와 `setQueryData`의 차이점은, `fetchQuery`는 비동기적이며, 동일한 query에 대해 중복된 요청이 발생하지 않도록 보장한다는 점입니다. 데이터를 가져오는 동안 동일한 query에 대해 여러 `useQuery` 인스턴스가 렌더링되는 경우에도 마찬가지입니다.
+
+```tsx
+try {
+  const data = await queryClient.fetchQuery({ queryKey, queryFn });
+} catch (error) {
+  console.log(error);
+}
+```
+
+`staleTime`을 지정하여 데이터가 특정 시간보다 오래된 경우에만 데이터를 가져오도록 할 수 있습니다:
+
+```tsx
+try {
+  const data = await queryClient.fetchQuery({
+    queryKey,
+    queryFn,
+    staleTime: 10000,
+  });
+} catch (error) {
+  console.log(error);
+}
+```
+
+**Options**
+
+`fetchQuery`의 옵션은 [`useQuery`](../../framework/react/reference/useQuery)의 옵션과 동일하지만, 다음과 같은 예외가 있습니다: `enabled, refetchInterval, refetchIntervalInBackground, refetchOnWindowFocus, refetchOnReconnect, refetchOnMount, notifyOnChangeProps, throwOnError, select, suspense, placeholderData`. 이러한 옵션은 `useQuery`와 `useInfiniteQuery`에서만 사용됩니다. 자세한 내용은 [소스 코드](https://github.com/TanStack/query/blob/7cd2d192e6da3df0b08e334ea1cf04cd70478827/packages/query-core/src/types.ts#L119)를 참조하세요.
+
+**Returns**
+
+- `Promise<TData>`
+
+## `queryClient.fetchInfiniteQuery`
+
+`fetchInfiniteQuery`는 `fetchQuery`와 유사하지만, 무한 스크롤 쿼리를 가져오고 cache하는 데 사용할 수 있습니다.
+
+```tsx
+try {
+  const data = await queryClient.fetchInfiniteQuery({ queryKey, queryFn });
+  console.log(data.pages);
+} catch (error) {
+  console.log(error);
+}
+```
+
+**Options**
+
+`fetchInfiniteQuery`의 옵션은 [`fetchQuery`](#queryclientfetchquery)와 정확히 동일합니다.
+
+---
+
+## `QueryClient`
+
+### `queryClient.prefetchQuery`
+
+`prefetchQuery`는 `useQuery`와 관련된 훅이 사용되기 전에 쿼리를 미리 가져오기 위해 사용되는 비동기 메서드입니다. 이 메서드는 `fetchQuery`와 유사하게 동작하지만, 데이터를 반환하거나 에러를 던지지 않습니다.
+
+```tsx
+await queryClient.prefetchQuery({ queryKey, queryFn });
+```
+
+설정에서 기본 `queryFn`과 함께 사용할 수도 있습니다:
+
+```tsx
+await queryClient.prefetchQuery({ queryKey });
+```
+
+**Options**
+
+`prefetchQuery`의 옵션은 [`fetchQuery`](#queryclientfetchquery)의 옵션과 동일합니다.
+
+**Returns**
+
+- `Promise<void>`
+  - 가져올 필요가 없을 경우 즉시 해결되거나 쿼리가 실행된 후에 해결됩니다. 데이터나 에러를 반환하지 않습니다.
+
+### `queryClient.prefetchInfiniteQuery`
+
+`prefetchInfiniteQuery`는 `prefetchQuery`와 유사하지만, 무한 쿼리를 미리 가져오고 캐싱하는 데 사용됩니다.
+
+```tsx
+await queryClient.prefetchInfiniteQuery({ queryKey, queryFn });
+```
+
+**Options**
+
+`prefetchInfiniteQuery`의 옵션은 [`fetchQuery`](#queryclientfetchquery)의 옵션과 동일합니다.
+
+**Returns**
+
+- `Promise<void>`
+  - 가져올 필요가 없을 경우 즉시 해결되거나 쿼리가 실행된 후에 해결됩니다. 데이터나 에러를 반환하지 않습니다.
+
+### `queryClient.getQueryData`
+
+`getQueryData`는 기존 쿼리의 캐시된 데이터를 가져오기 위해 사용되는 동기 함수입니다. 쿼리가 존재하지 않는 경우, `undefined`가 반환됩니다.
+
+```tsx
+const data = queryClient.getQueryData(queryKey);
+```
+
+**Options**
+
+- `queryKey: QueryKey`: [Query Keys](../../framework/react/guides/query-keys)
+
+**Returns**
+
+- `data: TQueryFnData | undefined`
+  - 쿼리의 캐시된 데이터 또는 쿼리가 존재하지 않는 경우 `undefined`.
+
+### `queryClient.ensureQueryData`
+
+`ensureQueryData`는 기존 쿼리의 캐시된 데이터를 가져오기 위해 사용되는 비동기 함수입니다. 쿼리가 존재하지 않는 경우, `queryClient.fetchQuery`가 호출되고 그 결과가 반환됩니다.
+
+```tsx
+const data = await queryClient.ensureQueryData({ queryKey, queryFn });
+```
+
+**Options**
+
+- [`fetchQuery`](#queryclientfetchquery)와 동일한 옵션.
+- `revalidateIfStale: boolean`
+  - 선택 사항
+  - 기본값은 `false`
+  - `true`로 설정되면, 캐시된 데이터가 즉시 반환되지만, 오래된 데이터는 백그라운드에서 다시 가져옵니다.
+
+**Returns**
+
+- `Promise<TData>`
+
+### `queryClient.getQueriesData`
+
+`getQueriesData`는 여러 쿼리의 캐시된 데이터를 가져오기 위해 사용되는 동기 함수입니다. 전달된 `queryKey` 또는 `queryFilter`와 일치하는 쿼리만 반환됩니다. 일치하는 쿼리가 없으면 빈 배열이 반환됩니다.
+
+```tsx
+const data = queryClient.getQueriesData(filters);
+```
+
+**Options**
+
+- `filters: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+  - 필터가 전달된 경우, 필터와 일치하는 `queryKeys`의 데이터가 반환됩니다.
+
+**Returns**
+
+- `[queryKey: QueryKey, data: TQueryFnData | undefined][]`
+  - 일치하는 쿼리 키의 튜플 배열, 일치하는 것이 없을 경우 `[]`. 튜플은 쿼리 키와 해당 연관 데이터로 구성됩니다.
+
+**Caveats**
+
+각 튜플의 반환된 데이터는 다양한 구조를 가질 수 있으므로, `TData` 제네릭은 기본적으로 `unknown`으로 설정됩니다. 만약 `TData`에 더 구체적인 타입을 제공하면, 각 튜플의 데이터 항목이 동일한 타입이라고 가정합니다.
+
+### `queryClient.setQueryData`
+
+`setQueryData`는 쿼리의 캐시된 데이터를 즉시 업데이트하기 위해 사용되는 동기 함수입니다. 쿼리가 존재하지 않는 경우, 쿼리가 생성됩니다. **쿼리가 기본 `gcTime`인 5분 내에 쿼리 훅에서 사용되지 않으면, 쿼리가 가비지 컬렉션됩니다**. 여러 쿼리를 한 번에 업데이트하고 쿼리 키를 부분적으로 일치시키려면 [`queryClient.setQueriesData`](#queryclientsetqueriesdata)를 사용해야 합니다.
+
+> `setQueryData`는 동기적이며, 이미 데이터가 동기적으로 사용 가능하다고 가정합니다. 비동기적으로 데이터를 가져와야 하는 경우, 쿼리 키를 다시 가져오거나 비동기적으로 가져오는 `fetchQuery`를 사용하는 것이 좋습니다.
+
+```tsx
+queryClient.setQueryData(queryKey, updater);
+```
+
+---
+
+### **Options**
+
+- `queryKey: QueryKey`: [Query Keys](../../framework/react/guides/query-keys)
+- `updater: TQueryFnData | undefined | ((oldData: TQueryFnData | undefined) => TQueryFnData | undefined)`
+  - 함수가 아닌 값이 전달된 경우, 데이터는 이 값으로 업데이트됩니다.
+  - 함수가 전달된 경우, 해당 함수는 이전 데이터 값을 받아 새로운 값을 반환해야 합니다.
+
+### **Updater 값 사용**
+
+```tsx
+setQueryData(queryKey, newData);
+```
+
+값이 `undefined`인 경우, 쿼리 데이터는 업데이트되지 않습니다.
+
+### **Updater 함수 사용**
+
+편리한 구문을 위해, 현재 데이터 값을 받아 새로운 값을 반환하는 updater 함수를 전달할 수도 있습니다:
+
+```tsx
+setQueryData(queryKey, (oldData) => newData);
+```
+
+업데이트 함수가 `undefined`를 반환하는 경우, 쿼리 데이터는 업데이트되지 않습니다. 만약 업데이트 함수가 입력으로 `undefined`를 받으면, `undefined`를 반환하여 업데이트를 중단하고 새로운 캐시 항목이 생성되지 않도록 할 수 있습니다.
+
+### **불변성 (Immutability)**
+
+`setQueryData`를 통한 업데이트는 _불변성_ 방식으로 수행해야 합니다. **절대로** `oldData`나 `getQueryData`로 가져온 데이터를 직접 수정하여 캐시에 기록하려고 하지 마십시오.
+
+## `queryClient.getQueryState`
+
+`getQueryState`는 기존 쿼리의 상태를 가져오기 위해 사용되는 동기 함수입니다. 쿼리가 존재하지 않는 경우, `undefined`가 반환됩니다.
+
+```tsx
+const state = queryClient.getQueryState(queryKey);
+console.log(state.dataUpdatedAt);
+```
+
+### **Options**
+
+- `queryKey: QueryKey`: [Query Keys](../../framework/react/guides/query-keys)
+
+## `queryClient.setQueriesData`
+
+`setQueriesData`는 필터 함수나 부분적으로 일치하는 쿼리 키를 사용하여 여러 쿼리의 캐시된 데이터를 즉시 업데이트하기 위해 사용되는 동기 함수입니다. 전달된 `queryKey` 또는 `queryFilter`와 일치하는 쿼리만 업데이트됩니다. 새로운 캐시 항목은 생성되지 않습니다. 내부적으로는, 기존 쿼리에 대해 [`setQueryData`](#queryclientsetquerydata)가 호출됩니다.
+
+```tsx
+queryClient.setQueriesData(filters, updater);
+```
+
+---
+
+### **Options**
+
+- `filters: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+  - 필터가 전달되면, 필터와 일치하는 queryKeys가 업데이트됩니다.
+- `updater: TQueryFnData | (oldData: TQueryFnData | undefined) => TQueryFnData`
+  - [setQueryData](#queryclientsetquerydata) updater 함수 또는 새 데이터는 일치하는 각 queryKey에 대해 호출됩니다.
+
+## `queryClient.invalidateQueries`
+
+`invalidateQueries` 메서드는 쿼리 키 또는 쿼리의 기타 기능적으로 접근 가능한 속성/상태에 따라 캐시에서 하나 이상의 쿼리를 무효화하고 다시 가져오기 위해 사용됩니다. 기본적으로, 일치하는 모든 쿼리는 즉시 무효화되며, 활성 쿼리는 백그라운드에서 다시 가져옵니다.
+
+- 활성 쿼리가 다시 가져와지지 않도록 하고 싶다면, `refetchType: 'none'` 옵션을 사용할 수 있습니다.
+- 비활성 쿼리도 다시 가져오고 싶다면, `refetchType: 'all'` 옵션을 사용하세요.
+
+```tsx
+await queryClient.invalidateQueries(
+  {
+    queryKey: ["posts"],
+    exact,
+    refetchType: "active",
+  },
+  { throwOnError, cancelRefetch }
+);
+```
+
+### **Options**
+
+- `filters?: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+  - `queryKey?: QueryKey`: [Query Keys](../../framework/react/guides/query-keys)
+  - `refetchType?: 'active' | 'inactive' | 'all' | 'none'`
+    - 기본값은 `'active'`입니다.
+    - `active`로 설정된 경우, 다시 가져오기 조건과 일치하고 `useQuery` 및 관련된 훅을 통해 렌더링되고 있는 쿼리만 백그라운드에서 다시 가져옵니다.
+    - `inactive`로 설정된 경우, 다시 가져오기 조건과 일치하고 `useQuery` 및 관련된 훅을 통해 렌더링되지 않는 쿼리만 백그라운드에서 다시 가져옵니다.
+    - `all`로 설정된 경우, 다시 가져오기 조건과 일치하는 모든 쿼리를 백그라운드에서 다시 가져옵니다.
+    - `none`으로 설정된 경우, 다시 가져오는 쿼리는 없으며 일치하는 쿼리만 무효화됩니다.
+- `options?: InvalidateOptions`:
+  - `throwOnError?: boolean`
+    - `true`로 설정된 경우, 쿼리 다시 가져오기 작업 중 하나라도 실패하면 이 메서드는 오류를 발생시킵니다.
+  - `cancelRefetch?: boolean`
+    - 기본값은 `true`입니다.
+      - 기본적으로, 현재 실행 중인 요청은 새 요청이 이루어지기 전에 취소됩니다.
+    - `false`로 설정된 경우, 이미 요청이 실행 중인 경우 다시 가져오기가 수행되지 않습니다.
+
+## `queryClient.refetchQueries`
+
+`refetchQueries` 메서드는 특정 조건에 따라 쿼리를 다시 가져오는 데 사용됩니다.
+
+예시:
+
+```tsx
+// 모든 쿼리를 다시 가져오기:
+await queryClient.refetchQueries();
+
+// 모든 오래된(stale) 쿼리를 다시 가져오기:
+await queryClient.refetchQueries({ stale: true });
+
+// 쿼리 키와 부분적으로 일치하는 모든 활성 쿼리를 다시 가져오기:
+await queryClient.refetchQueries({ queryKey: ["posts"], type: "active" });
+
+// 쿼리 키와 정확히 일치하는 모든 활성 쿼리를 다시 가져오기:
+await queryClient.refetchQueries({
+  queryKey: ["posts", 1],
+  type: "active",
+  exact: true,
+});
+```
+
+### **Options**
+
+- `filters?: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+- `options?: RefetchOptions`:
+  - `throwOnError?: boolean`
+    - `true`로 설정된 경우, 쿼리 다시 가져오기 작업 중 하나라도 실패하면 이 메서드는 오류를 발생시킵니다.
+  - `cancelRefetch?: boolean`
+    - 기본값은 `true`입니다.
+      - 기본적으로, 현재 실행 중인 요청은 새 요청이 이루어지기 전에 취소됩니다.
+    - `false`로 설정된 경우, 이미 요청이 실행 중인 경우 다시 가져오기가 수행되지 않습니다.
+
+---
+
+### **Returns**
+
+이 함수는 모든 쿼리의 다시 가져오기가 완료되면 해결되는 약속을 반환합니다. 기본적으로, 쿼리 다시 가져오기 작업 중 하나라도 실패하면 오류를 발생시키지 않지만, `throwOnError` 옵션을 `true`로 설정하면 이 동작을 구성할 수 있습니다.
+
+## `queryClient.cancelQueries`
+
+`cancelQueries` 메서드는 쿼리 키 또는 쿼리의 기타 기능적으로 접근 가능한 속성/상태에 따라 진행 중인 쿼리를 취소하는 데 사용됩니다.
+
+이는 낙관적 업데이트를 수행할 때 가장 유용합니다. 진행 중인 쿼리 다시 가져오기가 낙관적 업데이트를 덮어쓰지 않도록 취소해야 할 가능성이 높기 때문입니다.
+
+```tsx
+await queryClient.cancelQueries({ queryKey: ["posts"], exact: true });
+```
+
+### **Options**
+
+- `filters?: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+
+### **Returns**
+
+이 메서드는 아무것도 반환하지 않습니다.
+
+## `queryClient.removeQueries`
+
+`removeQueries` 메서드는 쿼리 키 또는 쿼리의 기타 기능적으로 접근 가능한 속성/상태에 따라 캐시에서 쿼리를 제거하는 데 사용됩니다.
+
+```tsx
+queryClient.removeQueries({ queryKey, exact: true });
+```
+
+### **Options**
+
+- `filters?: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+
+### **Returns**
+
+이 메서드는 아무것도 반환하지 않습니다.
+
+## `queryClient.resetQueries`
+
+`resetQueries` 메서드는 쿼리 키 또는 쿼리의 기타 기능적으로 접근 가능한 속성/상태에 따라 캐시의 쿼리를 초기 상태로 재설정하는 데 사용됩니다.
+
+이 메서드는 `clear`와 달리 모든 구독자에게 알리며, `invalidateQueries`와 달리 쿼리를 로드 전 상태로 재설정합니다. 쿼리에 `initialData`가 있는 경우, 쿼리의 데이터는 해당 초기 데이터로 재설정됩니다. 쿼리가 활성 상태인 경우, 다시 가져옵니다.
+
+```tsx
+queryClient.resetQueries({ queryKey, exact: true });
+```
+
+### **Options**
+
+- `filters?: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+- `options?: ResetOptions`:
+  - `throwOnError?: boolean`
+    - `true`로 설정된 경우, 쿼리 다시 가져오기 작업 중 하나라도 실패하면 이 메서드는 오류를 발생시킵니다.
+  - `cancelRefetch?: boolean`
+    - 기본값은 `true`입니다.
+      - 기본적으로, 현재 실행 중인 요청은 새 요청이 이루어지기 전에 취소됩니다.
+    - `false`로 설정된 경우, 이미 요청이 실행 중인 경우 다시 가져오기가 수행되지 않습니다.
+
+---
+
+### **Returns**
+
+이 메서드는 모든 활성 쿼리가 다시 가져와질 때까지 해결되는 약속을 반환합니다.
+
+## `queryClient.isFetching`
+
+`isFetching` 메서드는 캐시에서 현재 데이터 가져오기를 진행 중인 쿼리의 수를 나타내는 `integer` 값을 반환합니다. 여기에는 백그라운드 가져오기, 새 페이지 로딩, 또는 무한 쿼리 결과 추가 로딩이 포함됩니다.
+
+```tsx
+if (queryClient.isFetching()) {
+  console.log("적어도 하나의 쿼리가 데이터를 가져오고 있습니다!");
+}
+```
+
+TanStack Query는 [`useIsFetching`](../../framework/react/reference/useIsFetching) 훅도 제공하여, 컴포넌트에서 쿼리 캐시에 대한 수동 구독 없이 이 상태를 구독할 수 있게 해줍니다.
+
+### **Options**
+
+- `filters?: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+
+### **Returns**
+
+이 메서드는 가져오기를 진행 중인 쿼리의 수를 반환합니다.
+
+## `queryClient.isMutating`
+
+`isMutating` 메서드는 캐시에서 현재 데이터를 변경 중인 뮤테이션의 수를 나타내는 `integer` 값을 반환합니다.
+
+```tsx
+if (queryClient.isMutating()) {
+  console.log("적어도 하나의 뮤테이션이 데이터를 가져오고 있습니다!");
+}
+```
+
+TanStack Query는 [`useIsMutating`](../../framework/react/reference/useIsMutating) 훅도 제공하여, 컴포넌트에서 뮤테이션 캐시에 대한 수동 구독 없이 이 상태를 구독할 수 있게 해줍니다.
+
+### **Options**
+
+- `filters: MutationFilters`: [Mutation Filters](../../framework/react/guides/filters#mutation-filters)
+
+### **Returns**
+
+이 메서드는 가져오기를 진행 중인 뮤테이션의 수를 반환합니다.
+
+---
+
+## `queryClient.getDefaultOptions`
+
+`getDefaultOptions` 메서드는 클라이언트를 생성할 때 설정된 기본 옵션이나 `setDefaultOptions`로 설정한 기본 옵션을 반환합니다.
+
+```tsx
+const defaultOptions = queryClient.getDefaultOptions();
+```
+
+## `queryClient.setDefaultOptions`
+
+`setDefaultOptions` 메서드는 이 `queryClient`의 기본 옵션을 동적으로 설정하는 데 사용됩니다. 이전에 정의된 기본 옵션은 덮어쓰여집니다.
+
+```tsx
+queryClient.setDefaultOptions({
+  queries: {
+    staleTime: Infinity,
+  },
+});
+```
+
+## `queryClient.getQueryDefaults`
+
+`getQueryDefaults` 메서드는 특정 쿼리에 대해 설정된 기본 옵션을 반환합니다.
+
+```tsx
+const defaultOptions = queryClient.getQueryDefaults(["posts"]);
+```
+
+> 주의: 여러 쿼리 기본값이 주어진 쿼리 키와 일치할 경우, **첫 번째** 일치하는 기본값이 반환됩니다. 이로 인해 예상치 못한 동작이 발생할 수 있습니다. 자세한 내용은 [`setQueryDefaults`](#queryclientsetquerydefaults)를 참조하세요.
+
+## `queryClient.setQueryDefaults`
+
+`setQueryDefaults`는 특정 쿼리에 대한 기본 옵션을 설정하는 데 사용할 수 있습니다.
+
+```tsx
+queryClient.setQueryDefaults(["posts"], { queryFn: fetchPosts });
+
+function Component() {
+  const { data } = useQuery({ queryKey: ["posts"] });
+}
+```
+
+### **Options**
+
+- `queryKey: QueryKey`: [Query Keys](../../framework/react/guides/query-keys)
+- `options: QueryOptions`
+
+> [`getQueryDefaults`](#queryclientgetquerydefaults)에서 언급한 바와 같이, 쿼리 기본값의 등록 순서는 중요합니다. `getQueryDefaults`는 **첫 번째** 일치하는 기본값을 반환하므로, 등록은 **가장 일반적인 키**에서 **가장 구체적인 키**로 순서대로 진행해야 합니다. 이렇게 하면 특정 키의 경우, 첫 번째 일치하는 기본값이 예상한 값이 됩니다.
+
+## `queryClient.getMutationDefaults`
+
+`getMutationDefaults` 메서드는 특정 뮤테이션에 대해 설정된 기본 옵션을 반환합니다.
+
+```tsx
+const defaultOptions = queryClient.getMutationDefaults(["addPost"]);
+```
+
+## `queryClient.setMutationDefaults`
+
+`setMutationDefaults`는 특정 뮤테이션에 대한 기본 옵션을 설정하는 데 사용할 수 있습니다.
+
+```tsx
+queryClient.setMutationDefaults(["addPost"], { mutationFn: addPost });
+
+function Component() {
+  const { data } = useMutation({ mutationKey: ["addPost"] });
+}
+```
+
+### **Options**
+
+- `mutationKey: unknown[]`
+- `options: MutationOptions`
+
+> [`setQueryDefaults`](#queryclientsetquerydefaults)와 유사하게, 등록 순서는 중요합니다.
+
+## `queryClient.getQueryCache`
+
+`getQueryCache` 메서드는 이 클라이언트가 연결된 쿼리 캐시를 반환합니다.
+
+```tsx
+const queryCache = queryClient.getQueryCache();
+```
+
+## `queryClient.getMutationCache`
+
+`getMutationCache` 메서드는 이 클라이언트가 연결된 뮤테이션 캐시를 반환합니다.
+
+```tsx
+const mutationCache = queryClient.getMutationCache();
+```
+
+## `queryClient.clear`
+
+`clear` 메서드는 모든 연결된 캐시를 지웁니다.
+
+```tsx
+queryClient.clear();
+```
+
+## `queryClient.resumePausedMutations`
+
+네트워크 연결이 없어서 일시 중지된 뮤테이션을 재개하는 데 사용할 수 있습니다.
+
+```tsx
+queryClient.resumePausedMutations();
+```
