@@ -1,0 +1,62 @@
+---
+id: broadcastQueryClient
+title: broadcastQueryClient (Experimental)
+---
+
+## broadcastQueryClient (Experimental)
+
+> 매우 중요: 이 유틸리티는 현재 실험 단계에 있습니다. 이는 마이너 및 패치 릴리스에서 브레이킹 체인지가 발생할 수 있음을 의미합니다. 자신의 위험 부담 하에 사용하세요. 실험 단계에서 이를 프로덕션에서 사용하려면 예상치 못한 중단을 피하기 위해 패치 레벨 버전으로 버전을 잠그는 것이 좋습니다.
+
+`broadcastQueryClient`는 같은 출처를 가진 브라우저 탭/창 간에 `queryClient`의 상태를 브로드캐스트하고 동기화하는 유틸리티입니다.
+
+## 설치
+
+이 유틸리티는 별도의 패키지로 제공되며 `'@tanstack/query-broadcast-client-experimental'`에서 가져올 수 있습니다.
+
+## 사용법
+
+`broadcastQueryClient` 함수를 가져와서 `QueryClient` 인스턴스를 전달하고, 선택적으로 `broadcastChannel`을 설정합니다.
+
+```tsx
+import { broadcastQueryClient } from "@tanstack/query-broadcast-client-experimental";
+
+const queryClient = new QueryClient();
+
+broadcastQueryClient({
+  queryClient,
+  broadcastChannel: "my-app",
+});
+```
+
+## API
+
+### `broadcastQueryClient`
+
+이 함수에 `QueryClient` 인스턴스와 선택적으로 `broadcastChannel`을 전달합니다.
+
+```tsx
+broadcastQueryClient({ queryClient, broadcastChannel });
+```
+
+### `Options`
+
+옵션 객체:
+
+```tsx
+interface broadcastQueryClient {
+  /** 동기화할 QueryClient */
+  queryClient: QueryClient;
+  /** 탭과 창 간의 통신에 사용될 고유한 채널 이름 */
+  broadcastChannel?: string;
+  /** BroadcastChannel API에 대한 옵션 */
+  options?: BroadcastChannelOptions;
+}
+```
+
+기본 옵션은 다음과 같습니다:
+
+```tsx
+{
+  broadcastChannel = 'react-query',
+}
+```
