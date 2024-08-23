@@ -1,0 +1,101 @@
+---
+id: eslint-plugin-query
+title: ESLint Plugin Query
+---
+
+## ESLint Plugin Query
+
+TanStack Query에는 최선의 관행을 강제하고 일반적인 실수를 피하는 데 도움을 주는 ESLint 플러그인이 포함되어 있습니다.
+
+## Installation
+
+플러그인은 별도의 패키지로, 다음 명령어로 설치할 수 있습니다:
+
+```bash
+$ npm i -D @tanstack/eslint-plugin-query
+```
+
+또는
+
+```bash
+$ pnpm add -D @tanstack/eslint-plugin-query
+```
+
+또는
+
+```bash
+$ yarn add -D @tanstack/eslint-plugin-query
+```
+
+또는
+
+```bash
+$ bun add -D @tanstack/eslint-plugin-query
+```
+
+## Flat Config (`eslint.config.js`)
+
+### Recommended setup
+
+플러그인의 모든 추천 규칙을 활성화하려면, 다음 구성을 추가합니다:
+
+```js
+import pluginQuery from "@tanstack/eslint-plugin-query";
+
+export default [
+  ...pluginQuery.configs["flat/recommended"],
+  // 기타 설정...
+];
+```
+
+### Custom setup
+
+또는 플러그인을 로드하고 사용하려는 규칙만 구성할 수 있습니다:
+
+```js
+import pluginQuery from "@tanstack/eslint-plugin-query";
+
+export default [
+  {
+    plugins: {
+      "@tanstack/query": pluginQuery,
+    },
+    rules: {
+      "@tanstack/query/exhaustive-deps": "error",
+    },
+  },
+  // 기타 설정...
+];
+```
+
+## Legacy Config (`.eslintrc`)
+
+### Recommended setup
+
+플러그인의 모든 추천 규칙을 활성화하려면, `extends`에 `plugin:@tanstack/eslint-plugin-query/recommended`를 추가합니다:
+
+```json
+{
+  "extends": ["plugin:@tanstack/eslint-plugin-query/recommended"]
+}
+```
+
+### Custom setup
+
+또는 `plugins` 섹션에 `@tanstack/eslint-plugin-query`를 추가하고, 사용하려는 규칙을 구성할 수 있습니다:
+
+```json
+{
+  "plugins": ["@tanstack/query"],
+  "rules": {
+    "@tanstack/query/exhaustive-deps": "error"
+  }
+}
+```
+
+## Rules
+
+- [@tanstack/query/exhaustive-deps](../exhaustive-deps)
+- [@tanstack/query/no-rest-destructuring](../no-rest-destructuring)
+- [@tanstack/query/stable-query-client](../stable-query-client)
+- [@tanstack/query/no-unstable-deps](../no-unstable-deps.md)
