@@ -1,0 +1,31 @@
+---
+id: QueryErrorResetBoundary
+title: QueryErrorResetBoundary
+---
+
+## QueryErrorResetBoundary
+
+**suspense** 또는 **throwOnError**를 쿼리에서 사용할 때, 오류 발생 후 다시 렌더링할 때 쿼리를 다시 시도할 방법이 필요합니다. `QueryErrorResetBoundary` 컴포넌트를 사용하면 컴포넌트의 경계 내에서 쿼리 오류를 리셋할 수 있습니다.
+
+```tsx
+import { QueryErrorResetBoundary } from "@tanstack/react-query";
+import { ErrorBoundary } from "react-error-boundary";
+
+const App = () => (
+  <QueryErrorResetBoundary>
+    {({ reset }) => (
+      <ErrorBoundary
+        onReset={reset}
+        fallbackRender={({ resetErrorBoundary }) => (
+          <div>
+            오류가 발생했습니다!
+            <Button onClick={() => resetErrorBoundary()}>다시 시도</Button>
+          </div>
+        )}
+      >
+        <Page />
+      </ErrorBoundary>
+    )}
+  </QueryErrorResetBoundary>
+);
+```
