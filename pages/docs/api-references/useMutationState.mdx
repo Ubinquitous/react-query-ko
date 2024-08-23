@@ -1,0 +1,88 @@
+---
+id: useMutationState
+title: useMutationState
+---
+
+## useMutationState
+
+`useMutationState`는 `MutationCache`의 모든 mutation에 접근할 수 있는 hook입니다. `filters`를 사용해 mutation을 필터링할 수 있고, `select`를 사용해 mutation의 상태를 변형할 수 있습니다.
+
+**Example 1: 모든 실행 중인 mutations의 변수 가져오기**
+
+```tsx
+import { useMutationState } from "@tanstack/react-query";
+
+const variables = useMutationState({
+  filters: { status: "pending" },
+  select: (mutation) => mutation.state.variables,
+});
+```
+
+이 예제는 `status`가 `'pending'`인 모든 실행 중인 mutation의 변수들을 가져옵니다.
+
+**Example 2: `mutationKey`를 통해 특정 mutation의 모든 데이터 가져오기**
+
+```tsx
+import { useMutation, useMutationState } from "@tanstack/react-query";
+
+const mutationKey = ["posts"];
+
+// 상태를 가져오고자 하는 mutation
+const mutation = useMutation({
+  mutationKey,
+  mutationFn: (newPost) => {
+    return axios.post("/posts", newPost);
+  },
+});
+
+const data = useMutationState({
+  // 이 mutation key는 위의 mutation key와 일치해야 합니다.
+  filters: { mutationKey },
+  select: (mutation) => mutation.state.data,
+});
+```
+
+이 예제는 `mutationKey`가 `['posts']`인 mutation의 모든 데이터를 가져옵니다.
+
+**Example 3: `mutationKey`를 통해 최신 mutation 데이터 접근하기**
+
+각 `mutate` 호출은 `gcTime` 밀리초 동안 mutation cache에 새 항목을 추가합니다. 최신 호출에 접근하려면 `useMutationState`가 반환하는 마지막 항목을 확인할 수 있습니다.
+
+```tsx
+import { useMutation, useMutationState } from "@tanstack/react-query";
+
+const mutationKey = ["posts"];
+
+// 상태를 가져오고자 하는 mutation
+const mutation = useMutation({
+  mutationKey,
+  mutationFn: (newPost) => {
+    return axios.post("/posts", newPost);
+  },
+});
+
+const data = useMutationState({
+  // 이 mutation key는 위의 mutation key와 일치해야 합니다.
+  filters: { mutationKey },
+  select: (mutation) => mutation.state.data,
+});
+
+// 최신 mutation 데이터
+const latest = data[data.length - 1];
+```
+
+이 예제는 최신 mutation 데이터를 `data` 배열의 마지막 항목에서 가져옵니다.
+
+**Options**
+
+- `options`
+  - `filters?: MutationFilters`: [Mutation Filters](../../guides/filters#mutation-filters)
+  - `select?: (mutation: Mutation) => TResult`
+    - 이 옵션을 사용해 mutation 상태를 변형할 수 있습니다.
+- `queryClient?: QueryClient`
+  - 커스텀 `QueryClient`를 사용하려면 이 옵션을 설정합니다. 그렇지 않으면 가장 가까운 컨텍스트의 `QueryClient`가 사용됩니다.
+
+**Returns**
+
+- `Array<TResult>`
+  - `select`가 반환하는 값으로 이루어진 배열을 반환합니다.
