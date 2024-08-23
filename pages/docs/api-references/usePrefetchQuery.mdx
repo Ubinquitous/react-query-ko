@@ -1,0 +1,27 @@
+---
+id: usePrefetchQuery
+title: usePrefetchQuery
+---
+
+## usePrefetchQuery
+
+```tsx
+usePrefetchQuery(options);
+```
+
+**Options**
+
+`usePrefetchQuery`에 전달할 수 있는 옵션은 [`queryClient.prefetchQuery`](../../../../reference/QueryClient#queryclientprefetchquery)와 동일합니다. 다음은 필수로 제공해야 하는 옵션들입니다:
+
+- `queryKey: QueryKey`
+
+  - **필수**
+  - 렌더링 중에 prefetch할 query key입니다.
+
+- `queryFn: (context: QueryFunctionContext) => Promise<TData>`
+
+  - **필수, 그러나 기본 query 함수가 정의되지 않은 경우에만**. 기본 query 함수에 대한 자세한 내용은 [Default Query Function](../../guides/default-query-function)을 참조하세요.
+
+**Returns**
+
+`usePrefetchQuery`는 아무것도 반환하지 않습니다. 이는 단지 render 중에 prefetch를 실행하는 용도로 사용되며, [`useSuspenseQuery`](../useSuspenseQuery)를 사용하는 컴포넌트를 감싸는 suspense boundary 전에 호출해야 합니다.
