@@ -1,0 +1,30 @@
+---
+id: useQueryErrorResetBoundary
+title: useQueryErrorResetBoundary
+---
+
+## useQueryErrorResetBoundary
+
+이 훅은 가장 가까운 `QueryErrorResetBoundary` 내의 쿼리 오류를 리셋합니다. 만약 정의된 경계가 없으면 전역적으로 오류를 리셋합니다:
+
+```tsx
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { ErrorBoundary } from "react-error-boundary";
+
+const App = () => {
+  const { reset } = useQueryErrorResetBoundary();
+  return (
+    <ErrorBoundary
+      onReset={reset}
+      fallbackRender={({ resetErrorBoundary }) => (
+        <div>
+          오류가 발생했습니다!
+          <Button onClick={() => resetErrorBoundary()}>다시 시도</Button>
+        </div>
+      )}
+    >
+      <Page />
+    </ErrorBoundary>
+  );
+};
+```
