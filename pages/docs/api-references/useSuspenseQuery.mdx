@@ -1,0 +1,27 @@
+---
+id: useSuspenseQuery
+title: useSuspenseQuery
+---
+
+## useSuspenseQuery
+
+```tsx
+const result = useSuspenseQuery(options);
+```
+
+**옵션**
+
+`[useQuery](../useQuery)`와 동일하지만, 다음 옵션이 없습니다:
+
+- `throwOnError`
+- `enabled`
+- `placeholderData`
+
+**반환값**
+
+`[useQuery](../useQuery)`와 동일한 객체를 반환하지만, 다음과 같은 차이점이 있습니다:
+
+- `data`는 항상 정의되어 있습니다.
+- `isPlaceholderData`는 없습니다.
+- `status`는 항상 `success`입니다.
+  - 파생된 플래그는 이에 맞게 설정됩니다.
