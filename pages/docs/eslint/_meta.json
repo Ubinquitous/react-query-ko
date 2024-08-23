@@ -1,0 +1,17 @@
+{
+  "eslint-plugin-query": {
+    "title": "ESlint Plugin Query"
+  },
+  "exhaustive-deps": {
+    "title": "Exhaustive Deps"
+  },
+  "no-rest-destructuring": {
+    "title": "No Rest Destructuring"
+  },
+  "no-unstable-deps": {
+    "title": "No Unstable Deps"
+  },
+  "stable-query-client": {
+    "title": "Stable Query Client"
+  }
+}
