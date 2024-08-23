@@ -1,0 +1,120 @@
+---
+id: createAsyncStoragePersister
+title: createAsyncStoragePersister
+---
+
+## Installation
+
+이 유틸리티는 별도의 패키지로 제공되며, `'@tanstack/query-async-storage-persister'`로 임포트할 수 있습니다.
+
+```bash
+npm install @tanstack/query-async-storage-persister @tanstack/react-query-persist-client
+```
+
+또는
+
+```bash
+pnpm add @tanstack/query-async-storage-persister @tanstack/react-query-persist-client
+```
+
+또는
+
+```bash
+yarn add @tanstack/query-async-storage-persister @tanstack/react-query-persist-client
+```
+
+또는
+
+```bash
+bun add @tanstack/query-async-storage-persister @tanstack/react-query-persist-client
+```
+
+## Usage
+
+- `createAsyncStoragePersister` 함수를 임포트합니다.
+- 새 `asyncStoragePersister`를 생성합니다.
+  - `AsyncStorage` 인터페이스를 따르는 어떤 `storage`도 사용할 수 있습니다. 아래 예제에서는 React Native의 async-storage를 사용합니다.
+- [`PersistQueryClientProvider`](../persistQueryClient#persistqueryclientprovider) 컴포넌트를 사용하여 앱을 감쌉니다.
+
+```tsx
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24시간
+    },
+  },
+});
+
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+});
+
+const Root = () => (
+  <PersistQueryClientProvider
+    client={queryClient}
+    persistOptions={{ persister: asyncStoragePersister }}
+  >
+    <App />
+  </PersistQueryClientProvider>
+);
+
+export default Root;
+```
+
+## Retries
+
+Retries는 [SyncStoragePersister](../createSyncStoragePersister)와 동일하게 작동하지만, 비동기적일 수 있습니다. 모든 사전 정의된 retry 핸들러를 사용할 수도 있습니다.
+
+## API
+
+### `createAsyncStoragePersister`
+
+이 함수를 호출하여 나중에 `persistQueryClient`와 함께 사용할 수 있는 asyncStoragePersister를 생성합니다.
+
+```tsx
+createAsyncStoragePersister(options: CreateAsyncStoragePersisterOptions)
+```
+
+### `Options`
+
+```tsx
+interface CreateAsyncStoragePersisterOptions {
+  /** 캐시에서 항목을 설정하고 검색하는 데 사용되는 storage 클라이언트 */
+  storage: AsyncStorage | undefined | null;
+  /** 캐시를 localStorage에 저장할 때 사용할 키 */
+  key?: string;
+  /** localStorage의 과도한 저장을 방지하기 위해
+   * 캐시를 디스크에 저장하는 빈도를 조절할 시간(ms) */
+  throttleTime?: number;
+  /** 데이터를 저장소에 직렬화하는 방법 */
+  serialize?: (client: PersistedClient) => string;
+  /** 저장소에서 데이터를 역직렬화하는 방법 */
+  deserialize?: (cachedString: string) => PersistedClient;
+  /** 오류 발생 시 persistence를 재시도하는 방법 **/
+  retry?: AsyncPersistRetryer;
+}
+
+interface AsyncStorage {
+  getItem: (key: string) => Promise<string | null>;
+  setItem: (key: string, value: string) => Promise<unknown>;
+  removeItem: (key: string) => Promise<void>;
+}
+```
+
+기본 옵션은 다음과 같습니다:
+
+```tsx
+{
+  key = `REACT_QUERY_OFFLINE_CACHE`,
+  throttleTime = 1000,
+  serialize = JSON.stringify,
+  deserialize = JSON.parse,
+}
+```
+
+이 설정은 캐시를 저장하고 관리하는 방법을 정의합니다. `storage`는 데이터를 저장하고 불러오는 데 사용되며, `key`는 캐시를 저장할 때의 식별자입니다. `throttleTime`은 캐시를 디스크에 저장하는 빈도를 조절하고, `serialize`와 `deserialize`는 데이터를 직렬화하고 역직렬화하는 방법을 설정합니다. `retry`는 오류 발생 시 persistence를 재시도하는 방법을 정의합니다.
