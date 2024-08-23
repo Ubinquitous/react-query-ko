@@ -1,0 +1,120 @@
+---
+id: QueryCache
+title: QueryCache
+---
+
+## `QueryCache`
+
+`QueryCache`는 TanStack Query의 저장 메커니즘으로, 모든 데이터, 메타 정보 및 쿼리 상태를 저장합니다.
+
+**일반적으로 `QueryCache`와 직접 상호작용하지 않고, 특정 캐시에 대해 `QueryClient`를 사용합니다.**
+
+```tsx
+import { QueryCache } from "@tanstack/react-query";
+
+const queryCache = new QueryCache({
+  onError: (error) => {
+    console.log(error);
+  },
+  onSuccess: (data) => {
+    console.log(data);
+  },
+  onSettled: (data, error) => {
+    console.log(data, error);
+  },
+});
+
+const query = queryCache.find(["posts"]);
+```
+
+사용 가능한 메서드는 다음과 같습니다:
+
+- [`find`](#querycachefind)
+- [`findAll`](#querycachefindall)
+- [`subscribe`](#querycachesubscribe)
+- [`clear`](#querycacheclear)
+
+### **Options**
+
+- `onError?: (error: unknown, query: Query) => void`
+  - 선택적
+  - 쿼리가 오류를 만날 경우 호출됩니다.
+- `onSuccess?: (data: unknown, query: Query) => void`
+  - 선택적
+  - 쿼리가 성공할 경우 호출됩니다.
+- `onSettled?: (data: unknown | undefined, error: unknown | null, query: Query) => void`
+  - 선택적
+  - 쿼리가 완료되었을 때(성공 또는 오류) 호출됩니다.
+
+## `queryCache.find`
+
+`find`는 캐시에서 기존 쿼리 인스턴스를 가져오는 데 사용되는 약간 더 고급 동기 메서드입니다. 이 인스턴스는 쿼리에 대한 **모든** 상태를 포함하며, 모든 인스턴스와 쿼리의 내부 정보도 포함됩니다. 쿼리가 존재하지 않으면 `undefined`가 반환됩니다.
+
+> 참고: 대부분의 애플리케이션에서는 일반적으로 필요하지 않지만, 드문 시나리오(예: 쿼리의 `state.dataUpdatedAt` 타임스탬프를 보고 쿼리가 초기 값으로 사용할 만큼 신선한지 결정할 때)에서 더 많은 정보를 얻는 데 유용할 수 있습니다.
+
+```tsx
+const query = queryCache.find(queryKey);
+```
+
+### **Options**
+
+- `filters?: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+
+**Returns**
+
+- `Query`
+  - 캐시에서 가져온 쿼리 인스턴스
+
+## `queryCache.findAll`
+
+`findAll`은 캐시에서 쿼리 키와 부분적으로 일치하는 기존 쿼리 인스턴스를 가져오는 데 사용되는 더 고급 동기 메서드입니다. 쿼리가 존재하지 않으면 빈 배열이 반환됩니다.
+
+> 참고: 대부분의 애플리케이션에서는 일반적으로 필요하지 않지만, 드문 시나리오에서 쿼리에 대한 더 많은 정보를 얻는 데 유용할 수 있습니다.
+
+```tsx
+const queries = queryCache.findAll(queryKey);
+```
+
+### **Options**
+
+- `queryKey?: QueryKey`: [Query Keys](../../framework/react/guides/query-keys)
+- `filters?: QueryFilters`: [Query Filters](../../framework/react/guides/filters#query-filters)
+
+**Returns**
+
+- `Query[]`
+  - 캐시에서 가져온 쿼리 인스턴스 배열
+
+## `queryCache.subscribe`
+
+`subscribe` 메서드는 쿼리 캐시 전체에 구독하여 쿼리 상태 변경 또는 쿼리의 업데이트, 추가, 제거와 같은 안전한/알려진 업데이트에 대한 알림을 받을 수 있습니다.
+
+```tsx
+const callback = (event) => {
+  console.log(event.type, event.query);
+};
+
+const unsubscribe = queryCache.subscribe(callback);
+```
+
+### **Options**
+
+- `callback: (event: QueryCacheNotifyEvent) => void`
+  - 이 함수는 쿼리 캐시가 업데이트될 때 호출됩니다(예: `query.setState`, `queryClient.removeQueries` 등). 범위를 벗어난 캐시 변경은 권장되지 않으며 구독 콜백을 트리거하지 않습니다.
+
+**Returns**
+
+- `unsubscribe: Function => void`
+  - 이 함수는 쿼리 캐시에서 콜백의 구독을 취소합니다.
+
+## `queryCache.clear`
+
+`clear` 메서드는 캐시를 완전히 지우고 새로 시작하는 데 사용됩니다.
+
+```tsx
+queryCache.clear();
+```
+
+## 추가 읽기
+
+`QueryCache`가 내부적으로 어떻게 작동하는지 더 잘 이해하려면 [#18: Inside React Query](../../framework/react/community/tkdodos-blog#18-inside-react-query)에서 커뮤니티 리소스를 참고하세요.
