@@ -5,13 +5,13 @@ title: TypeScript
 
 ## TypeScript
 
-이제 React Query는 타입스크립트로 작성되었기에, 라이브러리가 여러분의 프로젝트의 타입 안전성을 보장해줍니다!
+이제 React Query는 타입스크립트로 구성되어 여러분의 프로젝트에 타입 안전성을 보장해줍니다!
 
 기억해야 할 사항들:
 
 - 현재 TypeScript v4.7 이상을 요구합니다.
-- 이 저장소의 타입 변경은 호환성에 영향을 미치지 않으며, 보통 패치 버전으로 릴리스됩니다 (모든 타입 개선이 메이저 버전이 되지 않도록 하기 위함입니다).
-- React Query 패키지 버전을 특정 패치 릴리스로 고정하고, 타입이 수정되거나 업그레이드될 수 있음을 감안하여 업그레이드하는 것을 강력히 권장합니다.
+- 이 저장소의 타입 변경은 호환성에 영향을 미치지 않으며, 보통 패치 버전으로 릴리스됩니다 (모든 타입 개선이 상위 버전이 되지 않도록 하기 위함입니다).
+- React Query 패키지 버전을 특정 패치 릴리스로 고정하고, 타입이 수정되거나 업그레이드될 수 있음을 감안하고 업그레이드하는 것을 강력히 권장합니다.
 - React Query의 타입과 관련이 없는 공개 API는 여전히 엄격하게 semver를 따릅니다.
 
 ## Type Inference
@@ -46,7 +46,7 @@ const { data } = useQuery({
 
 [//]: # "TypeInference2"
 
-이 기능은 queryFn의 반환 타입이 명확하게 정의되어 있을 때 가장 잘 작동합니다. 대부분의 데이터 페칭 라이브러리는 기본적으로 any를 반환하므로, 이를 올바르게 타입이 지정된 함수로 추출하는 것이 중요합니다.
+이 기능은 queryFn의 반환 타입이 명확하게 정의되어 있을 때 가장 잘 작동하므로, 타입이 지정된 함수로 추출하는 것이 중요합니다. 대부분의 데이터 페칭 라이브러리는 기본적으로 any를 반환합니다.
 
 [//]: # "TypeInference3"
 
@@ -156,13 +156,13 @@ const { error } = useQuery({ queryKey: ["groups"], queryFn: fetchGroups });
 
 ### Registering global Meta
 
-[전역 오류 타입](#registering-a-global-error)을 등록하는 것과 유사하게, 전역 `Meta` 타입을 등록할 수도 있습니다. 이를 통해 [queries](/docs/api-references/useQuery)와 [mutations](/docs/api-references/useMutation)의 옵셔널한 `meta` 필드가 일관되게 유지되고 타입 안전성을 보장할 수 있습니다. 등록된 타입은 `Record<string, unknown>`을 확장해야 meta를 객체로 유지할 수 있습니다.
+[전역 Error 타입](#registering-a-global-error)을 등록하는 것과 유사하게, 전역 `Meta` 타입을 등록할 수도 있습니다. 이를 통해 [queries](/docs/api-references/useQuery)와 [mutations](/docs/api-references/useMutation)의 옵셔널한 `meta` 필드가 일관되게 유지되고 타입 안전성을 보장할 수 있습니다. 등록된 타입은 `Record<string, unknown>`을 확장해야 meta를 객체로 유지할 수 있습니다.
 
 ```ts
 import "@tanstack/react-query";
 
 interface MyMeta extends Record<string, unknown> {
-  // Your meta type definition.
+  // 메타 타입 정의
 }
 
 declare module "@tanstack/react-query" {
@@ -178,7 +178,7 @@ declare module "@tanstack/react-query" {
 
 ## Typing Query Options
 
-`useQuery`에 쿼리 옵션을 인라인으로 넣으면 자동으로 타입 추론이 됩니다. 그러나 예를 들어 쿼리 옵션을 별도의 함수로 추출하여 `useQuery`와 `prefetchQuery` 간에 공유하고 싶을 수도 있습니다. 이 경우에는 타입 추론이 사라지게 됩니다. 이를 다시 작동시키려면, `queryOptions` 헬퍼를 사용할 수 있습니다.
+`useQuery`에 queryOptions를 인라인으로 넣으면 자동으로 타입 추론이 됩니다. 그러나 예를 들어 쿼리 옵션을 별도의 함수로 추출하여 `useQuery`와 `prefetchQuery` 간에 공유하고 싶을 수도 있습니다. 이 경우에는 타입 추론이 사라지게 됩니다. 이를 다시 작동시키려면, `queryOptions`를 사용할 수 있습니다.
 
 ```ts
 import { queryOptions } from "@tanstack/react-query";
@@ -227,4 +227,10 @@ const data = queryClient.getQueryData<Group[]>(["groups"]);
 
 ## Typesafe disabling of queries using `skipToken`
 
-타입스크립트를 사용하고 있다면, `skipToken`을 사용하여 쿼리를 비활성화할 수 있습니다. 이는 조건에 따라 [쿼리를 비활성화](/docs/guides-and-concepts/disabling-queries)하면서도 타입 안전성을 유지하고 싶을 때 유용합니다. 더 자세한 내용은 쿼리 비활성화 가이드를 참조하세요.
+타입스크립트를 사용하고 있다면, `skipToken`을 사용하여 query를 비활성화할 수 있습니다. 이는 조건에 따라 [query를 비활성화](/docs/guides-and-concepts/disabling-queries)하면서도 타입 안전성을 유지하고 싶을 때 유용합니다. 더 자세한 내용은 query 비활성화 가이드를 참조하세요.
+
+#### Changed History
+
+**2024.08.26. @ubinquitous**
+
+- [구문] 이 기능은 queryFn의 반환 타입이 명확하게 정의되어 있을 때 가장 잘 작동합니다. 대부분의 데이터 페칭 라이브러리는 기본적으로 any를 반환하므로, 이를 올바르게 타입이 지정된 함수로 추출하는 것이 중요합니다. → 이 기능은 queryFn의 반환 타입이 명확하게 정의되어 있을 때 가장 잘 작동하므로, 타입이 지정된 함수로 추출하는 것이 중요합니다. 대부분의 데이터 페칭 라이브러리는 기본적으로 any를 반환합니다.
