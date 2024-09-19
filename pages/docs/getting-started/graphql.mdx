@@ -33,14 +33,14 @@ const allFilmsWithVariablesQueryDocument = graphql(/* GraphQL */ `
 `);
 
 function App() {
-  // `data` is fully typed!
+  // `data`가 완전히 입력되었습니다!
   const { data } = useQuery({
     queryKey: ["films"],
     queryFn: async () =>
       request(
         "https://swapi-graphql.netlify.app/.netlify/functions/index",
         allFilmsWithVariablesQueryDocument,
-        // variables are type-checked too!
+        // 변수 또한 타입 검사가 가능합니다!
         { first: 10 }
       ),
   });
@@ -53,3 +53,10 @@ function App() {
 [GraphQL Code Generator 문서의 전용 가이드](https://www.the-guild.dev/graphql/codegen/docs/guides/react-vue)를 통해 시작해 보세요.
 
 [//]: # "Codegen"
+
+#### Changed History
+
+**2024.08.26. @ubinquitous**
+
+- [주석] `data` is fully typed! → `data`가 완전히 입력되었습니다!
+- [주석] variables are type-checked too! → 변수 또한 타입 검사가 가능합니다!
