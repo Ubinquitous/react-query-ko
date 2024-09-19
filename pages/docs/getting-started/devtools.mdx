@@ -5,45 +5,27 @@ title: Devtools
 
 ## Devtools
 
-지금 당장 손을 번쩍 들고 "야호!"라고 외치세요! React Query에는 전용 개발 도구가 있거든요 🥳
+지금 당장 손을 번쩍 들고 "야호!"라고 외치세요! React Query 전용 개발 툴이 존재하거든요 🥳
 
-React Query로 떠나는 여정을 시작할 때 개발 도구들을 챙겨가면 좋습니다.  
-이 도구들은 React Query의 모든 내부 작동을 시각화하는 데 도움을 줍니다.  
-문제에 직면했을 때 디버깅 시간을 절약할 수 있는거죠!
+React Query로 떠나는 여정을 시작할 때 개발 툴들을 챙겨가면 좋습니다.  
+이 툴들은 React Query의 모든 내부 작동을 시각화하는 데 도움을 줍니다.  
+문제가 발생했을 때 디버깅 시간을 절약할 수 있는거죠!
 
-> <b>
->   <i>
->     "현재로서 개발 도구는 React Native를 지원하지 않음을 유의해 주세요. 개발
->     도구를 플랫폼에 구애받지 않도록 만드는 데 도움을 주고 싶으시면
->     알려주세요!"
->   </i>
-> </b>
+{/* prettier-ignore */}
+> <b><i>"현재로서 React Native에서는 개발 툴을 지원하지 않음을 유의해 주세요. 개발<br/>툴을 모든 플랫폼에서 사용할 수 있도록 만드는 데 도움을 주고 싶으시면<br/>알려주세요!"</i></b>
 
-> <b>
->   <i>
->     "신나는 소식: 이제 React Native용 React Query DevTools가 별도의 패키지로
->     제공됩니다! 이 새로운 추가 기능은 네이티브 지원을 제공하여 React Native
->     프로젝트에 DevTools를 직접 통합할 수 있습니다. 확인하고 기여해 주세요:
->     [react-native-react-query-devtools](https://github.com/LovesWorking/react-native-react-query-devtools)"
->   </i>
-> </b>
+{/* prettier-ignore */}
+> <b><i>"신나는 소식: 이제 React Native용 React Query DevTools가 별도의 패키지로<br/>제공됩니다! 이 새로운 추가 기능은 네이티브 지원을 제공하여 React Native<br/>프로젝트에 DevTools를 직접 통합할 수 있습니다. 확인하고 기여해 주세요:<br/>[react-native-react-query-devtools](https://github.com/LovesWorking/react-native-react-query-devtools)"</i></b>
 
-> <b>
->   <i>
->     "또한, 외부 대시보드를 통해 React Query DevTools를 사용할 수 있는 외부
->     도구도 제공됩니다. 자세한 내용과 기여 방법은
->     [react-query-external-sync](https://github.com/LovesWorking/react-query-external-sync)에서
->     확인해 주세요."
->   </i>
-> </b>
+{/* prettier-ignore */}
+> <b><i>"또한, 외부 대시보드를 통해 React Query DevTools를 사용할 수 있는 외부<br/>툴도 제공됩니다. 자세한 내용과 기여 방법은<br/>[react-query-external-sync](https://github.com/LovesWorking/react-query-external-sync)에서<br/>확인해 주세요."</i></b>
 
-> <b>
->   <i>"v5부터는 개발 도구가 mutations을 관찰하는 기능도 지원합니다."</i>
-> </b>
+{/* prettier-ignore */}
+> <b><i>"v5부터는 개발 툴이  mutations을 관찰하는 기능도 지원합니다."</i></b>
 
 ## Install and Import the Devtools
 
-개발 도구는 별도의 패키지로 제공되며, 설치가 필요합니다:
+개발 툴은 별도의 패키지로 제공되기에 설치가 필요합니다:
 
 ```bash
 $ npm i @tanstack/react-query-devtools
@@ -55,25 +37,25 @@ $ yarn add @tanstack/react-query-devtools
 $ bun add @tanstack/react-query-devtools
 ```
 
-Next 13+ App Dir의 경우, 개발 도구가 작동하려면 dev dependency로 설치해야 합니다.
+Next 13+ 앱 라우터의 경우, 개발 툴을 작동하려면 devdependencies로 설치해야 합니다.
 
-다음과 같이 개발 도구를 import할 수 있습니다:
+다음과 같이 개발 툴을 import할 수 있습니다:
 
 ```jsx
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 ```
 
 React Query Devtools는 `process.env.NODE_ENV === 'development'`일 때만  
-번들에 포함되므로, 프로덕션 빌드에서 번들을 제외하는 걱정을 할 필요가 없습니다.
+번들에 포함되므로, 프로덕션 빌드에서 번들을 따로 제외하지 않아도 됩니다.
 
 ## Floating Mode
 
-Floating Mode는 개발 도구를 앱 내 고정된 떠 있는 요소로 마운트하며,  
-화면의 모서리에 토글 버튼을 제공하여 개발 도구를 표시하거나 숨길 수 있습니다.  
+Floating Mode는 개발 툴을 앱 내 고정된 떠 있는 요소로 마운트하며,  
+화면의 모서리에 토글 버튼을 제공하여 개발 툴을 표시하거나 숨길 수 있습니다.  
 이 토글 상태는 로컬 스토리지에 저장되어 페이지를 새로 고침해도 기억됩니다.
 
-다음 코드를 React 앱에서 가능한 한 높은 위치에 배치하세요.  
-페이지의 루트에 가까울수록 더 잘 작동합니다!
+다음 코드를 React 앱에서 가능한 한 최상단에 배치하세요.
+루트에 가까울수록 더 잘 작동합니다!
 
 ```jsx
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -92,17 +74,17 @@ function App() {
 
 - `initialIsOpen: Boolean`
 
-  - 개발 도구가 기본적으로 열려 있도록 하려면 이 값을 true로 설정합니다.
+  - 개발 툴 패널이 기본적으로 오픈되게 하려면 이 값을 true로 설정합니다.
 
 - `buttonPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "relative"`
 
-  - 기본값은 bottom-right입니다.
-  - React Query 로고가 개발 도구 패널을 열고 닫는 버튼의 위치를 설정합니다. relative로 설정하면, 개발 도구를 렌더링하는 위치에 버튼이 배치됩니다.
+  - 디폴트값 : bottom-right
+  - 개발 툴 토글 버튼의 위치를 설정합니다. relative로 설정하면, 개발 툴을 렌더링하는 위치에 버튼이 배치됩니다.
 
 - `position?: "top" | "bottom" | "left" | "right"`
 
-  - 기본값은 bottom입니다.
-  - React Query 개발 도구 패널의 위치를 설정합니다.
+  - 디폴트값 : bottom
+  - React Query 개발 툴 패널의 위치를 설정합니다.
 
 - `client?: QueryClient`
 
@@ -110,22 +92,22 @@ function App() {
 
 - `errorTypes?: { name: string; initializer: (query: Query) => TError }`
 
-  - 쿼리에서 발생할 수 있는 일부 오류를 미리 정의하려면 이 값을 사용합니다. 오류가 UI에서 토글될 때 initializer가 호출되며(특정 쿼리와 함께), 반드시 Error 객체를 반환해야 합니다.
+  - query에서 발생할 수 있는 일부 오류를 미리 정의할 때 사용합니다. 오류가 UI에서 토글될 때 initializer가 호출되며(특정 query와 함께), 반드시 Error 객체를 반환해야 합니다.
 
 - `styleNonce?: string`
 
   - 문서 헤드에 추가된 스타일 태그에 nonce를 전달하려면 이 값을 사용합니다. Content Security Policy (CSP) nonce를 사용하여 인라인 스타일을 허용하는 경우 유용합니다.
 
 - `shadowDOMTarget?: ShadowRoot`
-  - 기본 동작은 개발 도구의 스타일을 DOM의 head 태그에 적용합니다.
-  - 스타일을 light DOM의 head 태그 대신 shadow DOM 내에 적용하려면 shadow DOM 타겟을 개발 도구에 전달합니다.
+  - 디폴트값 : 개발 툴의 스타일을 DOM의 head 태그에 적용
+  - 스타일을 light DOM의 head 태그 대신 shadow DOM 내에 적용하려면 shadow DOM의 target을 개발 툴에 전달합니다.
 
 ### Devtools in production
 
-개발 도구는 프로덕션 빌드에서 제외됩니다.
-하지만, 프로덕션 환경에서 개발 도구를 lazy loading하는 것이 바람직할 수 있습니다:
+개발 툴은 프로덕션 빌드에서 제외됩니다.
+하지만, 프로덕션 환경에서는 개발 툴을 lazy loading하는 것이 바람직할 수 있습니다:
 
-```jsx
+```tsx
 import * as React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -165,7 +147,7 @@ function App() {
 export default App;
 ```
 
-이 방법을 사용하면 window.toggleDevtools()를 호출하여 개발 도구 번들을 다운로드하고 표시할 수 있습니다.
+이 방법을 사용하면 window.toggleDevtools()를 호출하여 개발 툴 번들을 다운로드하고 표시할 수 있습니다.
 
 ### Modern bundlers
 
@@ -179,4 +161,13 @@ const ReactQueryDevtoolsProduction = React.lazy(() =>
 );
 ```
 
-TypeScript를 사용하는 경우, tsconfig에서 moduleResolution: 'nodenext'를 설정해야 하며, TypeScript 버전이 v4.7 이상이어야 합니다.
+TypeScript를 사용하는 경우, tsconfig에서 moduleResolution: 'nodenext'를 설정해야 하며, TypeScript v4.7 이상이어야 합니다.
+
+#### Changed History
+
+**2024.08.26. @ubinquitous**
+
+- [용어] 개발 툴 → 개발 툴
+- [용어] 기본 동작, 기본값 → 디폴트값
+- [구문] 번들을 제외하는 걱정을 할 필요가 없습니다. → 번들을 따로 제외하지 않아도 됩니다.
+- [구문] 가능한 한 높은 위치에 배치하세요. → 가능한 한 최상단에 배치하세요.
