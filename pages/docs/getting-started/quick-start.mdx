@@ -11,7 +11,7 @@ title: Quick Start
 - [Mutations](/docs/guides-and-concepts/mutations)
 - [Query Invalidation](/docs/guides-and-concepts/query-invalidation)
 
-완전히 작동하는 예제를 원한다면, 작성해둔 [간단한 StackBlitz 예제](https://tanstack.com/query/latest/docs/framework/react/examples/simple)를 확인해보세요.
+직접 작동시켜볼 수 있는 예제를 찾으신다면 [간단한 StackBlitz 예제](https://tanstack.com/query/latest/docs/framework/react/examples/simple)를 확인해보세요.
 
 ```tsx
 import {
@@ -23,12 +23,12 @@ import {
 } from "@tanstack/react-query";
 import { getTodos, postTodo } from "../my-api";
 
-// Create a client
+// 클라이언트를 생성합니다.
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    // Provide the client to your App
+    // 어플리케이션 루트에 클라이언트를 주입합니다.
     <QueryClientProvider client={queryClient}>
       <Todos />
     </QueryClientProvider>
@@ -36,7 +36,7 @@ function App() {
 }
 
 function Todos() {
-  // Access the client
+  // 클라이언트에 접근합니다.
   const queryClient = useQueryClient();
 
   // Queries
@@ -78,3 +78,12 @@ render(<App />, document.getElementById("root"));
 
 이 세 가지 개념은 React Query의 핵심 기능 대부분을 구성합니다.  
 문서의 다음 섹션에서는 이러한 핵심 개념 각각에 대해 자세히 설명하겠습니다.
+
+#### Changed History
+
+**2024.08.26. @ubinquitous**
+
+- [구문] 완전히 작동하는 예제를 원한다면, 작성해둔 → 직접 작동시켜볼 수 있는 예제를 찾으신다면
+- [주석] Create a client → 클라이언트를 생성합니다.
+- [주석] Provide the client to your App → 어플리케이션 루트에 클라이언트를 주입합니다.
+- [주석] Access the client → 클라이언트에 접근합니다.
