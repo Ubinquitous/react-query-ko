@@ -7,7 +7,7 @@ title: React Native
 
 React Query는 React Native와 즉시 호환되도록 설계되어 있지만, 현재로서는 devtools가 React DOM에서만 지원됩니다.
 
-다음은 React Native에서 사용할 수 있는 서드 파티 플러그인들입니다:
+다음은 React Native에서 사용할 수 있는 third-party 플러그인들입니다:
 
 [Expo](https://docs.expo.dev/) 플러그인: https://github.com/expo/dev-plugins/tree/main/packages/react-query
 
@@ -15,7 +15,7 @@ React Query는 React Native와 즉시 호환되도록 설계되어 있지만, �
 
 [Reactotron](https://github.com/infinitered/reactotron/) 플러그인: https://github.com/hsndmr/reactotron-react-query
 
-라이브러리 안에 내장된 devtools를 플랫폼에 구애받지 않도록 만들고 싶다면, React Query 팀에게 연락해주세요!
+라이브러리 안에 내장된 devtools를 모든 플랫폼에서 사용할 수 있도록 만들고 싶다면, React Query 팀에게 연락해주세요!
 
 ## Online status management
 
@@ -84,7 +84,7 @@ export function useRefreshOnFocus<T>(refetch: () => Promise<T>) {
 
 ## Disable re-renders on out of focus Screens
 
-성능 문제를 포함한 몇 가지 상황에서는 React Native 화면이 포커스에서 벗어날 때 리렌더링을 중지하고 싶을 수 있습니다. 이를 위해 `@react-navigation/native`의 `useFocusEffect`와 `notifyOnChangeProps` 쿼리 옵션을 함께 사용할 수 있습니다.
+성능 문제를 포함한 몇 가지 상황에서는 React Native 화면이 포커스에서 벗어날 때 리렌더링을 중지하고 싶을 수 있습니다. 이를 위해 `@react-navigation/native`의 `useFocusEffect`와 `notifyOnChangeProps` queryOption을 함께 사용할 수 있습니다.
 
 이 커스텀 훅은 화면이 포커스에서 벗어날 때 빈 배열을 반환하는 `notifyOnChangeProps` 옵션을 제공합니다. 이렇게 하면 해당 상황에서 리렌더링이 효과적으로 중지됩니다. 화면이 다시 포커스되면 동작이 정상으로 돌아옵니다.
 
@@ -149,7 +149,7 @@ function MyComponent() {
 
 ## Disable queries on out of focus screens
 
-enabled는 콜백으로 설정할 수도 있어, 상태와 리렌더링 없이 화면 포커스가 벗어난 경우 쿼리 비활성화를 지원합니다. 이는 notifyOnChangeProps가 작동하는 방식과 유사하지만, 추가로 refetchType이 active일 때 쿼리를 무효화할 때 재요청을 트리거하지 않습니다.
+enabled는 콜백으로 설정할 수도 있어, state와 리렌더링 없이 화면 포커스가 벗어난 경우 쿼리 비활성화를 지원합니다. 이는 notifyOnChangeProps가 작동하는 방식과 유사하지만, 추가로 refetchType이 active일 때 쿼리를 무효화할 때 재요청을 트리거하지 않습니다.
 
 ```tsx
 import React from 'react'
