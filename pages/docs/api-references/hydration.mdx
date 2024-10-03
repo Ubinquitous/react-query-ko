@@ -7,7 +7,7 @@ title: hydration
 
 ## `dehydrate`
 
-`dehydrate`는 `cache`의 동결된 표현을 생성하여, 나중에 `HydrationBoundary`나 `hydrate`로 복원할 수 있습니다. 이는 서버에서 클라이언트로 미리 가져온 쿼리를 전달하거나, 쿼리를 `localStorage`나 다른 지속적인 위치에 저장하는 데 유용합니다. 기본적으로 현재 성공적인 쿼리만 포함됩니다.
+`dehydrate`는 `cache`의 읽기 전용 hydrate 데이터를 생성하여, 나중에 `HydrationBoundary`나 `hydrate`로 dehydrate할 수 있습니다. 이는 서버에서 클라이언트로 미리 가져온 쿼리를 전달하거나, 쿼리를 `localStorage`나 다른 지속적인 위치에 저장하는 데 유용합니다. 기본적으로 성공적으로 데이터를 가져온 쿼리만 포함됩니다.
 
 ```tsx
 import { dehydrate } from "@tanstack/react-query";
@@ -21,37 +21,37 @@ const dehydratedState = dehydrate(queryClient, {
 **옵션**
 
 - `client: QueryClient`
-  - **필수**
+  - **Required**
   - `dehydrate`할 `queryClient`
 - `options: DehydrateOptions`
-  - 선택 사항
+  - Optional
   - `shouldDehydrateMutation: (mutation: Mutation) => boolean`
-    - 선택 사항
-    - mutation을 dehydrate할지 여부.
+    - Optional
+    - mutation을 dehydrate할지 여부입니다.
     - 캐시의 각 mutation에 대해 호출됩니다.
       - 이 mutation을 포함하려면 `true`를 반환하고, 그렇지 않으면 `false`를 반환합니다.
     - 기본적으로 일시 중지된 mutation만 포함됩니다.
     - 기본 동작을 유지하면서 이 함수를 확장하려면 `defaultShouldDehydrateMutation`을 가져와서 반환문에서 실행하면 됩니다.
   - `shouldDehydrateQuery: (query: Query) => boolean`
-    - 선택 사항
-    - 쿼리를 dehydrate할지 여부.
+    - Optional
+    - 쿼리를 dehydrate할지 여부입니다.
     - 캐시의 각 쿼리에 대해 호출됩니다.
       - 이 쿼리를 포함하려면 `true`를 반환하고, 그렇지 않으면 `false`를 반환합니다.
-    - 기본적으로 성공적인 쿼리만 포함됩니다.
+    - 기본적으로 성공적으로 데이터를 가져온 쿼리만 포함됩니다.
     - 기본 동작을 유지하면서 이 함수를 확장하려면 `defaultShouldDehydrateQuery`를 가져와서 반환문에서 실행하면 됩니다.
   - `serializeData?: (data: any) => any`
-    - 데이터를 dehydrate하는 동안 변환(직렬화)할 함수입니다.
+    - 데이터를 dehydrate하는 동안 변환(hydrate)할 함수입니다.
 
 **반환값**
 
 - `dehydratedState: DehydratedState`
-  - 나중에 `queryClient`를 복원하는 데 필요한 모든 것을 포함합니다.
-  - 이 응답의 정확한 형식에 의존해서는 안 되며, 공개 API의 일부가 아니므로 언제든지 변경될 수 있습니다.
-  - 이 결과는 직렬화된 형태가 아니므로, 필요에 따라 직접 직렬화해야 합니다.
+  - 나중에 `queryClient`를 dehydrate하는 데 필요한 모든 것을 포함합니다.
+  - 이 응답의 형식에 의존해서는 안 되며, 공식 API의 일부가 아니므로 언제든지 변경될 수 있습니다.
+  - 이 결과는 hydrate된 형태가 아니므로, 필요에 따라 직접 hydrate해야 합니다.
 
 ### Limitations
 
-일부 저장 시스템(예: 브라우저 [Web Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API))은 값이 JSON으로 직렬화 가능해야 합니다. JSON으로 자동 직렬화되지 않는 값(예: `Error`나 `undefined`)을 dehydrate해야 하는 경우, 직접 직렬화해야 합니다. 기본적으로 성공적인 쿼리만 포함되므로 `Errors`도 포함하려면 `shouldDehydrateQuery`를 제공해야 합니다. 예를 들어:
+일부 저장 시스템(예: 브라우저 [Web Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API))은 JSON으로 hydrate할 수 있는 값이어야 합니다. JSON으로 자동 hydrate되지 않는 값(예: `Error`나 `undefined`)을 dehydrate해야 하는 경우, 직접 hydrate해야 합니다. 기본적으로 성공적으로 데이터를 가져온 쿼리만 포함되므로 `Errors`도 포함하려면 `shouldDehydrateQuery`를 제공해야 합니다. 예를 들면:
 
 ```tsx
 // 서버
@@ -76,21 +76,21 @@ hydrate(queryClient, dehydratedState, options);
 **옵션**
 
 - `client: QueryClient`
-  - **필수**
+  - **Requied**
   - 상태를 `hydrate`할 `queryClient`
 - `dehydratedState: DehydratedState`
-  - **필수**
+  - **Requied**
   - 클라이언트에 `hydrate`할 상태
 - `options: HydrateOptions`
-  - 선택 사항
+  - Optional
   - `defaultOptions: DefaultOptions`
-    - 선택 사항
+    - Optional
     - `mutations: MutationOptions`
       - 복원된 mutations에 사용할 기본 mutation 옵션
     - `queries: QueryOptions`
       - 복원된 쿼리에 사용할 기본 쿼리 옵션
     - `deserializeData?: (data: any) => any`
-      - 캐시에 넣기 전에 데이터를 변환(복원)할 함수입니다.
+      - 캐시에 넣기 전에 데이터를 변환(dehydrate)할 함수입니다.
   - `queryClient?: QueryClient`
     - 커스텀 `QueryClient`를 사용하려면 이 옵션을 사용합니다. 그렇지 않으면 가장 가까운 컨텍스트의 `QueryClient`가 사용됩니다.
 
@@ -100,7 +100,7 @@ hydrate(queryClient, dehydratedState, options);
 
 ## `HydrationBoundary`
 
-`HydrationBoundary`는 `useQueryClient()`로 반환되는 `queryClient`에 이전에 dehydrate된 상태를 추가합니다. 클라이언트에 이미 데이터가 있는 경우, 새로운 쿼리는 업데이트 타임스탬프를 기준으로 지능적으로 병합됩니다.
+`HydrationBoundary`는 `useQueryClient()`로 반환되는 `queryClient`에 이전에 dehydrate된 상태를 추가합니다. 클라이언트에 이미 데이터가 있는 경우, 새로운 쿼리는 업데이트 타임스탬프를 기준으로 병합됩니다.
 
 ```tsx
 import { HydrationBoundary } from "@tanstack/react-query";
@@ -115,10 +115,18 @@ function App() {
 **옵션**
 
 - `state: DehydratedState`
-  - 복원할 상태
+  - dehydrate할 상태
 - `options: HydrateOptions`
-  - 선택 사항
+  - Optional
   - `defaultOptions: QueryOptions`
     - 복원된 쿼리에 사용할 기본 쿼리 옵션
   - `queryClient?: QueryClient`
     - 커스텀 `QueryClient`를 사용하려면 이 옵션을 사용합니다. 그렇지 않으면 가장 가까운 컨텍스트의 `QueryClient`가 사용됩니다.
+
+#### Changed History
+
+**2024.10.02. @ubinquitous**
+
+- [구문] 동결된 표현을 생성하여 -> 읽기 전용 hydrate 데이터를 생성하여
+- [구문] 복원할 수 있습니다 -> dehydrate할 수 있습니다
+- [구문] 현재 성공적인 쿼리만 포함됩니다 -> 성공적으로 데이터를 가져온 쿼리만 포함됩니다.
