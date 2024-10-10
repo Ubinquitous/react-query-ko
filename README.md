@@ -1,17 +1,31 @@
-## React Query 한글 번역 문서
+# Tanstack Query 한글 문서 번역
 
-어색한 표현이 있는지, 글을 읽었을 때 잘 이해가 되는지 꼭 확인하고 publish하기  
-이해가 안될 경우, 추가적인 원문을 작성하여 문서를 읽는 개발자가 해당 개념을 이해할 수 있게 도와야 함.  
-쉽고 올바른 이해를 위해서라면 원문의 글을 수정하거나 추가하는 것도 허용됨. (번역의 1순위 목표는 독자의 이해를 위함)
+Tanstack Query v5 공식 문서를 한글로 번역한 프로젝트입니다. by [@ubinquitous](https://github.com/ubinquitous)  
+React 환경에서 Tanstack Query v5를 사용하는 예제에 한해서만 번역을 진행했습니다.  
+문서 스타일링은 [@luciancah](https://github.com/luciancah)님의 [nextjs-ko](https://github.com/luciancah/nextjs-ko)를 참고했습니다.
 
-## TODO
+## Made By
 
-- 모든 문서 최소 두 번씩 첨삭
-- 스타일 번갈아 확인하며 동일한지 다시 확인
-- 유비쿼터스 랭귀지 설정하고 컨벤션에 따라 문서 키워드 재작성하기
+<br />
+<table>
+  <tbody>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/ubinquitous">
+          <img
+            alt="박우빈"
+            src="https://avatars.githubusercontent.com/ubinquitous"
+            width="100"
+          />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">박우빈</td>
+    </tr>
+  </tbody>
+</table>
 
-## History
+## Getting Started
 
-- 2024.08.23 모든 문서 첨삭 안한 초안 번역 완료 (기초 첨삭만 진행헀음)
-- 2024.09.19 getting-started 첨삭 완료
-- 2024.10.11 초안 다듬기 완료
+[문서 확인하기](https://react-query.kro.kr/docs/getting-started/)
