@@ -24,13 +24,13 @@ title: FocusManager
 import { focusManager } from "@tanstack/react-query";
 
 focusManager.setEventListener((handleFocus) => {
-  // visibilitychange 이벤트를 듣습니다.
+  // visibilitychange 이벤트를 구독합니다.
   if (typeof window !== "undefined" && window.addEventListener) {
     window.addEventListener("visibilitychange", handleFocus, false);
   }
 
   return () => {
-    // 새로운 핸들러가 설정되면 기존 핸들러를 구독 해제하세요.
+    // 새로운 핸들러가 설정되면 기존 핸들러의 구독을 해제합니다.
     window.removeEventListener("visibilitychange", handleFocus);
   };
 });
@@ -76,3 +76,9 @@ focusManager.setFocused(undefined);
 ```tsx
 const isFocused = focusManager.isFocused();
 ```
+
+#### Changed History
+
+**2024.10.02. @ubinquitous**
+
+- [주석] 이벤트를 듣습니다 → 이벤트를 구독합니다

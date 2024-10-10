@@ -312,10 +312,10 @@ const mutation = useMutation({ mutationKey: ["addTodo"] });
 mutation.mutate({ title: "title" });
 
 // 장치가 오프라인 상태로 인해 뮤테이션이 일시 중지된 경우,
-// 애플리케이션 종료 시 일시 중지된 뮤테이션을 탈수할 수 있습니다:
+// 어플리케이션 종료 시 일시 중지된 뮤테이션을 탈수할 수 있습니다:
 const state = dehydrate(queryClient);
 
-// 애플리케이션이 시작되면 뮤테이션을 다시 수화할 수 있습니다:
+// 어플리케이션이 시작되면 뮤테이션을 다시 수화할 수 있습니다:
 hydrate(queryClient, state);
 
 // 일시 중지된 뮤테이션 재개:

@@ -425,10 +425,10 @@ export const MyComponentDataProvider = ({
 };
 ```
 
-3. 애플리케이션에서 두 데이터 패키지 사용.
+3. 어플리케이션에서 두 데이터 패키지 사용.
 
 ```tsx
-// 애플리케이션
+// 어플리케이션
 
 import { ContainerDataProvider, useUser } from "@my-scope/container-data";
 import { AppDataProvider } from "@my-scope/app-data";
@@ -436,7 +436,7 @@ import { MyComponentDataProvider, useItems } from "@my-scope/my-component-data";
 
 <ContainerDataProvider> // <-- 자신의 React Query provider를 사용하여 컨테이너 데이터(예: "user") 제공
   ...
-  <AppDataProvider> // <-- 자신의 React Query provider를 사용하여 애플리케이션 데이터 제공 (이 예제에서는 사용되지 않음)
+  <AppDataProvider> // <-- 자신의 React Query provider를 사용하여 어플리케이션 데이터 제공 (이 예제에서는 사용되지 않음)
     ...
       <MyComponentDataProvider> // <-- 자신의 React Query provider를 사용하여 컴포넌트 데이터(예: "items") 제공
         <MyComponent />

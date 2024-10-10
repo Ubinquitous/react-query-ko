@@ -37,7 +37,7 @@ const queryClient = new QueryClient({
 
 ### Cache Busting
 
-애플리케이션이나 데이터에 대한 변경으로 인해 즉시 모든 캐시된 데이터가 무효화되어야 하는 경우가 있습니다. 이럴 때는 `buster` 문자열 옵션을 사용할 수 있습니다. 캐시에서 이 buster 문자열이 포함되지 않은 경우, 캐시는 삭제됩니다. 다음 여러 함수에서 이 옵션을 사용할 수 있습니다:
+어플리케이션이나 데이터에 대한 변경으로 인해 즉시 모든 캐시된 데이터가 무효화되어야 하는 경우가 있습니다. 이럴 때는 `buster` 문자열 옵션을 사용할 수 있습니다. 캐시에서 이 buster 문자열이 포함되지 않은 경우, 캐시는 삭제됩니다. 다음 여러 함수에서 이 옵션을 사용할 수 있습니다:
 
 ```tsx
 persistQueryClient({ queryClient, persister, buster: buildHash });
