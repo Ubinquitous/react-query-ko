@@ -21,11 +21,11 @@ title: Advanced Server Rendering
 
 지금까지 이 가이드에서는 *서버*와 *클라이언트*에 대해 이야기했습니다. 하지만, 이 용어들이 *Server Components*와 *Client Components*와 일대일로 매칭되는 것은 아닙니다. Server Components는 서버에서만 실행되지만, Client Components는 실제로 두 장소에서 모두 실행될 수 있습니다. 이는 Client Components가 초기 _서버 렌더링_ 단계에서도 렌더링될 수 있기 때문입니다.
 
-이것을 생각하는 한 가지 방법은 Server Components가 "렌더링"되긴 하지만, 이는 "로더 단계"에서 발생하고, Client Components는 "애플리케이션 단계"에서 실행된다는 것입니다. 이 애플리케이션은 SSR 동안 서버에서 실행될 수도 있고, 예를 들어 브라우저에서도 실행될 수 있습니다.
+이것을 생각하는 한 가지 방법은 Server Components가 "렌더링"되긴 하지만, 이는 "로더 단계"에서 발생하고, Client Components는 "어플리케이션 단계"에서 실행된다는 것입니다. 이 어플리케이션은 SSR 동안 서버에서 실행될 수도 있고, 예를 들어 브라우저에서도 실행될 수 있습니다.
 
 ### Initial setup
 
-React Query 설정의 첫 단계는 항상 `queryClient`를 생성하고 애플리케이션을 `QueryClientProvider`로 감싸는 것입니다. Server Components에서는 이 과정이 프레임워크에 따라 거의 동일하며, 파일 이름 규칙만 다를 수 있습니다:
+React Query 설정의 첫 단계는 항상 `queryClient`를 생성하고 어플리케이션을 `QueryClientProvider`로 감싸는 것입니다. Server Components에서는 이 과정이 프레임워크에 따라 거의 동일하며, 파일 이름 규칙만 다를 수 있습니다:
 
 ```tsx
 // Next.js에서는 이 파일의 이름을: app/providers.jsx로 지정합니다.

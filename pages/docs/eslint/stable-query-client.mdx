@@ -3,7 +3,7 @@ id: stable-query-client
 title: Stable Query Client
 ---
 
-`QueryClient`은 `QueryCache`를 포함하므로, 애플리케이션의 라이프사이클 동안 단 하나의 `QueryClient` 인스턴스만 생성하는 것이 좋습니다. 매 렌더링 시마다 새로운 인스턴스를 생성해서는 안 됩니다.
+`QueryClient`은 `QueryCache`를 포함하므로, 어플리케이션의 라이프사이클 동안 단 하나의 `QueryClient` 인스턴스만 생성하는 것이 좋습니다. 매 렌더링 시마다 새로운 인스턴스를 생성해서는 안 됩니다.
 
 > 예외: 비동기 서버 컴포넌트 내부에서는 새로운 `QueryClient`를 생성하는 것이 허용됩니다. 비동기 함수는 서버에서 한 번만 호출되기 때문입니다.
 

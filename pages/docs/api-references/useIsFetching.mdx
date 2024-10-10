@@ -5,7 +5,7 @@ title: useIsFetching
 
 ## useIsFetching
 
-`useIsFetching`은 애플리케이션이 백그라운드에서 로딩 중이거나 데이터를 가져오고 있는 쿼리의 `number`를 반환하는 선택적 훅입니다 (전체 애플리케이션의 로딩 인디케이터에 유용합니다).
+`useIsFetching`은 어플리케이션이 백그라운드에서 로딩 중이거나 데이터를 가져오고 있는 쿼리의 `number`를 반환하는 선택적 훅입니다 (전체 어플리케이션의 로딩 인디케이터에 유용합니다).
 
 ```tsx
 import { useIsFetching } from "@tanstack/react-query";
@@ -24,4 +24,4 @@ const isFetchingPosts = useIsFetching({ queryKey: ["posts"] });
 **반환값**
 
 - `isFetching: number`
-  - 애플리케이션이 현재 백그라운드에서 로딩 중이거나 데이터를 가져오고 있는 쿼리의 수입니다.
+  - 어플리케이션이 현재 백그라운드에서 로딩 중이거나 데이터를 가져오고 있는 쿼리의 수입니다.

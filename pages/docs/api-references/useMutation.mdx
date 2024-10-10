@@ -74,37 +74,37 @@ mutationOptions({
 
 - `mutationKey: unknown[]`
 
-  - 선택 사항입니다.
+  - Optional
   - Mutation 키를 설정하여 `queryClient.setMutationDefaults`로 설정한 기본값을 상속할 수 있습니다.
 
 - `networkMode: 'online' | 'always' | 'offlineFirst'`
 
-  - 선택 사항입니다.
+  - Optional
   - 기본값은 `'online'`입니다.
   - [네트워크 모드](../../guides/network-mode)에서 자세한 정보를 확인할 수 있습니다.
 
 - `onMutate: (variables: TVariables) => Promise<TContext | void> | TContext | void`
 
-  - 선택 사항입니다.
+  - Optional
   - 이 함수는 mutation 함수가 실행되기 전에 호출되며 mutation 함수가 받을 변수와 동일한 변수를 전달받습니다.
   - 성공을 기대하고 자원에 대해 낙관적인 업데이트를 수행하는 데 유용합니다.
   - 이 함수에서 반환된 값은 `onError` 및 `onSettled` 함수로 전달되며, mutation 실패 시 낙관적인 업데이트를 롤백하는 데 유용합니다.
 
 - `onSuccess: (data: TData, variables: TVariables, context: TContext) => Promise<unknown> | unknown`
 
-  - 선택 사항입니다.
+  - Optional
   - 이 함수는 mutation이 성공할 때 호출되며 mutation의 결과를 전달받습니다.
   - 프로미스가 반환되면, 진행하기 전에 프로미스를 기다리고 해결합니다.
 
 - `onError: (err: TError, variables: TVariables, context?: TContext) => Promise<unknown> | unknown`
 
-  - 선택 사항입니다.
+  - Optional
   - 이 함수는 mutation에서 오류가 발생할 때 호출되며 오류를 전달받습니다.
   - 프로미스가 반환되면, 진행하기 전에 프로미스를 기다리고 해결합니다.
 
 - `onSettled: (data: TData, error: TError, variables: TVariables, context?: TContext) => Promise<unknown> | unknown`
 
-  - 선택 사항입니다.
+  - Optional
   - 이 함수는 mutation이 성공적으로 완료되거나 오류가 발생할 때 호출되며 데이터 또는 오류를 전달받습니다.
   - 프로미스가 반환되면, 진행하기 전에 프로미스를 기다리고 해결합니다.
 
@@ -123,7 +123,7 @@ mutationOptions({
 
 - `scope: { id: string }`
 
-  - 선택 사항입니다.
+  - Optional
   - 기본값은 고유한 id입니다 (그래서 모든 mutations가 병렬로 실행됩니다).
   - 동일한 scope id를 가진 mutations는 직렬로 실행됩니다.
 
@@ -136,7 +136,7 @@ mutationOptions({
 
 - `meta: Record<string, unknown>`
 
-  - 선택 사항입니다.
+  - Optional
   - 설정하면 mutation 캐시 항목에 추가 정보를 저장할 수 있으며, 필요한 곳에서 사용할 수 있습니다. 이 정보는 `mutation`이 가능한 곳에서 접근할 수 있습니다 (예: `onError`, `onSuccess` 함수의 `MutationCache`).
 
 - `queryClient?: QueryClient`
@@ -148,18 +148,18 @@ mutationOptions({
 
   - 변수를 사용하여 mutation을 트리거하고 추가 콜백 옵션을 처리할 수 있는 mutation 함수입니다.
   - `variables: TVariables`
-    - 선택 사항입니다.
+    - Optional
     - `mutationFn`에 전달할 변수 객체입니다.
   - `onSuccess: (data: TData, variables: TVariables, context: TContext) => void`
-    - 선택 사항입니다.
+    - Optional
     - 이 함수는 mutation이 성공할 때 호출되며 mutation의 결과를 전달받습니다.
     - 반환값은 무시됩니다.
   - `onError: (err: TError, variables: TVariables, context: TContext | undefined) => void`
-    - 선택 사항입니다.
+    - Optional
     - 이 함수는 mutation에서 오류가 발생할 때 호출되며 오류를 전달받습니다.
     - 반환값은 무시됩니다.
   - `onSettled: (data: TData | undefined, error: TError | null, variables: TVariables, context: TContext | undefined) => void`
-    - 선택 사항입니다.
+    - Optional
     - 이 함수는 mutation이 성공적으로 완료되거나 오류가 발생할 때 호출되며 데이터 또는 오류를 전달받습니다.
     - 반환값은 무시됩니다.
   - 여러 요청을 할 경우, `onSuccess`는 마지막 호출이 완료된 후에만 호출됩니다.

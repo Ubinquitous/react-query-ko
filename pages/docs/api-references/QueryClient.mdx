@@ -54,13 +54,13 @@ await queryClient.prefetchQuery({ queryKey: ["posts"], queryFn: fetchPosts });
 **Options**
 
 - `queryCache?: QueryCache`
-  - 선택 사항
+  - Optional
   - 이 클라이언트가 연결된 query cache입니다.
 - `mutationCache?: MutationCache`
-  - 선택 사항
+  - Optional
   - 이 클라이언트가 연결된 mutation cache입니다.
 - `defaultOptions?: DefaultOptions`
-  - 선택 사항
+  - Optional
   - 이 `queryClient`를 사용하는 모든 query와 mutation에 대한 기본값을 정의합니다.
   - [hydration](../../framework/react/reference/hydration)을 위한 기본값도 정의할 수 있습니다.
 
@@ -192,7 +192,7 @@ const data = await queryClient.ensureQueryData({ queryKey, queryFn });
 
 - [`fetchQuery`](#queryclientfetchquery)와 동일한 옵션.
 - `revalidateIfStale: boolean`
-  - 선택 사항
+  - Optional
   - 기본값은 `false`
   - `true`로 설정되면, 캐시된 데이터가 즉시 반환되지만, 오래된 데이터는 백그라운드에서 다시 가져옵니다.
 
