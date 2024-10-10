@@ -28,7 +28,7 @@ React 환경에서 Tanstack Query v5를 사용하는 예제에 한해서만 번�
 
 ## Getting Started
 
-[문서 확인하기](https://react-query.kro.kr/docs/getting-started/)
+[문서 확인하기](http://react-query.kro.kr/docs/getting-started/)
 
 ## CONTRIBUTING
 
