@@ -1,0 +1,101 @@
+---
+id: placeholder-query-data
+title: Placeholder Query Data
+---
+
+## What is placeholder data?
+
+Placeholder data는 `initialData` 옵션과 비슷하게 query가 마치 이미 데이터를 가지고 있는 것처럼 동작하게 해줍니다. 하지만 중요한 차이점은 **그 데이터가 cache에 저장되지 않는다는 것**입니다. 이 기능은 데이터를 백그라운드에서 fetch하는 동안 일부의 데이터만 있어도 query를 성공적으로 렌더링할 수 있을 때 유용합니다.
+
+> 예시: 블로그 게시물 개별 query는 제목과 게시물 본문 일부만 포함한 부모 목록에서 "미리보기" 데이터를 가져올 수 있습니다. 이 부분 데이터를 개별 query의 결과로 저장하지는 않겠지만, 전체 데이터를 fetch하는 동안 최대한 빨리 콘텐츠 레이아웃을 보여주는 데 유용합니다.
+
+query에 placeholder data를 제공하는 방법은 몇 가지가 있습니다:
+
+- 선언적으로:
+  - query에 `placeholderData`를 제공하여 cache가 비어있을 때 미리 채워줍니다.
+- 명령적으로:
+  - [queryClient와 `placeholderData` 옵션을 사용하여 데이터를 미리 가져오거나(fetch) 사용할 수 있습니다.](../../../react/guides/prefetching)
+
+`placeholderData`를 사용하면, Query는 `pending` 상태에 있지 않고 바로 `success` 상태로 시작됩니다. 이유는 우리가 표시할 수 있는 `data`가 있기 때문이죠. 비록 그 데이터가 "placeholder"일지라도요. 또한 Query 결과에는 `isPlaceholderData` 플래그가 `true`로 설정되어, 실제 데이터와 구분할 수 있습니다.
+
+## Placeholder Data as a Value
+
+[//]: # "ExampleValue"
+
+```tsx
+function Todos() {
+  const result = useQuery({
+    queryKey: ["todos"],
+    queryFn: () => fetch("/todos"),
+    placeholderData: placeholderTodos,
+  });
+}
+```
+
+[//]: # "ExampleValue"
+[//]: # "Memoization"
+
+### Placeholder Data Memoization
+
+만약 query의 placeholder data를 가져오는 과정이 시간이 많이 걸리거나 매 렌더링마다 실행하고 싶지 않다면, 값을 memoization 할 수 있습니다:
+
+```tsx
+function Todos() {
+  const placeholderData = useMemo(() => generateFakeTodos(), []);
+  const result = useQuery({
+    queryKey: ["todos"],
+    queryFn: () => fetch("/todos"),
+    placeholderData,
+  });
+}
+```
+
+[//]: # "Memoization"
+
+## Placeholder Data as a Function
+
+`placeholderData`는 함수로도 제공될 수 있습니다. 이 경우 이전에 성공했던 Query의 데이터와 메타 정보를 얻을 수 있습니다. 이 기능은 한 query의 데이터를 다른 query의 placeholder data로 사용하고 싶을 때 유용합니다. 예를 들어, QueryKey가 `['todos', 1]`에서 `['todos', 2]`로 변경될 때, 데이터를 *전환*하는 동안 로딩 스피너를 표시하는 대신 "이전" 데이터를 계속 표시할 수 있습니다. 더 자세한 내용은 [Paginated Queries](../paginated-queries)를 참고하세요.
+
+[//]: # "ExampleFunction"
+
+```tsx
+const result = useQuery({
+  queryKey: ["todos", id],
+  queryFn: () => fetch(`/todos/${id}`),
+  placeholderData: (previousData, previousQuery) => previousData,
+});
+```
+
+[//]: # "ExampleFunction"
+
+### Placeholder Data from Cache
+
+일부 상황에서는 다른 query의 cache된 결과에서 placeholder data를 제공할 수 있습니다. 예를 들어 블로그 게시물 목록 query에서 미리보기 버전의 게시물을 검색한 후, 그 데이터를 개별 게시물 query의 placeholder data로 사용하는 방법이 있습니다:
+
+[//]: # "ExampleCache"
+
+```tsx
+function Todo({ blogPostId }) {
+  const queryClient = useQueryClient();
+  const result = useQuery({
+    queryKey: ["blogPost", blogPostId],
+    queryFn: () => fetch(`/blogPosts/${blogPostId}`),
+    placeholderData: () => {
+      // 'blogPosts' query에서 해당 게시물의
+      // 작은 미리보기 버전을 placeholder data로 사용
+      return queryClient
+        .getQueryData(["blogPosts"])
+        ?.find((d) => d.id === blogPostId);
+    },
+  });
+}
+```
+
+[//]: # "ExampleCache"
+[//]: # "Materials"
+
+## Further reading
+
+`Placeholder Data`와 `Initial Data`의 차이점에 대해서는 [Community Resources](../../community/tkdodos-blog#9-placeholder-and-initial-data-in-react-query)를 참조하세요.
+
+[//]: # "Materials"
