@@ -13,11 +13,11 @@ title: Query Options
 import { queryOptions } from '@tanstack/react-query'
 
 function groupOptions(id: number) {
-return queryOptions({
-queryKey: ['groups', id],
-queryFn: () => fetchGroups(id),
-staleTime: 5 \* 1000,
-})
+  return queryOptions({
+    queryKey: ['groups', id],
+    queryFn: () => fetchGroups(id),
+    staleTime: 5 \* 1000,
+  })
 }
 
 // 사용 예시:
@@ -25,7 +25,7 @@ staleTime: 5 \* 1000,
 useQuery(groupOptions(1))
 useSuspenseQuery(groupOptions(5))
 useQueries({
-queries: [groupOptions(1), groupOptions(2)],
+  queries: [groupOptions(1), groupOptions(2)],
 })
 queryClient.prefetchQuery(groupOptions(23))
 queryClient.setQueryData(groupOptions(42).queryKey, newGroups)

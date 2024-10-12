@@ -15,11 +15,11 @@ title: Parallel Queries
 
 ```tsx
 function App () {
-// 다음 쿼리들은 병렬로 실행됩니다
-const usersQuery = useQuery({ queryKey: ['users'], queryFn: fetchUsers })
-const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: fetchTeams })
-const projectsQuery = useQuery({ queryKey: ['projects'], queryFn: fetchProjects })
-...
+  // 다음 쿼리들은 병렬로 실행됩니다
+  const usersQuery = useQuery({ queryKey: ['users'], queryFn: fetchUsers })
+  const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: fetchTeams })
+  const projectsQuery = useQuery({ queryKey: ['projects'], queryFn: fetchProjects })
+  ...
 }
 ```
 
