@@ -38,21 +38,21 @@ const result = useQuery({
 ```tsx
 // 모든 query에 대해 설정
 import {
-QueryCache,
-QueryClient,
-QueryClientProvider,
-} from '@tanstack/react-query'
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-  queries: {
-    retryDelay: (attemptIndex) => Math.min(1000 \* 2 \*\* attemptIndex, 30000),
+    queries: {
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
   },
-},
-})
+});
 
 function App() {
-  return <QueryClientProvider client={queryClient}>...</QueryClientProvider>
+  return <QueryClientProvider client={queryClient}>...</QueryClientProvider>;
 }
 ```
 

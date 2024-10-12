@@ -10,25 +10,25 @@ title: Query Options
 [//]: # "Example1"
 
 ```ts
-import { queryOptions } from '@tanstack/react-query'
+import { queryOptions } from "@tanstack/react-query";
 
 function groupOptions(id: number) {
   return queryOptions({
-    queryKey: ['groups', id],
+    queryKey: ["groups", id],
     queryFn: () => fetchGroups(id),
-    staleTime: 5 \* 1000,
-  })
+    staleTime: 5 * 1000,
+  });
 }
 
 // 사용 예시:
 
-useQuery(groupOptions(1))
-useSuspenseQuery(groupOptions(5))
+useQuery(groupOptions(1));
+useSuspenseQuery(groupOptions(5));
 useQueries({
   queries: [groupOptions(1), groupOptions(2)],
-})
-queryClient.prefetchQuery(groupOptions(23))
-queryClient.setQueryData(groupOptions(42).queryKey, newGroups)
+});
+queryClient.prefetchQuery(groupOptions(23));
+queryClient.setQueryData(groupOptions(42).queryKey, newGroups);
 ```
 
 무한 쿼리의 경우에는 별도의 `infiniteQueryOptions` 헬퍼를 사용할 수 있습니다.
