@@ -28,12 +28,12 @@ const {
 
 **Options**
 
-`useInfiniteQuery`의 옵션은 [`useQuery` 훅](../useQuery)과 동일하지만, 다음 옵션이 추가됩니다:
+`useInfiniteQuery`의 옵션은 [`useQuery` 훅](/docs/api-references/useQuery)과 동일하지만, 다음 옵션이 추가됩니다:
 
 - `queryFn: (context: QueryFunctionContext) => Promise<TData>`
-  - **필수, 단 기본 쿼리 함수가 정의되지 않은 경우에만** [`defaultQueryFn`](../../guides/default-query-function)
+  - **필수, 단 기본 쿼리 함수가 정의되지 않은 경우에만** [`defaultQueryFn`](/docs/guides-concepts/default-query-fn)
   - 쿼리가 데이터를 요청할 때 사용할 함수입니다.
-  - [QueryFunctionContext](../../guides/query-functions#queryfunctioncontext)를 받습니다.
+  - [QueryFunctionContext](/docs/guides-concepts/query-functions#queryfunctioncontext)를 받습니다.
   - 데이터 또는 오류를 반환하는 Promise를 반환해야 합니다.
 - `initialPageParam: TPageParam`
   - **필수**
@@ -56,7 +56,7 @@ const {
 
 **Returns**
 
-`useInfiniteQuery`의 반환 속성은 [`useQuery` 훅](../useQuery)과 동일하지만, 다음 속성과 `isRefetching` 및 `isRefetchError`의 작은 차이가 있습니다:
+`useInfiniteQuery`의 반환 속성은 [`useQuery` 훅](/docs/api-references/useQuery)과 동일하지만, 다음 속성과 `isRefetching` 및 `isRefetchError`의 작은 차이가 있습니다:
 
 - `data.pages: TData[]`
   - 모든 페이지를 포함하는 배열입니다.

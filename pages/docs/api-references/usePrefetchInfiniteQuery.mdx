@@ -11,7 +11,7 @@ usePrefetchInfiniteQuery(options);
 
 **Options**
 
-`usePrefetchInfiniteQuery`에 전달할 수 있는 옵션은 [`queryClient.prefetchInfiniteQuery`](../../../../reference/QueryClient#queryclientprefetchinfinitequery)와 동일합니다. 다음은 필수로 제공해야 하는 옵션들입니다:
+`usePrefetchInfiniteQuery`에 전달할 수 있는 옵션은 [`queryClient.prefetchInfiniteQuery`](/docs/api-references/QueryClient#queryclientprefetchinfinitequery)와 동일합니다. 다음은 필수로 제공해야 하는 옵션들입니다:
 
 - `queryKey: QueryKey`
 
@@ -20,7 +20,7 @@ usePrefetchInfiniteQuery(options);
 
 - `queryFn: (context: QueryFunctionContext) => Promise<TData>`
 
-  - **필수, 그러나 기본 query 함수가 정의되지 않은 경우에만**. 기본 query 함수에 대한 자세한 내용은 [Default Query Function](../../guides/default-query-function)을 참조하세요.
+  - **필수, 그러나 기본 query 함수가 정의되지 않은 경우에만**. 기본 query 함수에 대한 자세한 내용은 [Default Query Function](/docs/guides-concepts/default-query-fn)을 참조하세요.
 
 - `initialPageParam: TPageParam`
 
@@ -36,4 +36,4 @@ usePrefetchInfiniteQuery(options);
 
 - **Returns**
 
-`usePrefetchInfiniteQuery`는 아무것도 반환하지 않습니다. 이는 단지 render 중에 prefetch를 실행하는 용도로 사용되며, [`useSuspenseInfiniteQuery`](../useSuspenseInfiniteQuery)를 사용하는 컴포넌트를 감싸는 suspense boundary 전에 호출해야 합니다.
+`usePrefetchInfiniteQuery`는 아무것도 반환하지 않습니다. 이는 단지 render 중에 prefetch를 실행하는 용도로 사용되며, [`useSuspenseInfiniteQuery`](/docs/api-references/useSuspenseInfiniteQuery)를 사용하는 컴포넌트를 감싸는 suspense boundary 전에 호출해야 합니다.

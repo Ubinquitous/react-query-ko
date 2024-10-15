@@ -27,7 +27,7 @@ queryClient.invalidateQueries({ queryKey: ["todos"] });
 
 ## Query Matching with `invalidateQueries`
 
-`invalidateQueries`와 `removeQueries` (및 다른 부분 쿼리 매칭을 지원하는 API)를 사용할 때, 쿼리 키의 접두사를 사용하여 여러 쿼리를 매칭하거나, 특정 쿼리와 정확히 매칭할 수 있습니다. 사용할 수 있는 필터의 종류에 대한 정보는 [쿼리 필터](../filters#query-filters)를 참조하세요.
+`invalidateQueries`와 `removeQueries` (및 다른 부분 쿼리 매칭을 지원하는 API)를 사용할 때, 쿼리 키의 접두사를 사용하여 여러 쿼리를 매칭하거나, 특정 쿼리와 정확히 매칭할 수 있습니다. 사용할 수 있는 필터의 종류에 대한 정보는 [쿼리 필터](/docs/api-references/filters#query-filters)를 참조하세요.
 
 다음 예제에서는 `todos` 접두사를 사용하여 쿼리 키가 `todos`로 시작하는 모든 쿼리를 무효화할 수 있습니다:
 

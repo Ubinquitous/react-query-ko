@@ -85,14 +85,14 @@ function fetchTodoList({ queryKey }) {
 
 `QueryFunctionContext`는 각 쿼리 함수에 전달되는 객체입니다. 다음으로 구성됩니다:
 
-- `queryKey: QueryKey`: [Query Keys](../query-keys)
+- `queryKey: QueryKey`: [Query Keys](/docs/api-references/query-keys)
 - `signal?: AbortSignal`
   - TanStack Query에서 제공하는 [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) 인스턴스
-  - [쿼리 취소](../query-cancellation)에 사용될 수 있습니다
+  - [쿼리 취소](/docs/api-references/query-cancellation)에 사용될 수 있습니다
 - `meta: Record<string, unknown> | undefined`
   - 쿼리에 대한 추가 정보를 채울 수 있는 선택적 필드
 
-추가로, [무한 쿼리](../infinite-queries)에는 다음과 같은 옵션이 전달됩니다:
+추가로, [무한 쿼리](/docs/api-references/infinite-queries)에는 다음과 같은 옵션이 전달됩니다:
 
 - `pageParam: TPageParam`
   - 현재 페이지를 가져오는 데 사용되는 페이지 매개변수

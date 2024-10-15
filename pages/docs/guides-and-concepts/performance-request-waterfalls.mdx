@@ -9,11 +9,11 @@ title: Performance & Request Waterfalls
 
 React Query 또는 컴포넌트 내에서 데이터를 가져오는 모든 데이터 패칭 라이브러리에서 가장 큰 성능 문제 중 하나는 요청 워터폴(Request Waterfall)입니다. 이 페이지에서는 요청 워터폴이 무엇인지, 이를 감지하는 방법, 그리고 어플리케이션이나 API를 재구성하여 이를 피할 수 있는 방법에 대해 설명합니다.
 
-[Prefetching & Router Integration 가이드](../prefetching)에서는 어플리케이션이나 API를 재구성하는 것이 불가능하거나 비현실적인 경우, 미리 데이터를 가져오는 방법에 대해 설명합니다.
+[Prefetching & Router Integration 가이드](/docs/api-references/prefetching)에서는 어플리케이션이나 API를 재구성하는 것이 불가능하거나 비현실적인 경우, 미리 데이터를 가져오는 방법에 대해 설명합니다.
 
-[Server Rendering & Hydration 가이드](../ssr)에서는 서버에서 데이터를 미리 가져와 클라이언트로 전달하여 다시 가져오지 않도록 하는 방법을 다룹니다.
+[Server Rendering & Hydration 가이드](/docs/api-references/ssr)에서는 서버에서 데이터를 미리 가져와 클라이언트로 전달하여 다시 가져오지 않도록 하는 방법을 다룹니다.
 
-[Advanced Server Rendering 가이드](../advanced-ssr)에서는 이러한 패턴을 Server Components 및 Streaming Server Rendering에 적용하는 방법을 더 깊이 있게 다룹니다.
+[Advanced Server Rendering 가이드](/docs/api-references/advanced-ssr)에서는 이러한 패턴을 Server Components 및 Streaming Server Rendering에 적용하는 방법을 더 깊이 있게 다룹니다.
 
 ## What is a Request Waterfall?
 
@@ -67,7 +67,7 @@ React Query 또는 컴포넌트 내에서 데이터를 가져오는 모든 데�
 
 ### Single Component Waterfalls / Serial Queries
 
-하나의 컴포넌트가 먼저 하나의 쿼리를 가져온 다음 다른 쿼리를 가져오는 경우, 이는 요청 워터폴입니다. 이는 [종속 쿼리](../dependent-queries)가 있는 경우 발생할 수 있습니다. 즉, 첫 번째 쿼리의 데이터가 있어야 두 번째 쿼리를 가져올 수 있는 경우입니다.
+하나의 컴포넌트가 먼저 하나의 쿼리를 가져온 다음 다른 쿼리를 가져오는 경우, 이는 요청 워터폴입니다. 이는 [종속 쿼리](/docs/api-references/dependent-queries)가 있는 경우 발생할 수 있습니다. 즉, 첫 번째 쿼리의 데이터가 있어야 두 번째 쿼리를 가져올 수 있는 경우입니다.
 
 ```tsx
 // 사용자 가져오기
@@ -93,7 +93,7 @@ const {
 
 최적의 성능을 위해서는 API를 재구성하여 두 쿼리를 단일 쿼리로 가져오는 것이 좋습니다. 위의 예제에서는 `getUserByEmail`을 먼저 가져와야 `getProjectsByUser`를 할 수 있는 대신, 새로운 `getProjectsByUserEmail` 쿼리를 도입하여 워터폴을 평탄화할 수 있습니다.
 
-> API를 재구성하지 않고 종속 쿼리를 완화하는 또 다른 방법은 서버에서 워터폴을 이동시키는 것입니다. 이것이 [Advanced Server Rendering guide](../advanced-ssr)에서 다루는 Server Components의 아이디어입니다.
+> API를 재구성하지 않고 종속 쿼리를 완화하는 또 다른 방법은 서버에서 워터폴을 이동시키는 것입니다. 이것이 [Advanced Server Rendering guide](/docs/api-references/advanced-ssr)에서 다루는 Server Components의 아이디어입니다.
 
 또 다른 예는 React Query와 Suspense를 사용하는 경우입니다:
 
@@ -239,7 +239,7 @@ function GraphFeedItem({ feedItem }) {
 2.   |> getGraphDataById()
 ```
 
-이 예제에서는 단순히 쿼리를 부모로 이동하거나 미리 가져오는 것으로 워터폴을 평탄화할 수 없습니다. 첫 번째 쿼리 `getFeed`에 그래프 데이터를 포함하도록 API를 리팩토링하는 것이 하나의 옵션입니다. 또 다른 고급 솔루션은 [Advanced Server Rendering guide](../advanced-ssr)에서 다루는 Server Components를 활용하여 서버에서 워터폴을 이동시키는 것입니다. 하지만 이는 매우 큰 아키텍처 변경이 될 수 있습니다.
+이 예제에서는 단순히 쿼리를 부모로 이동하거나 미리 가져오는 것으로 워터폴을 평탄화할 수 없습니다. 첫 번째 쿼리 `getFeed`에 그래프 데이터를 포함하도록 API를 리팩토링하는 것이 하나의 옵션입니다. 또 다른 고급 솔루션은 [Advanced Server Rendering guide](/docs/api-references/advanced-ssr)에서 다루는 Server Components를 활용하여 서버에서 워터폴을 이동시키는 것입니다. 하지만 이는 매우 큰 아키텍처 변경이 될 수 있습니다.
 
 약간의 쿼리 워터폴이 있어도 성능이 좋을 수 있지만, 이러한 문제를 염두에 두고 주의하는 것이 좋습니다. 특히 코드 분할이 포함된 경우에는 특히 교활할 수 있습니다. 이를 살펴보겠습니다.
 
@@ -305,9 +305,9 @@ function GraphFeedItem({ feedItem }) {
 2.   |> JS for <GraphFeedItem>
 ```
 
-이는 매우 큰 트레이드오프입니다. 이제 `getGraphDataById`의 데이터 패칭 코드가 `<Feed>`와 동일한 번들에 포함되므로, 이 경우 무엇이 최상의 선택인지 평가하는 것이 중요합니다. 이를 수행하는 방법에 대해 더 자세히 알아보려면 [Prefetching & Router Integration guide](../prefetching)를 참조하십시오.
+이는 매우 큰 트레이드오프입니다. 이제 `getGraphDataById`의 데이터 패칭 코드가 `<Feed>`와 동일한 번들에 포함되므로, 이 경우 무엇이 최상의 선택인지 평가하는 것이 중요합니다. 이를 수행하는 방법에 대해 더 자세히 알아보려면 [Prefetching & Router Integration guide](/docs/api-references/prefetching)를 참조하십시오.
 
-> 코드 데이터 패칭 코드를 기본 번들에 포함할지, 요청 워터폴이 있는 코드 분할 번들에 포함할지에 대한 트레이드오프는 좋지 않습니다. 이는 Server Components의 동기 중 하나입니다. Server Components를 사용하면 두 가지 모두 피할 수 있으므로, [Advanced Server Rendering guide](../advanced-ssr)에서 React Query에 어떻게 적용되는지에 대해 알아보십시오.
+> 코드 데이터 패칭 코드를 기본 번들에 포함할지, 요청 워터폴이 있는 코드 분할 번들에 포함할지에 대한 트레이드오프는 좋지 않습니다. 이는 Server Components의 동기 중 하나입니다. Server Components를 사용하면 두 가지 모두 피할 수 있으므로, [Advanced Server Rendering guide](/docs/api-references/advanced-ssr)에서 React Query에 어떻게 적용되는지에 대해 알아보십시오.
 
 ## Summary and takeaways
 
@@ -320,4 +320,4 @@ function GraphFeedItem({ feedItem }) {
 
 이러한 우발적 복잡성으로 인해 워터폴에 주의하고 어플리케이션을 정기적으로 검사하는 것이 좋습니다(좋은 방법은 네트워크 탭을 가끔 확인하는 것입니다!). 모든 워터폴을 평탄화할 필요는 없지만, 높은 영향을 미치는 워터폴을 주의 깊게 살펴보는 것이 좋습니다.
 
-다음 가이드에서는 [Prefetching & Router Integration](../prefetching)을 활용하여 워터폴을 평탄화하는 방법을 살펴보겠습니다.
+다음 가이드에서는 [Prefetching & Router Integration](/docs/api-references/prefetching)을 활용하여 워터폴을 평탄화하는 방법을 살펴보겠습니다.

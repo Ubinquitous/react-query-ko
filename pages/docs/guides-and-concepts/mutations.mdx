@@ -57,7 +57,7 @@ function App() {
 
 위의 예제에서는 **단일 변수 또는 객체**를 사용하여 `mutate` 함수로 뮤테이션 함수에 변수를 전달하는 방법도 보셨습니다.
 
-변수만으로는 뮤테이션이 특별할 게 없지만, `onSuccess` 옵션과 [Query Client의 `invalidateQueries` 메서드](../../../../reference/QueryClient/#queryclientinvalidatequeries) 및 [Query Client의 `setQueryData` 메서드](../../../../reference/QueryClient/#queryclientsetquerydata)와 함께 사용하면, 뮤테이션은 매우 강력한 도구가 됩니다.
+변수만으로는 뮤테이션이 특별할 게 없지만, `onSuccess` 옵션과 [Query Client의 `invalidateQueries` 메서드](/docs/api-references/QueryClient/#queryclientinvalidatequeries) 및 [Query Client의 `setQueryData` 메서드](/docs/api-references/QueryClient/#queryclientsetquerydata)와 함께 사용하면, 뮤테이션은 매우 강력한 도구가 됩니다.
 
 > 중요: `mutate` 함수는 비동기 함수이므로, **React 16 및 이전 버전**에서는 이벤트 콜백에서 직접 사용할 수 없습니다. `onSubmit`에서 이벤트에 접근해야 하는 경우, `mutate`를 다른 함수로 래핑해야 합니다. 이는 [React 이벤트 풀링](https://reactjs.org/docs/legacy-event-pooling.html) 때문입니다.
 > [//]: # "Info1"
@@ -131,7 +131,7 @@ const CreateTodo = () => {
 
 ## Mutation Side Effects
 
-`useMutation`은 뮤테이션 생애 주기 동안 어느 단계에서나 빠르고 쉽게 사이드 이펙트를 처리할 수 있는 몇 가지 헬퍼 옵션을 제공합니다. 이러한 옵션들은 [뮤테이션 후 쿼리 무효화 및 재패칭](../invalidations-from-mutations)과 [낙관적 업데이트](../optimistic-updates)에도 유용합니다.
+`useMutation`은 뮤테이션 생애 주기 동안 어느 단계에서나 빠르고 쉽게 사이드 이펙트를 처리할 수 있는 몇 가지 헬퍼 옵션을 제공합니다. 이러한 옵션들은 [뮤테이션 후 쿼리 무효화 및 재패칭](/docs/api-references/invalidations-from-mutations)과 [낙관적 업데이트](/docs/api-references/optimistic-updates)에도 유용합니다.
 
 [//]: # "Example4"
 
@@ -326,7 +326,7 @@ queryClient.resumePausedMutations();
 
 ### Persisting Offline mutations
 
-오프라인 뮤테이션을 [persistQueryClient 플러그인](../../../react/plugins/persistQueryClient)으로 영속화할 경우, 페이지를 새로 고침했을 때 뮤테이션을 재개할 수 없으므로 기본 뮤테이션 함수를 제공해야 합니다.
+오프라인 뮤테이션을 [persistQueryClient 플러그인](/docs/plugins/persistQueryClient)으로 영속화할 경우, 페이지를 새로 고침했을 때 뮤테이션을 재개할 수 없으므로 기본 뮤테이션 함수를 제공해야 합니다.
 
 이는 기술적인 제한으로, 외부 저장소에 저장할 때는 뮤테이션의 상태만 저장되며, 함수는 직렬화할 수 없기 때문입니다. 수화 후에는 뮤테이션을 트리거하는 컴포넌트가 마운트되지 않을 수 있으므로, `resumePausedMutations`를 호출할 때 `No mutationFn found` 오류가 발생할 수 있습니다.
 
@@ -365,7 +365,7 @@ export default function App() {
 }
 ```
 
-또한, [오프라인 예제](../../examples/offline)에서는 쿼리와 뮤테이션 모두를 다루는 광범위한 예제를 제공합니다.
+또한, [오프라인 예제](https://tanstack.com/query/latest/docs/framework/react/examples/offline)에서는 쿼리와 뮤테이션 모두를 다루는 광범위한 예제를 제공합니다.
 
 ## Mutation Scopes
 
@@ -387,6 +387,6 @@ const mutation = useMutation({
 
 ## Further reading
 
-뮤테이션에 대한 자세한 내용은 [#12: Mastering Mutations in React Query](../../community-resources/tkdodos-blog#12-mastering-mutations-in-react-query)**에서 확인하실 수 있습니다.**
+뮤테이션에 대한 자세한 내용은 [#12: Mastering Mutations in React Query](/docs/community-resources/tkdodos-blog#12-mastering-mutations-in-react-query)**에서 확인하실 수 있습니다.**
 
 [//]: # "Materials"

@@ -208,7 +208,7 @@ React.useEffect(() => mySideEffectHere(data), [data]);
 
 ### `persistQueryClient` and the corresponding persister plugins are no longer experimental and have been renamed
 
-`createWebStoragePersistor`와 `createAsyncStoragePersistor`는 각각 [`createSyncStoragePersister`](../../plugins/createSyncStoragePersister)와 [`createAsyncStoragePersister`](../../plugins/createAsyncStoragePersister)로 이름이 변경되었습니다. `persistQueryClient`는 이제 실험적이지 않으며 `PersistQueryClient`로 리팩토링되었습니다:
+`createWebStoragePersistor`와 `createAsyncStoragePersistor`는 각각 [`createSyncStoragePersister`](/docs/plugins/createSyncStoragePersister)와 [`createAsyncStoragePersister`](/docs/plugins/createAsyncStoragePersister)로 이름이 변경되었습니다. `persistQueryClient`는 이제 실험적이지 않으며 `PersistQueryClient`로 리팩토링되었습니다:
 
 ```tsx
 - import { persistQueryClient } from 'react-query/persistQueryClient-experimental' // [!code --]
@@ -222,7 +222,7 @@ React.useEffect(() => mySideEffectHere(data), [data]);
 
 ### The `cancel` method on promises is no longer supported
 
-기존의 `cancel` 메서드([구버전 `cancel` 메서드](../query-cancellation#old-cancel-function))는 더 이상 지원되지 않습니다. 이 메서드는 Promise에 `cancel` 함수를 정의하여 라이브러리가 쿼리 취소를 지원하도록 했으나 제거되었습니다. 이제는 [`AbortController` API](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)를 내부적으로 사용하여 [`AbortSignal` 인스턴스](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)를 제공하는 [새로운 API](../query-cancellation) (v3.30.0에서 도입됨)를 사용하는 것이 좋습니다.
+기존의 `cancel` 메서드([구버전 `cancel` 메서드](/docs/api-references/query-cancellation#old-cancel-function))는 더 이상 지원되지 않습니다. 이 메서드는 Promise에 `cancel` 함수를 정의하여 라이브러리가 쿼리 취소를 지원하도록 했으나 제거되었습니다. 이제는 [`AbortController` API](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)를 내부적으로 사용하여 [`AbortSignal` 인스턴스](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)를 제공하는 [새로운 API](/docs/api-references/query-cancellation) (v3.30.0에서 도입됨)를 사용하는 것이 좋습니다.
 
 ### TypeScript
 
@@ -230,7 +230,7 @@ React.useEffect(() => mySideEffectHere(data), [data]);
 
 ### Supported Browsers
 
-v4부터 React Query는 최신 브라우저에 최적화되었습니다. 브라우저 리스트를 업데이트하여 더 현대적이고 성능이 뛰어나며 더 작은 번들을 생성하도록 했습니다. 요구 사항에 대해서는 [여기](../../installation#requirements)에서 확인하실 수 있습니다.
+v4부터 React Query는 최신 브라우저에 최적화되었습니다. 브라우저 리스트를 업데이트하여 더 현대적이고 성능이 뛰어나며 더 작은 번들을 생성하도록 했습니다. 요구 사항에 대해서는 [여기](/docs/getting-started/installation#requirements)에서 확인하실 수 있습니다.
 
 ### `setLogger` is removed
 
@@ -345,7 +345,7 @@ v3에서는 React Query가 쿼리와 변이를 실행한 후 인터넷에 연결
 - 네트워크 연결이 필요 없는 쿼리를 오프라인 상태에서 실행하고 싶을 때, 쿼리가 다른 이유로 실패하면 이제는 온라인 상태가 될 때까지 일시 중지됩니다.
 - 창 포커스 재요청이 오프라인 상태에서는 아무런 동작을 하지 않았습니다.
 
-v4에서는 이러한 문제를 해결하기 위해 새로운 `networkMode`를 도입했습니다. 새로운 [Network mode](../network-mode)에 대한 페이지를 참조하여 더 많은 정보를 확인해 보세요.
+v4에서는 이러한 문제를 해결하기 위해 새로운 `networkMode`를 도입했습니다. 새로운 [Network mode](/docs/api-references/network-mode)에 대한 페이지를 참조하여 더 많은 정보를 확인해 보세요.
 
 ### Tracked Queries per default
 
@@ -353,7 +353,7 @@ React Query는 기본적으로 쿼리 속성을 "추적"하여 렌더링 최적�
 
 ### Bailing out of updates with setQueryData
 
-[setQueryData의 함수형 업데이트자](../../../../reference/QueryClient/#queryclientsetquerydata)를 사용할 때, `undefined`를 반환하여 업데이트를 중단할 수 있습니다. 이는 `undefined`가 `previousValue`로 제공되어 현재 캐시된 항목이 없고 생성할 수 없을 때 유용합니다. 예를 들어, 할 일을 토글하는 경우 다음과 같습니다:
+[setQueryData의 함수형 업데이트자](/docs/api-references/QueryClient/#queryclientsetquerydata)를 사용할 때, `undefined`를 반환하여 업데이트를 중단할 수 있습니다. 이는 `undefined`가 `previousValue`로 제공되어 현재 캐시된 항목이 없고 생성할 수 없을 때 유용합니다. 예를 들어, 할 일을 토글하는 경우 다음과 같습니다:
 
 ```tsx
 queryClient.setQueryData(["todo", id], (previousTodo) =>
