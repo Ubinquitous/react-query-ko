@@ -34,7 +34,7 @@ bun add @tanstack/query-async-storage-persister @tanstack/react-query-persist-cl
 - `createAsyncStoragePersister` 함수를 임포트합니다.
 - 새 `asyncStoragePersister`를 생성합니다.
   - `AsyncStorage` 인터페이스를 따르는 어떤 `storage`도 사용할 수 있습니다. 아래 예제에서는 React Native의 async-storage를 사용합니다.
-- [`PersistQueryClientProvider`](../persistQueryClient#persistqueryclientprovider) 컴포넌트를 사용하여 앱을 감쌉니다.
+- [`PersistQueryClientProvider`](/docs/plugins/persistQueryClient#persistqueryclientprovider) 컴포넌트를 사용하여 앱을 감쌉니다.
 
 ```tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -68,7 +68,7 @@ export default Root;
 
 ## Retries
 
-Retries는 [SyncStoragePersister](../createSyncStoragePersister)와 동일하게 작동하지만, 비동기적일 수 있습니다. 모든 사전 정의된 retry 핸들러를 사용할 수도 있습니다.
+Retries는 [SyncStoragePersister](/docs/plugins/createSyncStoragePersister)와 동일하게 작동하지만, 비동기적일 수 있습니다. 모든 사전 정의된 retry 핸들러를 사용할 수도 있습니다.
 
 ## API
 

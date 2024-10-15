@@ -9,8 +9,8 @@ title: persistQueryClient
 
 ## Build Persisters
 
-- [createSyncStoragePersister](../createSyncStoragePersister)
-- [createAsyncStoragePersister](../createAsyncStoragePersister)
+- [createSyncStoragePersister](/docs/plugins/createSyncStoragePersister)
+- [createAsyncStoragePersister](/docs/plugins/createAsyncStoragePersister)
 - [커스텀 persister 만들기](#persisters)
 
 ## How It Works
@@ -60,7 +60,7 @@ persistQueryClientRestore({ queryClient, persister, buster: buildHash });
 
 ### `persistQueryClientSave`
 
-- 쿼리/변경 사항이 [`dehydrated`](../../reference/hydration#dehydrate)되고 제공한 persister에 의해 저장됩니다.
+- 쿼리/변경 사항이 [`dehydrated`](/docs/api-references/hydration#dehydrate)되고 제공한 persister에 의해 저장됩니다.
 - `createSyncStoragePersister`와 `createAsyncStoragePersister`는 이 작업이 최대 1초마다 한 번만 수행되도록 조절하여 잠재적으로 비용이 많이 드는 쓰기를 줄입니다. 조정 가능한 throttle timing에 대한 문서를 검토하십시오.
 
 원하는 순간에 캐시를 명시적으로 저장하는 데 사용할 수 있습니다.
@@ -92,7 +92,7 @@ persistQueryClientSubscribe({
 
 ### `persistQueryClientRestore`
 
-- persister에서 이전에 저장된 dehydrated query/mutation 캐시를 `queryClient`의 쿼리 캐시로 [`hydrate`](../../reference/hydration#hydrate)하려고 시도합니다.
+- persister에서 이전에 저장된 dehydrated query/mutation 캐시를 `queryClient`의 쿼리 캐시로 [`hydrate`](/docs/api-references/hydration#hydrate)하려고 시도합니다.
 - `maxAge`(기본값: 24시간)보다 오래된 캐시는 삭제됩니다. 이 타이밍은 필요에 맞게 사용자 정의할 수 있습니다.
 
 원하는 순간에 캐시를 복원할 때 사용할 수 있습니다.
@@ -177,7 +177,7 @@ ReactDOM.createRoot(rootElement).render(<App />);
 
 ### PersistQueryClientProvider
 
-이 경우에는 `PersistQueryClientProvider`를 사용할 수 있습니다. 이 컴포넌트는 React 컴포넌트 라이프사이클에 따라 구독 및 구독 해제를 올바르게 처리하며, 복원 중에 쿼리가 데이터를 가져오는 것을 방지합니다. 쿼리는 여전히 렌더링되지만, 데이터가 복원될 때까지 `fetchingState: 'idle'` 상태로 유지됩니다. 데이터가 복원되면, 데이터가 충분히 *신선*하면 쿼리가 다시 가져오지 않고, *initialData*도 존중됩니다. 이는 일반 [QueryClientProvider](../../reference/QueryClientProvider) 대신 사용할 수 있습니다:
+이 경우에는 `PersistQueryClientProvider`를 사용할 수 있습니다. 이 컴포넌트는 React 컴포넌트 라이프사이클에 따라 구독 및 구독 해제를 올바르게 처리하며, 복원 중에 쿼리가 데이터를 가져오는 것을 방지합니다. 쿼리는 여전히 렌더링되지만, 데이터가 복원될 때까지 `fetchingState: 'idle'` 상태로 유지됩니다. 데이터가 복원되면, 데이터가 충분히 *신선*하면 쿼리가 다시 가져오지 않고, *initialData*도 존중됩니다. 이는 일반 [QueryClientProvider](/docs/api-references/QueryClientProvider) 대신 사용할 수 있습니다:
 
 ```tsx
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -207,14 +207,14 @@ ReactDOM.createRoot(rootElement).render(
 
 #### Props
 
-`PersistQueryClientProvider`는 [QueryClientProvider](../../reference/QueryClientProvider)와 동일한 props를 사용하며, 추가로:
+`PersistQueryClientProvider`는 [QueryClientProvider](/docs/api-references/QueryClientProvider)와 동일한 props를 사용하며, 추가로:
 
 - `persistOptions: PersistQueryClientOptions`
   - [`persistQueryClient`](#persistqueryclient)에 전달할 수 있는 모든 [옵션](#options), 단 QueryClient 자체는 제외
 - `onSuccess?: () => Promise<unknown> | unknown`
   - 선택 사항
   - 초기 복원이 완료되면 호출됨
-  - [resumePausedMutations](../../../../reference/QueryClient/#queryclientresumepausedmutations)를 호출하는 데 사용될 수 있음
+  - [resumePausedMutations](/docs/api-references/QueryClient/#queryclientresumepausedmutations)를 호출하는 데 사용될 수 있음
   - Promise가 반환되면, 해당 Promise가 해결될 때까지 복원은 진행 중으로 간주됨
 
 ### `useIsRestoring`

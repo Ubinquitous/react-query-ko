@@ -66,26 +66,26 @@ const {
 
   - **Required**
   - 이 query에 사용할 query key입니다.
-  - query key는 안정적인 해시로 해시화됩니다. 자세한 내용은 [Query Keys](../../guides/query-keys)를 참조하세요.
+  - query key는 안정적인 해시로 해시화됩니다. 자세한 내용은 [Query Keys](/docs/guides-concepts/query-keys)를 참조하세요.
   - 이 키가 변경되면 쿼리는 자동으로 업데이트됩니다 (`enabled`가 `false`로 설정되지 않은 한).
 
 - `queryFn: (context: QueryFunctionContext) => Promise<TData>`
 
-  - **Required, 그러나 기본 query 함수가 정의되지 않은 경우에만**. 기본 query 함수에 대한 자세한 내용은 [Default Query Function](../../guides/default-query-function)을 참조하세요.
+  - **Required, 그러나 기본 query 함수가 정의되지 않은 경우에만**. 기본 query 함수에 대한 자세한 내용은 [Default Query Function](/docs/guides-concepts/default-query-fn)을 참조하세요.
   - 쿼리가 데이터를 요청할 때 사용하는 함수입니다.
-  - [QueryFunctionContext](../../guides/query-functions#queryfunctioncontext)를 인자로 받습니다.
+  - [QueryFunctionContext](/docs/guides-concepts/query-functions#queryfunctioncontext)를 인자로 받습니다.
   - 데이터를 반환하는 promise를 반환해야 하며, 데이터는 `undefined`일 수 없습니다.
 
 - `enabled: boolean | (query: Query) => boolean`
 
   - 쿼리가 자동으로 실행되지 않도록 하려면 `false`로 설정합니다.
-  - [Dependent Queries](../../guides/dependent-queries)에 사용할 수 있습니다.
+  - [Dependent Queries](/docs/guides-concepts/dependent-queries)에 사용할 수 있습니다.
 
 - `networkMode: 'online' | 'always' | 'offlineFirst'`
 
   - Optional
   - 기본값은 `'online'`입니다.
-  - [Network Mode](../../guides/network-mode)에서 자세한 내용을 확인하세요.
+  - [Network Mode](/docs/guides-concepts/network-mode)에서 자세한 내용을 확인하세요.
 
 - `retry: boolean | number | (failureCount: number, error: TError) => boolean`
 
@@ -286,7 +286,7 @@ const {
   - `fetching`: `queryFn`이 실행 중일 때, 즉 초기 `pending` 상태 및 백그라운드 재조회가 포함됩니다.
   - `paused`: 쿼리가 가져오기를 원했지만 `paused` 상태입니다.
   - `idle`: 쿼리가 가져오지 않고 있습니다.
-  - 자세한 내용은 [Network Mode](../../guides/network-mode)를 참조하세요.
+  - 자세한 내용은 [Network Mode](/docs/guides-concepts/network-mode)를 참조하세요.
 
 - `isFetching: boolean`
 

@@ -5,13 +5,13 @@ title: Network Mode
 
 ## Network Mode
 
-TanStack Query는 네트워크 연결이 없을 때 [Queries](../queries)와 [Mutations](../mutations)의 동작 방식을 구분하기 위해 세 가지 네트워크 모드를 제공합니다. 이 모드는 각 Query/Mutation별로 개별적으로 설정할 수 있으며, 전역적으로는 Query/Mutation 기본값을 통해 설정할 수도 있습니다.
+TanStack Query는 네트워크 연결이 없을 때 [Queries](/docs/api-references/queries)와 [Mutations](/docs/api-references/mutations)의 동작 방식을 구분하기 위해 세 가지 네트워크 모드를 제공합니다. 이 모드는 각 Query/Mutation별로 개별적으로 설정할 수 있으며, 전역적으로는 Query/Mutation 기본값을 통해 설정할 수도 있습니다.
 
 TanStack Query는 데이터 가져오기를 데이터 가져오기 라이브러리와 함께 사용할 때 가장 자주 사용되므로, 기본 네트워크 모드는 [online](#network-mode-online)입니다.
 
 ## Network Mode: online
 
-이 모드에서는 네트워크 연결이 없으면 Queries와 Mutations가 실행되지 않습니다. 이것이 기본 모드입니다. Query에 대한 요청이 시작되면, 네트워크 연결이 없어서 요청을 할 수 없는 경우 현재의 `state` (`pending`, `error`, `success`) 상태를 계속 유지합니다. 그러나 추가적으로 [fetchStatus](../queries#fetchstatus)도 노출됩니다. 이 상태는 다음 중 하나일 수 있습니다:
+이 모드에서는 네트워크 연결이 없으면 Queries와 Mutations가 실행되지 않습니다. 이것이 기본 모드입니다. Query에 대한 요청이 시작되면, 네트워크 연결이 없어서 요청을 할 수 없는 경우 현재의 `state` (`pending`, `error`, `success`) 상태를 계속 유지합니다. 그러나 추가적으로 [fetchStatus](/docs/api-references/queries#fetchstatus)도 노출됩니다. 이 상태는 다음 중 하나일 수 있습니다:
 
 - `fetching`: `queryFn`이 실제로 실행 중입니다 - 요청이 진행 중입니다.
 - `paused`: Query가 실행되지 않습니다 - 네트워크 연결이 다시 생길 때까지 `paused` 상태입니다.
@@ -21,7 +21,7 @@ TanStack Query는 데이터 가져오기를 데이터 가져오기 라이브러�
 
 > `pending` 상태만으로 로딩 스피너를 표시하기에는 부족할 수 있습니다. Queries가 `state: 'pending'` 상태일 수 있지만, 네트워크 연결이 없으면 `fetchStatus: 'paused'` 상태일 수 있습니다.
 
-쿼리가 온라인 상태일 때 실행되지만, 가져오는 동안 오프라인 상태가 되면 TanStack Query는 재시도 메커니즘도 일시 중지합니다. 일시 중지된 Queries는 네트워크 연결이 다시 생기면 계속 실행됩니다. 이는 `refetchOnReconnect`와는 독립적이며 (이 모드에서는 기본값이 `true`), `refetch`가 아니라 `continue`이기 때문입니다. Query가 그 사이에 [cancelled](../query-cancellation)된 경우, 계속 실행되지 않습니다.
+쿼리가 온라인 상태일 때 실행되지만, 가져오는 동안 오프라인 상태가 되면 TanStack Query는 재시도 메커니즘도 일시 중지합니다. 일시 중지된 Queries는 네트워크 연결이 다시 생기면 계속 실행됩니다. 이는 `refetchOnReconnect`와는 독립적이며 (이 모드에서는 기본값이 `true`), `refetch`가 아니라 `continue`이기 때문입니다. Query가 그 사이에 [cancelled](/docs/api-references/query-cancellation)된 경우, 계속 실행되지 않습니다.
 
 ## Network Mode: always
 
@@ -39,7 +39,7 @@ TanStack Query는 데이터 가져오기를 데이터 가져오기 라이브러�
 
 ## Devtools
 
-[TanStack Query Devtools](../../devtools)는 Queries가 네트워크 연결이 없을 때 `paused` 상태로 표시됩니다. 또한 *Mock offline behavior*를 토글하는 버튼이 있습니다. 이 버튼은 실제로 네트워크 연결을 조작하지는 않지만 (브라우저 개발자 도구에서 조작할 수 있습니다), [OnlineManager](../../../../reference/onlineManager)를 오프라인 상태로 설정합니다.
+[TanStack Query Devtools](/docs/getting-started/devtools)는 Queries가 네트워크 연결이 없을 때 `paused` 상태로 표시됩니다. 또한 *Mock offline behavior*를 토글하는 버튼이 있습니다. 이 버튼은 실제로 네트워크 연결을 조작하지는 않지만 (브라우저 개발자 도구에서 조작할 수 있습니다), [OnlineManager](/docs/api-references/onlineManager)를 오프라인 상태로 설정합니다.
 
 ## Signature
 

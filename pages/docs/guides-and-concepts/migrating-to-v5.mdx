@@ -171,7 +171,7 @@ const query = useQuery({ queryKey, queryFn });
 
 ### Supported Browsers
 
-브라우저 리스트를 업데이트하여 더 현대적이고 성능이 우수하며 작은 번들을 생성하도록 했습니다. 요구 사항에 대한 자세한 내용은 [여기](../../installation#requirements)를 읽어보세요.
+브라우저 리스트를 업데이트하여 더 현대적이고 성능이 우수하며 작은 번들을 생성하도록 했습니다. 요구 사항에 대한 자세한 내용은 [여기](/docs/getting-started/installation#requirements)를 읽어보세요.
 
 ### Private class fields and methods
 
@@ -220,7 +220,7 @@ useQuery<number, string>({
 });
 ```
 
-다른 종류의 오류를 전역적으로 설정하는 방법은 [타입스크립트 가이드](../../typescript#registering-a-global-error)를 참조해보세요.
+다른 종류의 오류를 전역적으로 설정하는 방법은 [타입스크립트 가이드](/docs/getting-started#registering-a-global-error)를 참조해보세요.
 
 ### eslint `prefer-query-object-syntax` rule is removed
 
@@ -450,7 +450,7 @@ if (queryInfo.data) {
 }
 ```
 
-여기에서는 UI가 변할 때만 변화를 주고 직접적으로 캐시에 데이터를 작성하지 않습니다. 이는 낙관적 업데이트를 표시해야 할 단 하나의 장소만 있을 때 가장 잘 작동합니다. 자세한 내용은 [낙관적 업데이트 문서](../optimistic-updates)를 참조하세요.
+여기에서는 UI가 변할 때만 변화를 주고 직접적으로 캐시에 데이터를 작성하지 않습니다. 이는 낙관적 업데이트를 표시해야 할 단 하나의 장소만 있을 때 가장 잘 작동합니다. 자세한 내용은 [낙관적 업데이트 문서](/docs/api-references/optimistic-updates)를 참조하세요.
 
 ### Limited, Infinite Queries with new maxPages option
 
@@ -462,19 +462,19 @@ if (queryInfo.data) {
 
 ### Infinite Queries can prefetch multiple pages
 
-무한 쿼리도 일반 쿼리처럼 사전 패칭이 가능합니다. 기본적으로는 쿼리의 첫 페이지만 사전 패칭되어 주어진 쿼리 키 아래에 저장됩니다. 여러 페이지를 사전 패칭하고 싶다면 `pages` 옵션을 사용할 수 있습니다. 자세한 정보는 [사전 패칭 가이드](../prefetching)를 읽어보세요.
+무한 쿼리도 일반 쿼리처럼 사전 패칭이 가능합니다. 기본적으로는 쿼리의 첫 페이지만 사전 패칭되어 주어진 쿼리 키 아래에 저장됩니다. 여러 페이지를 사전 패칭하고 싶다면 `pages` 옵션을 사용할 수 있습니다. 자세한 정보는 [사전 패칭 가이드](/docs/api-references/prefetching)를 읽어보세요.
 
 ### New `combine` option for `useQueries`
 
-자세한 내용은 [useQueries 문서](../../reference/useQueries#combine)를 참조하세요.
+자세한 내용은 [useQueries 문서](/docs/api-references/useQueries#combine)를 참조하세요.
 
 ### Experimental `fine grained storage persister`
 
-자세한 내용은 [experimental_createPersister 문서](../../../react/plugins/createPersister)를 참조하세요.
+자세한 내용은 [experimental_createPersister 문서](/docs/plugins/createPersister)를 참조하세요.
 
 ### Typesafe way to create Query Options
 
-자세한 내용은 [TypeScript 문서](../../typescript#typing-query-options)를 참조하세요.
+자세한 내용은 [TypeScript 문서](/docs/getting-started#typing-query-options)를 참조하세요.
 
 ### new hooks for suspense
 
@@ -490,4 +490,4 @@ const { data: post } = useSuspenseQuery({
 
 실험적인 `suspense: boolean` 플래그는 쿼리 훅에서 제거되었습니다.
 
-자세한 내용은 [서스펜스 문서](../suspense)를 참조하세요.
+자세한 내용은 [서스펜스 문서](/docs/api-references/suspense)를 참조하세요.
