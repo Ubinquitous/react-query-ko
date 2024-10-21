@@ -368,7 +368,7 @@ await queryClient.refetchQueries({
 
 ### **Returns**
 
-이 함수는 모든 쿼리의 다시 가져오기가 완료되면 해결되는 약속을 반환합니다. 기본적으로, 쿼리 다시 가져오기 작업 중 하나라도 실패하면 오류를 발생시키지 않지만, `throwOnError` 옵션을 `true`로 설정하면 이 동작을 구성할 수 있습니다.
+이 함수는 모든 쿼리의 다시 가져오기가 완료되면 해결되는 Promise를 반환합니다. 기본적으로, 쿼리 다시 가져오기 작업 중 하나라도 실패하면 오류를 발생시키지 않지만, `throwOnError` 옵션을 `true`로 설정하면 이 동작을 구성할 수 있습니다.
 
 ## `queryClient.cancelQueries`
 
@@ -429,7 +429,7 @@ queryClient.resetQueries({ queryKey, exact: true });
 
 ### **Returns**
 
-이 메서드는 모든 활성 쿼리가 다시 가져와질 때까지 해결되는 약속을 반환합니다.
+이 메서드는 모든 활성 쿼리가 다시 가져와질 때까지 해결되는 Promise를 반환합니다.
 
 ## `queryClient.isFetching`
 
