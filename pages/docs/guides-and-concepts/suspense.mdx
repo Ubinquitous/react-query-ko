@@ -13,7 +13,7 @@ React Query는 React의 Suspense for Data Fetching API와 함께 사용할 수 �
 
 Suspense 모드를 사용할 때는 `status` 상태와 `error` 객체가 필요하지 않으며, 대신 `React.Suspense` 컴포넌트의 사용(여기에는 `fallback` 속성과 React 오류 경계(error boundaries) 사용이 포함됩니다)으로 대체됩니다. Suspense 모드를 설정하는 방법에 대한 자세한 내용은 [Error Boundaries 리셋](#resetting-error-boundaries)과 [Suspense 예제](https://stackblitz.com/github/TanStack/query/tree/main/examples/react/suspense)를 참조하세요.
 
-변경 사항이 오류를 오류 경계로 전파되도록 하려면(`쿼리와 유사하게) `throwOnError`옵션을`true`로 설정할 수 있습니다.
+변경 사항이 오류를 오류 경계로 전파되도록 하려면(쿼리와 유사하게) `throwOnError`옵션을`true`로 설정할 수 있습니다.
 
 쿼리에 대한 Suspense 모드 활성화:
 
