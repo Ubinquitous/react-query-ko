@@ -22,7 +22,7 @@ title: Prefetching & Router Integration
 
 다양한 프리패칭 패턴을 살펴보기 전에, `prefetchQuery`와 `prefetchInfiniteQuery` 함수에 대해 기본적인 내용을 살펴보겠습니다.
 
-- 기본적으로, 이 함수들은 `queryClient`에 설정된 기본 `staleTime`을 사용하여 캐시된 데이터가 신선한지 다시 가져와야 하는지를 결정합니다.
+- 기본적으로, 이 함수들은 `queryClient`에 설정된 기본 `staleTime`을 사용하여 캐시된 데이터가 fresh한지 다시 가져와야 하는지를 결정합니다.
 - 특정 `staleTime`을 전달할 수도 있습니다. 예를 들어: `prefetchQuery({ queryKey: ['todos'], queryFn: fn, staleTime: 5000 })`
   - 이 `staleTime`은 프리패칭에만 사용되며, `useQuery` 호출 시에도 별도로 설정해야 합니다.
   - `staleTime`을 무시하고 캐시에서 데이터가 항상 사용 가능하면 반환되도록 하려면, `ensureQueryData` 함수를 사용할 수 있습니다.
