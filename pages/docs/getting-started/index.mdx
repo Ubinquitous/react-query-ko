@@ -65,7 +65,7 @@ import {
   QueryClient,
   QueryClientProvider,
   useQuery,
-} from '@tanstack/react-query';
+} from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
@@ -79,23 +79,23 @@ export default function App() {
 
 function Example() {
   const { isPending, error, data } = useQuery({
-    queryKey: ['repoData'],
+    queryKey: ["repoData"],
     queryFn: () =>
-      fetch('https://api.github.com/repos/TanStack/query').then((res) =>
+      fetch("https://api.github.com/repos/TanStack/query").then((res) =>
         res.json()
       ),
   });
 
-  if (isPending) return '로딩중...';
+  if (isPending) return "로딩중...";
 
-  if (error) return '에러가 발생했습니다: ' + error.message;
+  if (error) return "에러가 발생했습니다: " + error.message;
 
   return (
     <div>
       <h1>{data.name}</h1>
       <p>{data.description}</p>
-      <strong>👀 {data.subscribers_count}</strong>{' '}
-      <strong>✨ {data.stargazers_count}</strong>{' '}
+      <strong>👀 {data.subscribers_count}</strong>{" "}
+      <strong>✨ {data.stargazers_count}</strong>{" "}
       <strong>🍴 {data.forks_count}</strong>
     </div>
   );
