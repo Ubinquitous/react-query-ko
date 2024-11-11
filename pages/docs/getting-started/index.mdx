@@ -12,7 +12,7 @@ TanStack Query(이전 명칭 React Query)는 웹 어플리케이션을 위한 �
 
 대부분의 웹 프레임워크는 데이터를 전체적으로 조회 및 관리하는 것에 대해 명확한 방법을 제공하지 않습니다.  
 그래서 개발자들은 데이터 페칭 프레임워크를 만들거나, 자신만의 페칭 방식을 고안하게 됩니다.  
-**보통 컴포넌트 **state와 side-effects를 함께 쓰거나, 비동기 데이터를 어플리케이션 전반에 저장하고  
+**보통 컴포넌트**state와 side-effects를 함께 쓰거나, 비동기 데이터를 어플리케이션 전반에 저장하고  
 제공하기 위해 상태 관리 라이브러리를 사용하기도 합니다.
 
 대부분의 상태 관리 라이브러리는 클라이언트에서의 상태를 다루는 데에는 뛰어나지만,  
@@ -65,7 +65,7 @@ import {
   QueryClient,
   QueryClientProvider,
   useQuery,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
 
@@ -79,23 +79,23 @@ export default function App() {
 
 function Example() {
   const { isPending, error, data } = useQuery({
-    queryKey: ["repoData"],
+    queryKey: ['repoData'],
     queryFn: () =>
-      fetch("https://api.github.com/repos/TanStack/query").then((res) =>
+      fetch('https://api.github.com/repos/TanStack/query').then((res) =>
         res.json()
       ),
   });
 
-  if (isPending) return "로딩중...";
+  if (isPending) return '로딩중...';
 
-  if (error) return "에러가 발생했습니다: " + error.message;
+  if (error) return '에러가 발생했습니다: ' + error.message;
 
   return (
     <div>
       <h1>{data.name}</h1>
       <p>{data.description}</p>
-      <strong>👀 {data.subscribers_count}</strong>{" "}
-      <strong>✨ {data.stargazers_count}</strong>{" "}
+      <strong>👀 {data.subscribers_count}</strong>{' '}
+      <strong>✨ {data.stargazers_count}</strong>{' '}
       <strong>🍴 {data.forks_count}</strong>
     </div>
   );
