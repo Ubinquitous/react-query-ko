@@ -40,11 +40,17 @@ React 환경에서 Tanstack Query v5를 사용하는 예제에 한해서만 번�
                 <img alt="이희성" src="https://avatars.githubusercontent.com/lheesung" width="100" />
             </a>
         </td>
+        <td align="center">
+            <a href="https://github.com/leesb971204">
+                <img alt="이승빈" src="https://avatars.githubusercontent.com/leesb971204" width="100" />
+            </a>
+        </td>
     </tr>
     <tr>
         <td align="center">박우빈</td>
         <td align="center">백승하</td>
         <td align="center">김준경</td>
         <td align="center">이희성</td>
+        <td align="center">이승빈</td>
     </tr>
 </table>
