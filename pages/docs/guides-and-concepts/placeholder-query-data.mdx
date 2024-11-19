@@ -14,7 +14,7 @@ query에 placeholder data를 제공하는 방법은 몇 가지가 있습니다:
 - 선언적으로:
   - query에 `placeholderData`를 제공하여 cache가 비어있을 때 미리 채워줍니다.
 - 명령적으로:
-  - [queryClient와 `placeholderData` 옵션을 사용하여 데이터를 미리 가져오거나(fetch) 사용할 수 있습니다.](/docs/guides-and-concepts/prefetching)
+  - [queryClient와 `placeholderData` 옵션을 사용하여 데이터를 미리 가져오거나(fetch) 사용할 수 있습니다.](/docs/guides-and-concepts/prefetching-router-integration)
 
 `placeholderData`를 사용하면, Query는 `pending` 상태에 있지 않고 바로 `success` 상태로 시작됩니다. 이유는 우리가 표시할 수 있는 `data`가 있기 때문이죠. 비록 그 데이터가 "placeholder"일지라도요. 또한 Query 결과에는 `isPlaceholderData` 플래그가 `true`로 설정되어, 실제 데이터와 구분할 수 있습니다.
 
