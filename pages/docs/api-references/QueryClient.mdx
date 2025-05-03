@@ -199,7 +199,6 @@ const data = await queryClient.ensureQueryData({ queryKey, queryFn });
 
 - `Promise<TData>`
 
-
 ### `queryClient.ensureInfiniteQueryData`
 
 `ensureInfiniteQueryData`는 기존 무한 쿼리의 캐시된 데이터를 가져오기 위해 사용되는 비동기 함수입니다. 쿼리가 존재하지 않는 경우, `queryClient.fetchInfiniteQuery`가 호출되고 그 결과가 반환됩니다.
