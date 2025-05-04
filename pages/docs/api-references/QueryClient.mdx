@@ -29,6 +29,7 @@ await queryClient.prefetchQuery({ queryKey: ["posts"], queryFn: fetchPosts });
 - [`queryClient.prefetchInfiniteQuery`](#queryclientprefetchinfinitequery)
 - [`queryClient.getQueryData`](#queryclientgetquerydata)
 - [`queryClient.ensureQueryData`](#queryclientensurequerydata)
+- [`queryClient.ensureInfiniteQueryData`](#queryclientensureinfinitequerydata)
 - [`queryClient.getQueriesData`](#queryclientgetqueriesdata)
 - [`queryClient.setQueryData`](#queryclientsetquerydata)
 - [`queryClient.getQueryState`](#queryclientgetquerystate)
@@ -69,8 +70,6 @@ await queryClient.prefetchQuery({ queryKey: ["posts"], queryFn: fetchPosts });
 `fetchQuery`는 비동기 메서드로, query를 가져오고 cache에 저장하는 데 사용됩니다. 이 메서드는 데이터를 반환하거나, 오류가 발생할 경우 오류를 던집니다. 결과가 필요하지 않고 query만 가져오고 싶다면 `prefetchQuery` 메서드를 사용하세요.
 
 query가 이미 존재하고 데이터가 무효화되지 않았거나 주어진 `staleTime`보다 오래되지 않은 경우, cache에서 데이터를 반환합니다. 그렇지 않으면 최신 데이터를 가져오려 시도합니다.
-
-> `fetchQuery`와 `setQueryData`의 차이점은, `fetchQuery`는 비동기적이며, 동일한 query에 대해 중복된 요청이 발생하지 않도록 보장한다는 점입니다. 데이터를 가져오는 동안 동일한 query에 대해 여러 `useQuery` 인스턴스가 렌더링되는 경우에도 마찬가지입니다.
 
 ```tsx
 try {
@@ -199,6 +198,31 @@ const data = await queryClient.ensureQueryData({ queryKey, queryFn });
 **Returns**
 
 - `Promise<TData>`
+
+### `queryClient.ensureInfiniteQueryData`
+
+`ensureInfiniteQueryData`는 기존 무한 쿼리의 캐시된 데이터를 가져오기 위해 사용되는 비동기 함수입니다. 쿼리가 존재하지 않는 경우, `queryClient.fetchInfiniteQuery`가 호출되고 그 결과가 반환됩니다.
+
+```tsx
+const data = await queryClient.ensureInfiniteQueryData({
+  queryKey,
+  queryFn,
+  initialPageParam,
+  getNextPageParam,
+})
+```
+
+**Options**
+
+- [`fetchInfiniteQuery`](#queryclientfetchinfinitequery)과 동일한 옵션.
+- `revalidateIfStale: boolean`
+  - Optional
+  - 기본값은 `false`
+  - `true`로 설정되면, 캐시된 데이터가 즉시 반환되지만, 오래된 데이터는 백그라운드에서 다시 가져옵니다.
+
+**Returns**
+
+- `Promise<InfiniteData<TData, TPageParam>>`
 
 ### `queryClient.getQueriesData`
 
@@ -501,7 +525,7 @@ queryClient.setDefaultOptions({
 const defaultOptions = queryClient.getQueryDefaults(["posts"]);
 ```
 
-> 주의: 여러 쿼리 기본값이 주어진 쿼리 키와 일치할 경우, **첫 번째** 일치하는 기본값이 반환됩니다. 이로 인해 예상치 못한 동작이 발생할 수 있습니다. 자세한 내용은 [`setQueryDefaults`](#queryclientsetquerydefaults)를 참조하세요.
+> 주의: 여러 쿼리 기본값이 주어진 쿼리 키와 일치할 경우, 등록된 순서에 따라 함께 병합됩니다. 자세한 내용은 [`setQueryDefaults`](#queryclientsetquerydefaults)를 참조하세요.
 
 ## `queryClient.setQueryDefaults`
 
@@ -520,7 +544,7 @@ function Component() {
 - `queryKey: QueryKey`: [Query Keys](/docs/guides-and-concepts/query-keys)
 - `options: QueryOptions`
 
-> [`getQueryDefaults`](#queryclientgetquerydefaults)에서 언급한 바와 같이, 쿼리 기본값의 등록 순서는 중요합니다. `getQueryDefaults`는 **첫 번째** 일치하는 기본값을 반환하므로, 등록은 **가장 일반적인 키**에서 **가장 구체적인 키**로 순서대로 진행해야 합니다. 이렇게 하면 특정 키의 경우, 첫 번째 일치하는 기본값이 예상한 값이 됩니다.
+> 일치하는 기본값들은 [`getQueryDefaults`](#queryclientgetquerydefaults)를 통해 병합되기 때문에, 등록은 **가장 일반적인 키**에서 **가장 구체적인 키**로 순서대로 진행해야 합니다. 이렇게 하면, 더 구체적인 기본값이 더 일반적인 기본값을 덮어쓰게 됩니다.
 
 ## `queryClient.getMutationDefaults`
 
